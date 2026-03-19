@@ -1,16 +1,27 @@
 # must_stay_focused
 
-A new Flutter project.
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Create emulator
+flutter emulators --create test_device
 
-A few resources to get you started if this is your first Flutter project:
+Launch emulator
+flutter emulators --launch test_device
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Check device id:
+flutter devices
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+IMPORTANT NOTE : Install OpenJDK 17 for building properly and set JAVA_HOME to the path of the JDK 17
+Build and run on the emulator: eg id - emulator-5554
+flutter run -d emulator-5554
