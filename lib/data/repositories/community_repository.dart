@@ -86,46 +86,22 @@ Map<String, dynamic> buildFlashcardPayload(
   };
 }
 
-//Upload TODO template
-Future<void> uploadTodoTemplate({
+//Upload raw template
+Future<void> uploadTemplateRaw({
+  required TemplateType type,
   required String title,
   required String authorName,
-  required List<Task> tasks,
+  required Map<String, dynamic> jsonPayload,
 }) async
 {
-  final payload = buildTodoPayload(tasks);
-
-  final template = CommunityTemplate(
-    id: '', // Supabase will generate
-    type: TemplateType.todoList,
-    title: title,
-    authorName: authorName,
-    downloads: 0,
-    starRating: 0,
-    jsonPayload: payload,
-  );
-
-  await uploadTemplate(template);
-}
-
-//Upload FLASHCARD template
-Future<void> uploadFlashcardTemplate({
-  required String title,
-  required String authorName,
-  required Deck deck,
-  required List<FlashCard> cards,
-}) async
-{
-  final payload = buildFlashcardPayload(deck, cards);
-
   final template = CommunityTemplate(
     id: '',
-    type: TemplateType.flashcardDeck,
+    type: type,
     title: title,
     authorName: authorName,
     downloads: 0,
     starRating: 0,
-    jsonPayload: payload,
+    jsonPayload: jsonPayload,
   );
 
   await uploadTemplate(template);
