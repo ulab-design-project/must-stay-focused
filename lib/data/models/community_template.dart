@@ -50,7 +50,7 @@ class CommunityTemplate
   Map<String, dynamic> toJson()
   {
     return {
-      'id': id,
+      if (id.isNotEmpty) 'id': id,
       'type': type.name,
       'title': title,
       'author_name': authorName,
