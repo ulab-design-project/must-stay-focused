@@ -52,3 +52,18 @@ class CommunityRepository
         .eq('id', id);
   }
 }
+
+//helper functions
+Map<String, dynamic> buildTodoPayload(List<Task> tasks)
+{
+  return {
+    "tasks": tasks.map((t) => {
+      "title": t.title,
+      "description": t.description,
+      "priority": t.priority.name,
+      "category": t.category.name,
+      "isCompleted": false,
+    }).toList()
+  };
+}
+
