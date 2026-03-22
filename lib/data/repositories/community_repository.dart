@@ -54,6 +54,7 @@ class CommunityRepository
 }
 
 //helper functions
+//Convert Tasks → jsonPayload
 Map<String, dynamic> buildTodoPayload(List<Task> tasks)
 {
   return {
@@ -67,3 +68,20 @@ Map<String, dynamic> buildTodoPayload(List<Task> tasks)
   };
 }
 
+//Convert Deck + Cards → jsonPayload
+Map<String, dynamic> buildFlashcardPayload(
+  Deck deck,
+  List<FlashCard> cards,
+)
+{
+  return {
+    "deck": {
+      "name": deck.name,
+      "subjectColorHex": deck.subjectColorHex,
+    },
+    "cards": cards.map((c) => {
+      "frontText": c.frontText,
+      "backText": c.backText,
+    }).toList()
+  };
+}
