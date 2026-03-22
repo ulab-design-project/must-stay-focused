@@ -20,7 +20,7 @@ class CommunityTemplate
   final String authorName;
   final int downloads;
   final double starRating;
-  final String jsonPayload;
+  final Map<String, dynamic> jsonPayload;
 
   CommunityTemplate({
     required this.id,
@@ -43,7 +43,7 @@ class CommunityTemplate
       authorName: json['author_name'],
       downloads: json['downloads'],
       starRating: (json['star_rating'] as num).toDouble(),
-      jsonPayload: json['json_payload'],
+      jsonPayload: json['json_payload'] as Map<String, dynamic>,
     );
   }
 
