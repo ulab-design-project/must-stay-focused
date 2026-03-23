@@ -9,13 +9,30 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService
 {
-  static Future<void> init() async
+  static final SupabaseService _instance = SupabaseService._internal();
+
+  factory SupabaseService()
   {
+    return _instance;
+  }
+
+  SupabaseService._internal();
+
+  Future<void> init() async
+  {
+    const url = String.fromEnvironment('SUPABASE_URL');
+    const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+
+    if (url.isEmpty || anonKey.isEmpty)
+    {
+      throw Exception('Supabase env variables not set');
+    }
+
     await Supabase.initialize(
-      url: const String.fromEnvironment('SUPABASE_URL'),
-      anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY'),
+      url: url,
+      anonKey: anonKey,
     );
   }
 
-  static SupabaseClient get client => Supabase.instance.client;
+  SupabaseClient get client => Supabase.instance.client;
 }
