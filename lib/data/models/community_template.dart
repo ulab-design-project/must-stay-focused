@@ -20,7 +20,7 @@ class CommunityTemplate
   final String authorName;
   final int downloads;
   final double starRating;
-  final Map<String, dynamic> jsonPayload;
+  final String jsonPayload;
 
   CommunityTemplate({
     required this.id,
@@ -36,14 +36,12 @@ class CommunityTemplate
   {
     return CommunityTemplate(
       id: json['id'],
-      type: TemplateType.values.firstWhere(
-        (e) => e.name == json['type'],
-      ),
+      type: TemplateType.values.firstWhere((e) => e.name == json['type']),
       title: json['title'],
       authorName: json['author_name'],
       downloads: json['downloads'],
       starRating: (json['star_rating'] as num).toDouble(),
-      jsonPayload: json['json_payload'] as Map<String, dynamic>,
+      jsonPayload: json['json_payload'],
     );
   }
 
