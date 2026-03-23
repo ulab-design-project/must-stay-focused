@@ -5,6 +5,9 @@
 // 1. `class SupabaseService`:
 //    - Method: `Future<void> init()` reading URL and ANON_KEY from Env configs.
 //    - Warning: Strictly configured to reject storing any primary user behavioral data (NFR-07 Privacy by Design rule).
+
+
+//note: 'reject storing primary user behavioral data' has not been implemented here. it should be implemented in lib/data/repository
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService
