@@ -12,3 +12,23 @@
 //    - `bool strictModeEnabled = false;`
 //    - `List<String> blockedPackages = [];`
 //    - `bool notificationsEnabled = true;`
+import 'package:isar/isar.dart';
+
+part 'user_settings.g.dart';
+
+@collection
+class UserSettings
+{
+  Id id = 1;
+
+  String? pinHash;
+  String? salt;
+
+  String themeMode = 'system';
+  String preferredChallengeType = 'math';
+
+  bool strictModeEnabled = false;
+  List<String> blockedPackages = [];
+
+  bool notificationsEnabled = true;
+}
