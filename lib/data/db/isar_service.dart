@@ -8,3 +8,39 @@
 //      - Calls `getApplicationDocumentsDirectory()`.
 //      - Runs `Isar.open([TaskSchema, FlashCardSchema, DeckSchema, UserSettingsSchema])`.
 //      - Setup fast write mechanisms (FR-42, NFR-18 ensures instant changes flush to disk).
+import 'dart:io';
+import 'package:isar/isar.dart';
+
+import '../models/task.dart';
+import '../models/flash_card.dart';
+import '../models/deck.dart';
+import '../models/user_settings.dart';
+
+class IsarService
+{
+  static final IsarService _instance = IsarService._internal();
+
+  late Isar db;
+
+  factory IsarService()
+  {
+    return _instance;
+  }
+
+  IsarService._internal();
+
+  Future<void> init() async
+  {
+    final dir = Directory.current.path;
+
+    db = await Isar.open(
+      [
+        TaskSchema,
+        FlashCardSchema,
+        DeckSchema,
+        UserSettingsSchema,
+      ],
+      directory: dir,
+    );
+  }
+}
