@@ -19,6 +19,8 @@ part 'flash_card.g.dart';
 @collection
 class FlashCard
 {
+  FlashCard();
+
   Id id = Isar.autoIncrement;
 
   late String frontText;

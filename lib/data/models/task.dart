@@ -39,6 +39,8 @@ enum TaskCategory
 @collection
 class Task
 {
+  Task();
+
   Id id = Isar.autoIncrement;
 
   late String title;

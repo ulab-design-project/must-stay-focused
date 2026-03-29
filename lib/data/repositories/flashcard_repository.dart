@@ -7,30 +7,28 @@
 //    - `Future<void> addCard(FlashCard card)`.
 //    - `Future<List<FlashCard>> getCardsDueForReview()` compares `nextReviewDate` <= `DateTime.now()`.
 //    - `Future<void> saveReviewSession(FlashCard updatedCard)`.
+import 'package:isar/isar.dart';
+
 import '../db/isar_service.dart';
 import '../models/deck.dart';
 import '../models/flash_card.dart';
 
-class FlashcardRepository
-{
+class FlashcardRepository {
   final _isar = IsarService().db;
 
-  Future<void> createDeck(Deck deck) async
-  {
+  Future<void> createDeck(Deck deck) async {
     await _isar.writeTxn(() async {
       await _isar.decks.put(deck);
     });
   }
 
-  Future<void> addCard(FlashCard card) async
-  {
+  Future<void> addCard(FlashCard card) async {
     await _isar.writeTxn(() async {
       await _isar.flashCards.put(card);
     });
   }
 
-  Future<List<FlashCard>> getCardsDueForReview() async
-  {
+  Future<List<FlashCard>> getCardsDueForReview() async {
     final now = DateTime.now();
 
     return await _isar.flashCards
@@ -39,8 +37,7 @@ class FlashcardRepository
         .findAll();
   }
 
-  Future<void> saveReviewSession(FlashCard updatedCard) async
-  {
+  Future<void> saveReviewSession(FlashCard updatedCard) async {
     await _isar.writeTxn(() async {
       await _isar.flashCards.put(updatedCard);
     });
