@@ -1,85 +1,163 @@
 // File: lib/data/models/task.dart
 // TODO: Implement Task Data Entity
-// Architecture: Isar annotated Model class.
-// Requirements:
-// 1. Enums: 
-//    - `enum TaskPriority { low, medium, high, critical }` (FR-13).
-//    - `enum TaskCategory { essentials, work, study, personal }` (FR-14).
-// 2. `@collection class Task`:
-//    - `Id id = Isar.autoIncrement;`
-//    - `String title;`
-//    - `String? description;`
-//    - `DateTime? dueDate;`
-//    - `DateTime? time;`
-//    - `@enumerated TaskPriority priority;`
-//    - `@enumerated TaskCategory category;`
-//    - `bool isCompleted = false;`
-// 3. Methods:
+
 //    - `Map<String, dynamic> toJson()` and `factory Task.fromJson(...)` for exports.
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 part 'task.g.dart';
 
-enum TaskPriority
-{
-  low,
-  medium,
-  high,
-  critical
-}
+enum TaskPriority { low, medium, high, critical }
 
-enum TaskCategory
-{
-  essentials,
-  work,
-  study,
-  personal
+@collection
+class TaskList {
+  Id id = Isar.autoIncrement;
+  
+  @Index(unique: true)
+  late String name;
+  
+  // Store icon as codePoint for persistence
+  late int iconCodePoint;
+  
+  // Helper to get Icon from codePoint (computed, not stored in DB)
+  @ignore
+  Icon get icon => Icon(IconData(iconCodePoint));
+
+  @Backlink(to: 'taskList')
+  final tasks = IsarLinks<Task>(); // one to many relation
 }
 
 @collection
-class Task
-{
+class Task {
   Task();
 
   Id id = Isar.autoIncrement;
 
   late String title;
+  
+  final taskList = IsarLink<TaskList>();
+  
   String? description;
-
-  DateTime? dueDate;
-  DateTime? time;
 
   @enumerated
   late TaskPriority priority;
 
-  @enumerated
-  late TaskCategory category;
+  DateTime? startTime; // if !null - Particular time
+  DateTime? endTime; // if !null - In range
+  List<int>? days;
+  // if !null - Regular interval: 1 Saturday 2 Sunday 3 Monday ... 7 Friday
+
+  late DateTime creationTime;
+  DateTime? completionTime; 
+  // if days != null, will reset everyday. preferably next launch of app.
+
+  
 
   bool isCompleted = false;
 
-  factory Task.fromJson(Map<String, dynamic> json)
-  {
+  // Helper to calculate urgency score (for "due soon" sorting)
+  // Returns duration until task is due, or null if no time set
+  @ignore
+  Duration? get urgencyScore {
+    final now = DateTime.now();
+    
+    if (days != null) {
+      // Regular interval: find next occurrence
+      final today = now.weekday; // 1 = Monday, 7 = Sunday
+      
+      for (int i = 0; i < 7; i++) {
+        final checkDay = (today + i - 1) % 7 + 1; // Convert to 1-7 (Mon-Sun)
+        if (days!.contains(checkDay)) {
+          var nextOccurrence = DateTime(now.year, now.month, now.day + i);
+          if (startTime != null) {
+            nextOccurrence = DateTime(
+              nextOccurrence.year,
+              nextOccurrence.month,
+              nextOccurrence.day,
+              startTime!.hour,
+              startTime!.minute,
+            );
+          }
+          return nextOccurrence.difference(now);
+        }
+      }
+      return null; // No matching day found
+    }
+    
+    if (startTime != null) {
+      // One-time task with specific time
+      return startTime!.difference(now);
+    }
+    
+    return null; // No time-based info
+  }
+
+  // Priority numeric value (higher = more important)
+  @ignore
+  int get priorityValue {
+    switch (priority) {
+      case TaskPriority.critical:
+        return 4;
+      case TaskPriority.high:
+        return 3;
+      case TaskPriority.medium:
+        return 2;
+      case TaskPriority.low:
+        return 1;
+    }
+  }
+
+  Task.make({
+    required this.title,
+    required TaskList taskList,
+    required this.priority,
+    required this.creationTime,
+    this.description,
+    this.startTime,
+    this.endTime,
+    this.days,
+    this.isCompleted = false,
+  }) {
+    this.taskList.value = taskList;
+  }
+
+  factory Task.fromJson(Map<String, dynamic> json) {
     return Task()
       ..id = json['id'] ?? Isar.autoIncrement
       ..title = json['title']
       ..description = json['description']
-      ..dueDate = json['due_date'] != null ? DateTime.parse(json['due_date']) : null
-      ..time = json['time'] != null ? DateTime.parse(json['time']) : null
-      ..priority = TaskPriority.values.firstWhere((e) => e.name == json['priority'])
-      ..category = TaskCategory.values.firstWhere((e) => e.name == json['category'])
-      ..isCompleted = json['is_completed'];
+      ..startTime = json['start_time'] != null
+          ? DateTime.parse(json['start_time'])
+          : null
+      ..endTime = json['end_time'] != null
+          ? DateTime.parse(json['end_time'])
+          : null
+      ..days = json['days'] != null ? List<int>.from(json['days']) : null
+      ..creationTime = json['creation_time'] != null
+          ? DateTime.parse(json['creation_time'])
+          : DateTime.now()
+      ..completionTime = json['completion_time'] != null
+          ? DateTime.parse(json['completion_time'])
+          : null
+      ..priority = TaskPriority.values.firstWhere(
+        (e) => e.name == json['priority'],
+        orElse: () => TaskPriority.medium,
+      )
+      ..isCompleted = json['is_completed'] ?? false;
   }
 
-  Map<String, dynamic> toJson()
-  {
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
+      'taskListId': taskList.value?.id,
       'description': description,
-      'due_date': dueDate?.toIso8601String(),
-      'time': time?.toIso8601String(),
+      'start_time': startTime?.toIso8601String(),
+      'end_time': endTime?.toIso8601String(),
+      'days': days,
+      'creation_time': creationTime.toIso8601String(),
+      'completion_time': completionTime?.toIso8601String(),
       'priority': priority.name,
-      'category': category.name,
       'is_completed': isCompleted,
     };
   }

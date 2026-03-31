@@ -10,17 +10,12 @@
 import 'package:isar/isar.dart';
 
 import '../db/isar_service.dart';
-import '../models/deck.dart';
 import '../models/flash_card.dart';
 
 class FlashcardRepository {
   final _isar = IsarService().db;
 
-  Future<void> createDeck(Deck deck) async {
-    await _isar.writeTxn(() async {
-      await _isar.decks.put(deck);
-    });
-  }
+
 
   Future<void> addCard(FlashCard card) async {
     await _isar.writeTxn(() async {

@@ -10,7 +10,6 @@ import 'dart:convert';
 import '../db/supabase_client.dart';
 import '../models/community_template.dart';
 import '../models/task.dart';
-import '../models/deck.dart';
 import '../models/flash_card.dart';
 
 class CommunityRepository
@@ -59,11 +58,10 @@ class CommunityRepository
   String buildTodoPayload(List<Task> tasks)
   {
     final payload = {
-      "tasks": tasks.map((t) => {
+      "tasks": tasks.map((t) => { //TODO : add name and other metadata like upload.
         "title": t.title,
         "description": t.description,
         "priority": t.priority.name,
-        "category": t.category.name,
       }).toList()
     };
 
@@ -71,15 +69,10 @@ class CommunityRepository
   }
 
   String buildFlashcardPayload(
-    Deck deck,
     List<FlashCard> cards,
   )
   {
-    final payload = {
-      "deck": {
-        "name": deck.name,
-        "subjectColorHex": deck.subjectColorHex,
-      },
+    final payload = { //TODO : add name for the deck     
       "cards": cards.map((c) => {
         "frontText": c.frontText,
         "backText": c.backText,
