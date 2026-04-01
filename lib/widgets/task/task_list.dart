@@ -5,3 +5,4 @@
 //    - Properties: `final List<Task> tasks`, `final bool isMiniView` (for interception screen).
 //    - Uses ListView.builder.
 //    - Wraps cards with Dismissible for swipe-to-delete.
+

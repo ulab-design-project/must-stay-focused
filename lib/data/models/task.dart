@@ -19,6 +19,9 @@ class TaskList {
   // Store icon as codePoint for persistence
   late int iconCodePoint;
   
+  // Prevent deletion of default list
+  bool isDefault = false;
+  
   // Helper to get Icon from codePoint (computed, not stored in DB)
   @ignore
   Icon get icon => Icon(IconData(iconCodePoint));
@@ -52,8 +55,8 @@ class Task {
   // if days != null, will reset everyday. preferably next launch of app.
 
   
-
-  bool isCompleted = false;
+  bool isArchived = false; 
+  bool isCompleted = false; // will reset if days != null, preferably on next launch of app.
 
   // Helper to calculate urgency score (for "due soon" sorting)
   // Returns duration until task is due, or null if no time set

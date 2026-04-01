@@ -1,13 +1,4 @@
-// File: lib/data/db/isar_service.dart
-// TODO: Setup Local Database Configuration
-// Architecture: Singleton wrapper or DI provider initializing Isar.
-// Requirements:
-// 1. `class IsarService`:
-//    - Property: `late Isar db;`
-//    - Method: `Future<void> init()`
-//      - Calls `getApplicationDocumentsDirectory()`.
-//      - Runs `Isar.open([TaskSchema, FlashCardSchema, DeckSchema, UserSettingsSchema])`.
-//      - Setup fast write mechanisms (FR-42, NFR-18 ensures instant changes flush to disk).
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -15,7 +6,7 @@ import '../models/task.dart';
 import '../models/flash_card.dart';
 import '../models/user_settings.dart';
 
-final Isar idb = IsarService().db; // global singleton
+final Isar idb = IsarService().db;
 
 class IsarService {
   static final IsarService _instance = IsarService._internal();
@@ -37,5 +28,17 @@ class IsarService {
       FlashCardSchema,
       UserSettingsSchema,
     ], directory: dir.path);
+
+    // // Ensure default list exists
+    // final existing = await db.taskLists.filter().isDefaultEqualTo(true).findFirst();
+    // if (existing == null) {
+    //   await db.writeTxn(() async {
+    //     final defaultList = TaskList()
+    //       ..name = 'Default'
+    //       ..iconCodePoint = Icons.list.codePoint
+    //       ..isDefault = true;
+    //     await db.taskLists.put(defaultList);
+    //   });
+    // }
   }
 }
