@@ -13,28 +13,24 @@ import '../db/isar_service.dart';
 import '../models/flash_card.dart';
 
 class FlashcardRepository {
-  final _isar = IsarService().db;
-
-
-
   Future<void> addCard(FlashCard card) async {
-    await _isar.writeTxn(() async {
-      await _isar.flashCards.put(card);
+    await idb.writeTxn(() async {
+      await idb.flashCards.put(card);
     });
   }
 
   Future<List<FlashCard>> getCardsDueForReview() async {
     final now = DateTime.now();
 
-    return await _isar.flashCards
+    return await idb.flashCards
         .filter()
         .nextReviewDateLessThan(now)
         .findAll();
   }
 
   Future<void> saveReviewSession(FlashCard updatedCard) async {
-    await _isar.writeTxn(() async {
-      await _isar.flashCards.put(updatedCard);
+    await idb.writeTxn(() async {
+      await idb.flashCards.put(updatedCard);
     });
   }
 }

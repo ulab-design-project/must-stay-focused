@@ -22,8 +22,13 @@ const TaskListSchema = CollectionSchema(
       name: r'iconCodePoint',
       type: IsarType.long,
     ),
-    r'name': PropertySchema(
+    r'isDefault': PropertySchema(
       id: 1,
+      name: r'isDefault',
+      type: IsarType.bool,
+    ),
+    r'name': PropertySchema(
+      id: 2,
       name: r'name',
       type: IsarType.string,
     )
@@ -37,7 +42,7 @@ const TaskListSchema = CollectionSchema(
     r'name': IndexSchema(
       id: 879695947855722453,
       name: r'name',
-      unique: true,
+      unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
@@ -81,7 +86,8 @@ void _taskListSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeLong(offsets[0], object.iconCodePoint);
-  writer.writeString(offsets[1], object.name);
+  writer.writeBool(offsets[1], object.isDefault);
+  writer.writeString(offsets[2], object.name);
 }
 
 TaskList _taskListDeserialize(
@@ -93,7 +99,8 @@ TaskList _taskListDeserialize(
   final object = TaskList();
   object.iconCodePoint = reader.readLong(offsets[0]);
   object.id = id;
-  object.name = reader.readString(offsets[1]);
+  object.isDefault = reader.readBool(offsets[1]);
+  object.name = reader.readString(offsets[2]);
   return object;
 }
 
@@ -107,6 +114,8 @@ P _taskListDeserializeProp<P>(
     case 0:
       return (reader.readLong(offset)) as P;
     case 1:
+      return (reader.readBool(offset)) as P;
+    case 2:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -124,60 +133,6 @@ List<IsarLinkBase<dynamic>> _taskListGetLinks(TaskList object) {
 void _taskListAttach(IsarCollection<dynamic> col, Id id, TaskList object) {
   object.id = id;
   object.tasks.attach(col, col.isar.collection<Task>(), r'tasks', id);
-}
-
-extension TaskListByIndex on IsarCollection<TaskList> {
-  Future<TaskList?> getByName(String name) {
-    return getByIndex(r'name', [name]);
-  }
-
-  TaskList? getByNameSync(String name) {
-    return getByIndexSync(r'name', [name]);
-  }
-
-  Future<bool> deleteByName(String name) {
-    return deleteByIndex(r'name', [name]);
-  }
-
-  bool deleteByNameSync(String name) {
-    return deleteByIndexSync(r'name', [name]);
-  }
-
-  Future<List<TaskList?>> getAllByName(List<String> nameValues) {
-    final values = nameValues.map((e) => [e]).toList();
-    return getAllByIndex(r'name', values);
-  }
-
-  List<TaskList?> getAllByNameSync(List<String> nameValues) {
-    final values = nameValues.map((e) => [e]).toList();
-    return getAllByIndexSync(r'name', values);
-  }
-
-  Future<int> deleteAllByName(List<String> nameValues) {
-    final values = nameValues.map((e) => [e]).toList();
-    return deleteAllByIndex(r'name', values);
-  }
-
-  int deleteAllByNameSync(List<String> nameValues) {
-    final values = nameValues.map((e) => [e]).toList();
-    return deleteAllByIndexSync(r'name', values);
-  }
-
-  Future<Id> putByName(TaskList object) {
-    return putByIndex(r'name', object);
-  }
-
-  Id putByNameSync(TaskList object, {bool saveLinks = true}) {
-    return putByIndexSync(r'name', object, saveLinks: saveLinks);
-  }
-
-  Future<List<Id>> putAllByName(List<TaskList> objects) {
-    return putAllByIndex(r'name', objects);
-  }
-
-  List<Id> putAllByNameSync(List<TaskList> objects, {bool saveLinks = true}) {
-    return putAllByIndexSync(r'name', objects, saveLinks: saveLinks);
-  }
 }
 
 extension TaskListQueryWhereSort on QueryBuilder<TaskList, TaskList, QWhere> {
@@ -407,6 +362,16 @@ extension TaskListQueryFilter
     });
   }
 
+  QueryBuilder<TaskList, TaskList, QAfterFilterCondition> isDefaultEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isDefault',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<TaskList, TaskList, QAfterFilterCondition> nameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -614,6 +579,18 @@ extension TaskListQuerySortBy on QueryBuilder<TaskList, TaskList, QSortBy> {
     });
   }
 
+  QueryBuilder<TaskList, TaskList, QAfterSortBy> sortByIsDefault() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDefault', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskList, TaskList, QAfterSortBy> sortByIsDefaultDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDefault', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskList, TaskList, QAfterSortBy> sortByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -653,6 +630,18 @@ extension TaskListQuerySortThenBy
     });
   }
 
+  QueryBuilder<TaskList, TaskList, QAfterSortBy> thenByIsDefault() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDefault', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskList, TaskList, QAfterSortBy> thenByIsDefaultDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isDefault', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskList, TaskList, QAfterSortBy> thenByName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.asc);
@@ -671,6 +660,12 @@ extension TaskListQueryWhereDistinct
   QueryBuilder<TaskList, TaskList, QDistinct> distinctByIconCodePoint() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'iconCodePoint');
+    });
+  }
+
+  QueryBuilder<TaskList, TaskList, QDistinct> distinctByIsDefault() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isDefault');
     });
   }
 
@@ -693,6 +688,12 @@ extension TaskListQueryProperty
   QueryBuilder<TaskList, int, QQueryOperations> iconCodePointProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'iconCodePoint');
+    });
+  }
+
+  QueryBuilder<TaskList, bool, QQueryOperations> isDefaultProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isDefault');
     });
   }
 
@@ -739,24 +740,29 @@ const TaskSchema = CollectionSchema(
       name: r'endTime',
       type: IsarType.dateTime,
     ),
-    r'isCompleted': PropertySchema(
+    r'isArchived': PropertySchema(
       id: 5,
+      name: r'isArchived',
+      type: IsarType.bool,
+    ),
+    r'isCompleted': PropertySchema(
+      id: 6,
       name: r'isCompleted',
       type: IsarType.bool,
     ),
     r'priority': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'priority',
       type: IsarType.byte,
       enumMap: _TaskpriorityEnumValueMap,
     ),
     r'startTime': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'startTime',
       type: IsarType.dateTime,
     ),
     r'title': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'title',
       type: IsarType.string,
     )
@@ -815,10 +821,11 @@ void _taskSerialize(
   writer.writeLongList(offsets[2], object.days);
   writer.writeString(offsets[3], object.description);
   writer.writeDateTime(offsets[4], object.endTime);
-  writer.writeBool(offsets[5], object.isCompleted);
-  writer.writeByte(offsets[6], object.priority.index);
-  writer.writeDateTime(offsets[7], object.startTime);
-  writer.writeString(offsets[8], object.title);
+  writer.writeBool(offsets[5], object.isArchived);
+  writer.writeBool(offsets[6], object.isCompleted);
+  writer.writeByte(offsets[7], object.priority.index);
+  writer.writeDateTime(offsets[8], object.startTime);
+  writer.writeString(offsets[9], object.title);
 }
 
 Task _taskDeserialize(
@@ -834,12 +841,13 @@ Task _taskDeserialize(
   object.description = reader.readStringOrNull(offsets[3]);
   object.endTime = reader.readDateTimeOrNull(offsets[4]);
   object.id = id;
-  object.isCompleted = reader.readBool(offsets[5]);
+  object.isArchived = reader.readBool(offsets[5]);
+  object.isCompleted = reader.readBool(offsets[6]);
   object.priority =
-      _TaskpriorityValueEnumMap[reader.readByteOrNull(offsets[6])] ??
+      _TaskpriorityValueEnumMap[reader.readByteOrNull(offsets[7])] ??
           TaskPriority.low;
-  object.startTime = reader.readDateTimeOrNull(offsets[7]);
-  object.title = reader.readString(offsets[8]);
+  object.startTime = reader.readDateTimeOrNull(offsets[8]);
+  object.title = reader.readString(offsets[9]);
   return object;
 }
 
@@ -863,11 +871,13 @@ P _taskDeserializeProp<P>(
     case 5:
       return (reader.readBool(offset)) as P;
     case 6:
+      return (reader.readBool(offset)) as P;
+    case 7:
       return (_TaskpriorityValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskPriority.low) as P;
-    case 7:
-      return (reader.readDateTimeOrNull(offset)) as P;
     case 8:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 9:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1518,6 +1528,16 @@ extension TaskQueryFilter on QueryBuilder<Task, Task, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterFilterCondition> isArchivedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isArchived',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterFilterCondition> isCompletedEqualTo(
       bool value) {
     return QueryBuilder.apply(this, (query) {
@@ -1845,6 +1865,18 @@ extension TaskQuerySortBy on QueryBuilder<Task, Task, QSortBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> sortByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> sortByIsArchivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> sortByIsCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompleted', Sort.asc);
@@ -1955,6 +1987,18 @@ extension TaskQuerySortThenBy on QueryBuilder<Task, Task, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Task, Task, QAfterSortBy> thenByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Task, Task, QAfterSortBy> thenByIsArchivedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isArchived', Sort.desc);
+    });
+  }
+
   QueryBuilder<Task, Task, QAfterSortBy> thenByIsCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isCompleted', Sort.asc);
@@ -2036,6 +2080,12 @@ extension TaskQueryWhereDistinct on QueryBuilder<Task, Task, QDistinct> {
     });
   }
 
+  QueryBuilder<Task, Task, QDistinct> distinctByIsArchived() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isArchived');
+    });
+  }
+
   QueryBuilder<Task, Task, QDistinct> distinctByIsCompleted() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isCompleted');
@@ -2096,6 +2146,12 @@ extension TaskQueryProperty on QueryBuilder<Task, Task, QQueryProperty> {
   QueryBuilder<Task, DateTime?, QQueryOperations> endTimeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endTime');
+    });
+  }
+
+  QueryBuilder<Task, bool, QQueryOperations> isArchivedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isArchived');
     });
   }
 

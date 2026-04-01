@@ -13,7 +13,7 @@ enum TaskPriority { low, medium, high, critical }
 class TaskList {
   Id id = Isar.autoIncrement;
   
-  @Index(unique: true)
+  @Index()
   late String name;
   
   // Store icon as codePoint for persistence
@@ -51,11 +51,10 @@ class Task {
   // if !null - Regular interval: 1 Saturday 2 Sunday 3 Monday ... 7 Friday
 
   late DateTime creationTime;
-  DateTime? completionTime; 
+  DateTime? completionTime;
   // if days != null, will reset everyday. preferably next launch of app.
 
-  
-  bool isArchived = false; 
+  bool isArchived = false;
   bool isCompleted = false; // will reset if days != null, preferably on next launch of app.
 
   // Helper to calculate urgency score (for "due soon" sorting)

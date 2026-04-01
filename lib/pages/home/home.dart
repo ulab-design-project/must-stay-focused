@@ -1,67 +1,45 @@
-// File: lib/pages/home.dart
-// Home Page with Placeholder Widgets
+// File: lib/pages/home/home.dart
+// Home Page with Task Management
+//
+// Requirements:
+// 1. class Home extends StatelessWidget:
+//    - AppBar with title and action buttons (store, settings).
+//    - Body contains TasksPage for full task management.
+//    - Uses global taskRepo for all task operations.
 
 import 'package:flutter/material.dart';
 
+import 'tasks.dart';
+
+/// Main home page that displays tasks.
+/// Contains an AppBar with store and settings actions.
+/// The body is the TasksPage widget which handles all task management.
 class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       appBar: AppBar(
-        title: const Text('Quotes here'),
+        title: const Text('Tasks'),
         actions: [
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.store),
-                onPressed: () {},
-              ),
-              IconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {},
-              ),
-            ],
+          // Store button placeholder
+          IconButton(
+            icon: const Icon(Icons.store),
+            onPressed: () {
+              // TODO: Navigate to community template store
+            },
+          ),
+          // Settings button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              // TODO: Navigate to settings page
+            },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Placeholder(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text('Templates drop down'),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Placeholder(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text('Sort By'),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Expanded(
-              child: Placeholder(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text('Task List'),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+      body: const TasksPage(),
     );
   }
 }
