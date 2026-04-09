@@ -12,7 +12,7 @@
 //    - `bool strictModeEnabled = false;`
 //    - `List<String> blockedPackages = [];`
 //    - `bool notificationsEnabled = true;`
-import 'package:isar/isar.dart';
+import 'package:isar/isar.dart'; // TODO use shared prefs for user settings.
 
 part 'user_settings.g.dart';
 

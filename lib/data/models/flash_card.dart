@@ -1,63 +1,102 @@
-// File: lib/data/models/flash_card.dart
-// TODO: Implement FlashCard Data Entity
-// Architecture: Isar annotated Model class holding Spaced Repetition state.
-// Requirements:
-// 1. `@collection class FlashCard`:
-//    - `Id id = Isar.autoIncrement;`
-//    - `String frontText;` (FR-18)
-//    - `String backText;`
-//    - `int deckId;` (Foreign key conceptually referencing a Deck)
-//    - `DateTime nextReviewDate;` (FR-20)
-//    - `double interval = 1.0;` (SM-2 data)
-//    - `int repetition = 0;` (SM-2 data)
-//    - `double easeFactor = 2.5;` (SM-2 data)
-// 2. Methods: toJson/fromJson.
-import 'package:isar/isar.dart';
+class FlashCard {
+  String front;
+  String back;
 
-part 'flash_card.g.dart';
+  
+  String deckId;
 
-@collection
-class FlashCard
-{
-  FlashCard();
+  DateTime creationDate;
 
-  Id id = Isar.autoIncrement;
+  double easeFactor;
+  int repetition;
+  int interval;
+  DateTime nextReviewDate;
 
-  late String frontText;
-  late String backText;
+  FlashCard({
+    required this.front,
+    required this.back,
+    required this.deckId,
+    required this.creationDate,
+    this.easeFactor = 2.5,
+    this.repetition = 0,
+    this.interval = 1,
+    DateTime? nextReviewDate,
+  }) : nextReviewDate = nextReviewDate ?? DateTime.now();
 
-  late int deckId;
-
-  late DateTime nextReviewDate;
-
-  double interval = 1.0;
-  int repetition = 0;
-  double easeFactor = 2.5;
-
-  factory FlashCard.fromJson(Map<String, dynamic> json)
-  {
-    return FlashCard()
-      ..id = json['id'] ?? Isar.autoIncrement
-      ..frontText = json['front_text']
-      ..backText = json['back_text']
-      ..deckId = json['deck_id']
-      ..nextReviewDate = DateTime.parse(json['next_review_date'])
-      ..interval = (json['interval'] as num).toDouble()
-      ..repetition = json['repetition']
-      ..easeFactor = (json['ease_factor'] as num).toDouble();
+ 
+  Map<String, dynamic> toJson() {
+    return {
+      'front': front,
+      'back': back,
+      'deckId': deckId,
+      'creationDate': creationDate.toIso8601String(),
+      'easeFactor': easeFactor,
+      'repetition': repetition,
+      'interval': interval,
+      'nextReviewDate': nextReviewDate.toIso8601String(),
+    };
   }
 
-  Map<String, dynamic> toJson()
-  {
-    return {
-      'id': id,
-      'front_text': frontText,
-      'back_text': backText,
-      'deck_id': deckId,
-      'next_review_date': nextReviewDate.toIso8601String(),
-      'interval': interval,
-      'repetition': repetition,
-      'ease_factor': easeFactor,
-    };
+  
+  factory FlashCard.fromJson(Map<String, dynamic> json) {
+    return FlashCard(
+      front: json['front'],
+      back: json['back'],
+      deckId: json['deckId'],
+      creationDate: DateTime.parse(json['creationDate']),
+      easeFactor: json['easeFactor'] ?? 2.5,
+      repetition: json['repetition'] ?? 0,
+      interval: json['interval'] ?? 1,
+      nextReviewDate: json['nextReviewDate'] != null
+          ? DateTime.parse(json['nextReviewDate'])
+          : DateTime.now(),
+    );
+  }
+
+ 
+  void updateSM2data(String difficulty) {
+    int quality;
+
+    switch (difficulty) {
+      case 'easy':
+        quality = 5;
+        break;
+      case 'medium':
+        quality = 4;
+        break;
+      case 'hard':
+        quality = 3;
+        break;
+      default:
+        quality = 2; 
+    }
+
+    if (quality < 3) {
+      repetition = 0;
+      interval = 1;
+    } else {
+      repetition += 1;
+
+      if (repetition == 1) {
+        interval = 1;
+      } else if (repetition == 2) {
+        interval = 6;
+      } else {
+        interval = (interval * easeFactor).round();
+      }
+    }
+
+    
+    easeFactor = easeFactor +
+        (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+
+    if (easeFactor < 1.3) {
+      easeFactor = 1.3;
+    }
+  }
+
+  
+  void calculateSM2ReviewDate() {
+    nextReviewDate = DateTime.now().add(Duration(days: interval));
   }
 }
