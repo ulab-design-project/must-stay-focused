@@ -1,24 +1,47 @@
-// File: lib/data/repositories/flashcard_repository.dart
-// TODO: Implement Flashcard/Deck Data Access Layer
-// Architecture: Define abstract interface and Isar implementation.
-// Requirements:
-// 1. Methods:
-//    - `Future<void> createDeck(Deck deck)`.
-//    - `Future<void> addCard(FlashCard card)`.
-//    - `Future<List<FlashCard>> getCardsDueForReview()` compares `nextReviewDate` <= `DateTime.now()`.
-//    - `Future<void> saveReviewSession(FlashCard updatedCard)`.
 import 'package:isar/isar.dart';
-
 import '../db/isar_service.dart';
 import '../models/flash_card.dart';
 
+final FlashcardRepository flashcardRepo = FlashcardRepository();
+
 class FlashcardRepository {
-  Future<void> addCard(FlashCard card) async {
-    await idb.writeTxn(() async {
-      await idb.flashCards.put(card);
+ 
+  Future<int> upsertDeck(Deck deck) async {
+    return await idb.writeTxn(() async {
+      return await idb.decks.put(deck);
     });
   }
 
+  Future<void> deleteDeck(int id) async {
+    await idb.writeTxn(() async {
+      await idb.decks.delete(id);
+    });
+  }
+
+  Future<Deck?> getDeckByName(String deckName) async {
+    return await idb.decks.filter().nameEqualTo(deckName).findFirst();
+  }
+
+  Future<List<Deck>> getAllDecks() async {
+    return await idb.decks.where().findAll();
+  }
+
+ 
+  Future<int> upsertFlashCard(FlashCard card) async {
+    return await idb.writeTxn(() async {
+      final id = await idb.flashCards.put(card);
+      await card.deck.save();
+      return id;
+    });
+  }
+
+  Future<void> deleteFlashCard(int id) async {
+    await idb.writeTxn(() async {
+      await idb.flashCards.delete(id);
+    });
+  }
+
+ 
   Future<List<FlashCard>> getCardsDueForReview() async {
     final now = DateTime.now();
 
@@ -28,9 +51,47 @@ class FlashcardRepository {
         .findAll();
   }
 
+  
   Future<void> saveReviewSession(FlashCard updatedCard) async {
-    await idb.writeTxn(() async {
-      await idb.flashCards.put(updatedCard);
-    });
+    await upsertFlashCard(updatedCard);
+  }
+
+  
+  Future<List<FlashCard>> getFilteredDeck({
+    required String deckName,
+    String? sortBy,
+    bool isAscending = true,
+    bool showFullDeck = false,
+  }) async {
+    final now = DateTime.now();
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+    List<FlashCard> cards;
+
+    if (!showFullDeck) {
+      cards = await idb.flashCards
+          .filter()
+          .deck((q) => q.nameEqualTo(deckName))
+          .nextReviewDateLessThan(todayEnd)
+          .findAll();
+    } else {
+      cards = await idb.flashCards
+          .filter()
+          .deck((q) => q.nameEqualTo(deckName))
+          .findAll();
+    }
+
+    
+    if (sortBy == 'creationTime') {
+      cards.sort((a, b) => isAscending
+          ? a.creationDate.compareTo(b.creationDate)
+          : b.creationDate.compareTo(a.creationDate));
+    } else if (sortBy == 'difficulty') {
+      cards.sort((a, b) => isAscending
+          ? a.easeFactor.compareTo(b.easeFactor)
+          : b.easeFactor.compareTo(a.easeFactor));
+    }
+
+    return cards;
   }
 }

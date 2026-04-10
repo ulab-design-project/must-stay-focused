@@ -15,6 +15,8 @@ class TaskList {
   
   @Index()
   late String name;
+
+  late List<String> tags = ['default'];
   
   // Store icon as codePoint for persistence
   late int iconCodePoint;
@@ -28,6 +30,27 @@ class TaskList {
 
   @Backlink(to: 'taskList')
   final tasks = IsarLinks<Task>(); // one to many relation
+
+  TaskList();
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'tags': tags,
+      'iconCodePoint': iconCodePoint,
+      'isDefault': isDefault,
+    };
+  }
+
+  factory TaskList.fromJson(Map<String, dynamic> json) {
+    return TaskList()
+      ..id = json['id'] ?? Isar.autoIncrement
+      ..name = json['name']
+      ..tags = (json['tags'] as List?)?.map((e) => e as String).toList() ?? ['default']
+      ..iconCodePoint = json['iconCodePoint'] ?? Icons.list.codePoint
+      ..isDefault = json['isDefault'] ?? false;
+  }
 }
 
 @collection
@@ -134,7 +157,7 @@ class Task {
       ..endTime = json['end_time'] != null
           ? DateTime.parse(json['end_time'])
           : null
-      ..days = json['days'] != null ? List<int>.from(json['days']) : null
+      ..days = (json['days'] as List?)?.map((e) => e as int).toList()
       ..creationTime = json['creation_time'] != null
           ? DateTime.parse(json['creation_time'])
           : DateTime.now()
