@@ -123,16 +123,15 @@ class _TasksPageState extends State<TasksPage> {
         // Top bar with list selector and sort controls
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Wrap(
+          child: Row(
             spacing: 8,
-            runSpacing: 8,
-            crossAxisAlignment: WrapCrossAlignment.center,
+            // runSpacing: 8,
+            // crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               GlassElevatedButton(
                 onPressed: _openAddTask,
                 isPrimary: true,
                 icon: const Icon(Icons.add),
-                label: const Text('Add'),
               ),
               // Task list selector with archived button
               TaskListSelector(
@@ -151,6 +150,7 @@ class _TasksPageState extends State<TasksPage> {
                 },
               ),
               // Sort controls grouped
+              Spacer(),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [

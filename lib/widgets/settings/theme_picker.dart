@@ -71,11 +71,8 @@ class _ThemePickerState extends State<ThemePicker> {
                       Expanded(
                         child: Text(
                           value,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                               ),
                         ),
                       ),
