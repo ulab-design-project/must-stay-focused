@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "/workspaces/must-stay-focused/linux"
+  "cmake.sourceDirectory": "/workspaces/must-stay-focused/linux",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

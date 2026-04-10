@@ -93,26 +93,28 @@ class _TaskListSelectorState extends State<TaskListSelector> {
     return InkWell(
       onTap: () => _showDropdown(context),
       child: Container(
+        width: 100,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.selectedList != null)
-              Icon(
-                IconData(widget.selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
-                size: 20,
-              )
-            else
-              const Icon(Icons.archive, size: 20),
-            const SizedBox(width: 8),
-            Text(widget.selectedList?.name ?? 'Archived'),
-            const Icon(Icons.arrow_drop_down),
-          ],
-        ),
+        child:  Text(widget.selectedList?.name ?? 'Archived', softWrap: false,), //TODO auto scroll name
+        // Row(
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     if (widget.selectedList != null)
+        //       Icon(
+        //         IconData(widget.selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
+        //         size: 20,
+        //       )
+        //     else
+        //       const Icon(Icons.archive, size: 20),
+        //     const SizedBox(width: 8),
+        //     Text(widget.selectedList?.name ?? 'Archived'),
+        //     const Icon(Icons.arrow_drop_down),
+        //   ],
+        // ),
       ),
     );
   }

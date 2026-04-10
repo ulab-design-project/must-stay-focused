@@ -40,8 +40,8 @@ class Deck {
 class FlashCard {
   Id id = Isar.autoIncrement;
 
-  late String front;
-  late String back;
+  late String front; //question
+  late String back; //answer
 
   final deck = IsarLink<Deck>();
 
