@@ -47,8 +47,11 @@ final Map<String, ThemeData> themes = {
 };
 
 class ThemeController extends ChangeNotifier {
-  String _currentThemeKey = 'Purple Light';
+  String _currentThemeKey = 'Purple Dark';
   bool _initialized = false;
+
+  final double glassOpacity = 0.1;
+  final double glassBlur = 50.0;
 
   String get currentThemeKey => _currentThemeKey;
   ThemeData get currentTheme => themes[_currentThemeKey] ?? themes['Purple Light']!;

@@ -24,7 +24,7 @@ class UserSettings
   String? pinHash;
   String? salt;
 
-  String themeMode = 'system';
+  String themeMode = 'Purple Dark';
   String preferredChallengeType = 'math';
 
   bool strictModeEnabled = false;

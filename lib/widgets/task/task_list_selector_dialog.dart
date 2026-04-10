@@ -45,6 +45,7 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return AlertDialog(
       title: const Text('Select Task List'),
       content: SizedBox(
@@ -76,7 +77,7 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
                     return ListTile(
                       leading: Icon(IconData(list.iconCodePoint, fontFamily: 'MaterialIcons')),
                       title: Text(list.name),
-                      trailing: isSelected ? const Icon(Icons.check, color: Colors.blue) : null,
+                      trailing: isSelected ? Icon(Icons.check, color: theme.colorScheme.primary) : null,
                       onTap: () => Navigator.pop(ctx, list),
                     );
                   },

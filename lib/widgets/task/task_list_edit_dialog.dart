@@ -109,6 +109,7 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isProtectedList = widget.existingList != null && widget.existingList!.isDefault;
 
     return AlertDialog(
@@ -122,12 +123,12 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.amber.shade100,
+                  color: theme.colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
+                child: Text(
                   'This is a system list and cannot be edited.',
-                  style: TextStyle(fontSize: 12, color: Colors.black87),
+                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer),
                 ),
               ),
             ),
@@ -148,7 +149,7 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: isSelected ? Colors.blue : Colors.transparent,
+                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
                       width: 2,
                     ),
                     borderRadius: BorderRadius.circular(8),

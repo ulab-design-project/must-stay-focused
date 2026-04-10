@@ -41,22 +41,24 @@ class TaskListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     // Show empty state if no tasks at all
     if (incompleteTasks.isEmpty && completedTasks.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.task_alt, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            Icon(Icons.task_alt, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+            const SizedBox(height: 16),
             Text(
               'No tasks yet',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+              style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               'Tap + to add your first task',
-              style: TextStyle(color: Colors.grey),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -71,6 +73,7 @@ class TaskListView extends StatelessWidget {
     // Build task list with cards
     return ListView.builder(
       itemCount: totalItems,
+      addRepaintBoundaries: false, // Fixes BackdropFilter blur disappearing during scroll
       itemBuilder: (context, index) {
         // First, show all incomplete tasks
         if (index < incompleteTasks.length) {
@@ -85,14 +88,13 @@ class TaskListView extends StatelessWidget {
         // Then, show "Completed Tasks" header if there are completed tasks
         final headerIndex = incompleteTasks.length;
         if (hasCompletedTasks && index == headerIndex) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Text(
               'Completed Tasks',
-              style: TextStyle(
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           );

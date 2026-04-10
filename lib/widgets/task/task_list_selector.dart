@@ -89,12 +89,13 @@ class _TaskListSelectorState extends State<TaskListSelector> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => _showDropdown(context),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(

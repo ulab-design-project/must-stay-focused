@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../utils/logging.dart';
+import '../../style/cards.dart';
+import '../../utils/theme_helpers.dart';
 
 /// A swipeable card widget representing a single task.
 /// Provides quick actions: toggle complete, move to Archived (swipe left), delete (swipe right).
@@ -39,16 +41,18 @@ class TaskCard extends StatelessWidget {
   });
 
   /// Returns the background color based on task priority.
-  Color _getPriorityColor() {
+  Color _getPriorityColor(BuildContext context) {
+    final theme = Theme.of(context);
+    final priorityColors = generatePriorityColors(theme.colorScheme.primary);
     switch (task.priority) {
       case TaskPriority.critical:
-        return Colors.red.shade100;
+        return priorityColors[0];
       case TaskPriority.high:
-        return Colors.orange.shade100;
+        return priorityColors[1];
       case TaskPriority.medium:
-        return Colors.blue.shade100;
+        return priorityColors[2];
       case TaskPriority.low:
-        return Colors.grey.shade200;
+        return priorityColors[3];
     }
   }
 
@@ -132,81 +136,110 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: ValueKey(task.id),
-      direction: DismissDirection.horizontal,
-      confirmDismiss: (direction) async {
-        // Swipe left (endToStart) = toggle archive
-        if (direction == DismissDirection.endToStart) {
-          await _toggleArchive(context);
-          return true;
-        } else {
-          // Swipe right (startToEnd) = delete with confirmation
-          final confirm = await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Delete Task'),
-              content: const Text(
-                'Are you sure you want to delete this task?',
+    final theme = Theme.of(context);
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
+      child: Dismissible(
+        key: ValueKey(task.id),
+        direction: DismissDirection.horizontal,
+        confirmDismiss: (direction) async {
+          // Swipe left (endToStart) = toggle archive
+          if (direction == DismissDirection.endToStart) {
+            await _toggleArchive(context);
+            return true;
+          } else {
+            // Swipe right (startToEnd) = delete with confirmation
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Delete Task'),
+                content: const Text(
+                  'Are you sure you want to delete this task?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Delete'),
+                  ),
+                ],
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Delete'),
-                ),
-              ],
-            ),
-          );
-          if (confirm == true && context.mounted) {
-            await _delete(context);
+            );
+            if (confirm == true && context.mounted) {
+              await _delete(context);
+            }
+            return confirm;
           }
-          return confirm;
-        }
-      },
-      // Background for swipe right (delete)
-      background: Container(
-        color: Colors.red,
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 16),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      // Background for swipe left (move to Archived)
-      secondaryBackground: Container(
-        color: Colors.orange,
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 16),
-        child: const Icon(Icons.archive, color: Colors.white),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: ListTile(
-          // Checkbox with its own tap handling - stops propagation to ListTile
+        },
+        // Background for swipe right (delete)
+        background: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(16)
+          ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.only(left: 16),
+          child: Icon(Icons.delete, color: theme.colorScheme.onErrorContainer),
+        ),
+        // Background for swipe left (move to Archived)
+        secondaryBackground: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.tertiaryContainer,
+            borderRadius: BorderRadius.circular(16)
+          ),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 16),
+          child: Icon(Icons.archive, color: theme.colorScheme.onTertiaryContainer),
+        ),
+        child: GlassListTile(
+          isPrimary: task.priority == TaskPriority.critical,
           leading: GestureDetector(
             onTap: () => _toggleComplete(context),
             child: Checkbox(
+              visualDensity: VisualDensity.compact,
+              // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               value: task.isCompleted,
-              onChanged: null, // null because we handle tap on GestureDetector
+              onChanged: null,
+              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return task.isCompleted ? theme.colorScheme.primary : theme.colorScheme.secondary.withValues(alpha: 0.2);
+                }
+                return theme.colorScheme.primary;
+              }),
             ),
           ),
-          title: Text(task.title),
+          title: Text(
+            task.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+              color: task.isCompleted ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : theme.colorScheme.onSurface,
+            ),
+          ),
           subtitle: Text(
             task.startTime != null
                 ? '${_formatTime(task.startTime!)}${task.endTime != null ? ' - ${_formatTime(task.endTime!)}' : ''}'
                 : (task.description ?? ''),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
           ),
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: _getPriorityColor(),
+              color: _getPriorityColor(context).withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
             ),
             child: Text(
-              task.priority.name,
-              style: const TextStyle(fontSize: 12),
+              task.priority.name.toUpperCase(),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           onTap: onEdit,

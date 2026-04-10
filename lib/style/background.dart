@@ -55,7 +55,6 @@ class BackgroundDrop extends StatelessWidget {
           ),
         ),
         // Blur Filter
-        
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: filterStrength, sigmaY: filterStrength),
@@ -64,6 +63,7 @@ class BackgroundDrop extends StatelessWidget {
             ),
           ),
         ),
+        // Positioned(child: Container(height: 100, width: 400, color: primaryColor,),top: screenHeight*0.4,),
         // Content (Glass Scaffold)
         Theme(
           data: theme.copyWith(
@@ -73,32 +73,34 @@ class BackgroundDrop extends StatelessWidget {
               elevation: 0,
             ),
           ),
-          child: Scaffold(
-            key: scaffold.key,
-            appBar: scaffold.appBar,
-            body: scaffold.body,
-            floatingActionButton: scaffold.floatingActionButton,
-            floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
-            floatingActionButtonAnimator: scaffold.floatingActionButtonAnimator,
-            persistentFooterButtons: scaffold.persistentFooterButtons,
-            persistentFooterAlignment: scaffold.persistentFooterAlignment,
-            drawer: scaffold.drawer,
-            onDrawerChanged: scaffold.onDrawerChanged,
-            endDrawer: scaffold.endDrawer,
-            onEndDrawerChanged: scaffold.onEndDrawerChanged,
-            bottomNavigationBar: scaffold.bottomNavigationBar,
-            bottomSheet: scaffold.bottomSheet,
-            backgroundColor: Colors.transparent, // force transparent bg
-            resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
-            primary: scaffold.primary,
-            drawerDragStartBehavior: scaffold.drawerDragStartBehavior,
-            extendBody: scaffold.extendBody,
-            extendBodyBehindAppBar: scaffold.extendBodyBehindAppBar,
-            drawerScrimColor: scaffold.drawerScrimColor,
-            drawerEdgeDragWidth: scaffold.drawerEdgeDragWidth,
-            drawerEnableOpenDragGesture: scaffold.drawerEnableOpenDragGesture,
-            endDrawerEnableOpenDragGesture: scaffold.endDrawerEnableOpenDragGesture,
-            restorationId: scaffold.restorationId,
+          child: BackdropGroup(
+            child: Scaffold(
+              key: scaffold.key,
+              appBar: scaffold.appBar,
+              body: scaffold.body,
+              floatingActionButton: scaffold.floatingActionButton,
+              floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
+              floatingActionButtonAnimator: scaffold.floatingActionButtonAnimator,
+              persistentFooterButtons: scaffold.persistentFooterButtons,
+              persistentFooterAlignment: scaffold.persistentFooterAlignment,
+              drawer: scaffold.drawer,
+              onDrawerChanged: scaffold.onDrawerChanged,
+              endDrawer: scaffold.endDrawer,
+              onEndDrawerChanged: scaffold.onEndDrawerChanged,
+              bottomNavigationBar: scaffold.bottomNavigationBar,
+              bottomSheet: scaffold.bottomSheet,
+              backgroundColor: Colors.transparent, // force transparent bg
+              resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
+              primary: scaffold.primary,
+              drawerDragStartBehavior: scaffold.drawerDragStartBehavior,
+              extendBody: scaffold.extendBody,
+              extendBodyBehindAppBar: scaffold.extendBodyBehindAppBar,
+              drawerScrimColor: scaffold.drawerScrimColor,
+              drawerEdgeDragWidth: scaffold.drawerEdgeDragWidth,
+              drawerEnableOpenDragGesture: scaffold.drawerEnableOpenDragGesture,
+              endDrawerEnableOpenDragGesture: scaffold.endDrawerEnableOpenDragGesture,
+              restorationId: scaffold.restorationId,
+            ),
           ),
         ),
       ],

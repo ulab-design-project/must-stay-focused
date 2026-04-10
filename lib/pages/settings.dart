@@ -16,10 +16,13 @@ class SettingsPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        body: const Column(
-          children: [
-            ThemePicker(),
-          ],
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: const Column(
+            children: [
+              ThemePicker(),
+            ],
+          ),
         ),
       ),
     );

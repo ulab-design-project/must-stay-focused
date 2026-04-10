@@ -16,6 +16,8 @@ import '../../widgets/task/task_edit_dialog.dart';
 import '../../widgets/task/task_list.dart';
 import '../../widgets/task/task_list_selector.dart';
 
+import '../../style/buttons.dart';
+
 /// Main task management page with full CRUD functionality.
 /// Displays tasks from the selected list with sorting options.
 /// All database operations are performed via the global taskRepo instance.
@@ -120,17 +122,17 @@ class _TasksPageState extends State<TasksPage> {
         // Top bar with list selector and sort controls
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              ElevatedButton(
+              GlassElevatedButton(
                 onPressed: _openAddTask,
-                child: Row(
-                  children: [
-                    const Icon(Icons.add),
-                  ],
-                ),
+                isPrimary: true,
+                icon: const Icon(Icons.add),
+                label: const Text('Add'),
               ),
-              const SizedBox(width: 8),
               // Task list selector with archived button
               TaskListSelector(
                 selectedList: _showArchived ? null : _selectedList,
@@ -147,34 +149,38 @@ class _TasksPageState extends State<TasksPage> {
                   _loadTasks();
                 },
               ),
-              const Spacer(),
-              // Sort by dropdown
-              DropdownButton<String>(
-                value: _sortBy,
-                underline: const SizedBox(),
-                items: const [
-                  DropdownMenuItem(value: 'creationTime', child: Text('Date')),
-                  DropdownMenuItem(value: 'priority', child: Text('Priority')),
-                  DropdownMenuItem(value: 'dueSoon', child: Text('Urgency')),
+              // Sort controls grouped
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButton<String>(
+                    value: _sortBy,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: 'creationTime', child: Text('Date')),
+                      DropdownMenuItem(value: 'priority', child: Text('Priority')),
+                      DropdownMenuItem(value: 'dueSoon', child: Text('Urgency')),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) {
+                        setState(() => _sortBy = v);
+                        _loadTasks();
+                      }
+                    },
+                  ),
+                  const SizedBox(width: 4),
+                  // Sort direction toggle
+                  IconButton(
+                    icon: Icon(
+                      _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                    ),
+                    onPressed: () {
+                      setState(() => _isAscending = !_isAscending);
+                      _loadTasks();
+                    },
+                    tooltip: _isAscending ? 'Ascending' : 'Descending',
+                  ),
                 ],
-                onChanged: (v) {
-                  if (v != null) {
-                    setState(() => _sortBy = v);
-                    _loadTasks();
-                  }
-                },
-              ),
-              const SizedBox(width: 4),
-              // Sort direction toggle
-              IconButton(
-                icon: Icon(
-                  _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                ),
-                onPressed: () {
-                  setState(() => _isAscending = !_isAscending);
-                  _loadTasks();
-                },
-                tooltip: _isAscending ? 'Ascending' : 'Descending',
               ),
             ],
           ),
