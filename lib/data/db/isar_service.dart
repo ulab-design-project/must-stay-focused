@@ -36,6 +36,7 @@ class IsarService {
       [
         TaskSchema,
         TaskListSchema,
+        DeckSchema,
         FlashCardSchema,
         UserSettingsSchema,
       ],

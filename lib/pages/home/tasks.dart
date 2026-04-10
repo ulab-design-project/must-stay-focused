@@ -29,22 +29,22 @@ class TasksPage extends StatefulWidget {
 class _TasksPageState extends State<TasksPage> {
   // Currently selected task list (acts as global cursor)
   TaskList? _selectedList;
-  
+
   // Whether to show archived tasks
   bool _showArchived = false;
-  
+
   // Current sort mode: 'priority', 'dueSoon', or 'creationTime'
   String _sortBy = 'creationTime';
-  
+
   // Sort direction: true = ascending, false = descending
   bool _isAscending = true;
-  
+
   // Currently loaded incomplete tasks
   List<Task> _incompleteTasks = [];
-  
+
   // Currently loaded completed tasks
   List<Task> _completedTasks = [];
-  
+
   // Loading state
   bool _isLoading = true;
 
@@ -104,10 +104,8 @@ class _TasksPageState extends State<TasksPage> {
   void _openEditTask(Task task) {
     showDialog(
       context: context,
-      builder: (ctx) => TaskEditDialog(
-        existingTask: task,
-        selectedList: _selectedList,
-      ),
+      builder: (ctx) =>
+          TaskEditDialog(existingTask: task, selectedList: _selectedList),
     ).then((_) => _loadTasks());
   }
 
@@ -117,78 +115,80 @@ class _TasksPageState extends State<TasksPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Scaffold(
-      body: Column(
-        children: [
-          // Top bar with list selector and sort controls
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // Task list selector with archived button
-                TaskListSelector(
-                  selectedList: _showArchived ? null : _selectedList,
-                  onListSelected: (list) {
-                    setState(() {
-                      _showArchived = false;
-                      _selectedList = list;
-                    });
-                    _loadTasks();
-                  },
-                  onListChanged: _loadTasks,
-                  onArchivedToggled: () {
-                    setState(() => _showArchived = true);
-                    _loadTasks();
-                  },
-                ),
-                const Spacer(),
-                // Sort by dropdown
-                DropdownButton<String>(
-                  value: _sortBy,
-                  underline: const SizedBox(),
-                  items: const [
-                    DropdownMenuItem(value: 'creationTime', child: Text('Date')),
-                    DropdownMenuItem(value: 'priority', child: Text('Priority')),
-                    DropdownMenuItem(value: 'dueSoon', child: Text('Urgency')),
+    return Column(
+      children: [
+        // Top bar with list selector and sort controls
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              ElevatedButton(
+                onPressed: _openAddTask,
+                child: Row(
+                  children: [
+                    const Icon(Icons.add),
                   ],
-                  onChanged: (v) {
-                    if (v != null) {
-                      setState(() => _sortBy = v);
-                      _loadTasks();
-                    }
-                  },
                 ),
-                const SizedBox(width: 4),
-                // Sort direction toggle
-                IconButton(
-                  icon: Icon(
-                    _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                  ),
-                  onPressed: () {
-                    setState(() => _isAscending = !_isAscending);
+              ),
+              const SizedBox(width: 8),
+              // Task list selector with archived button
+              TaskListSelector(
+                selectedList: _showArchived ? null : _selectedList,
+                onListSelected: (list) {
+                  setState(() {
+                    _showArchived = false;
+                    _selectedList = list;
+                  });
+                  _loadTasks();
+                },
+                onListChanged: _loadTasks,
+                onArchivedToggled: () {
+                  setState(() => _showArchived = true);
+                  _loadTasks();
+                },
+              ),
+              const Spacer(),
+              // Sort by dropdown
+              DropdownButton<String>(
+                value: _sortBy,
+                underline: const SizedBox(),
+                items: const [
+                  DropdownMenuItem(value: 'creationTime', child: Text('Date')),
+                  DropdownMenuItem(value: 'priority', child: Text('Priority')),
+                  DropdownMenuItem(value: 'dueSoon', child: Text('Urgency')),
+                ],
+                onChanged: (v) {
+                  if (v != null) {
+                    setState(() => _sortBy = v);
                     _loadTasks();
-                  },
-                  tooltip: _isAscending ? 'Ascending' : 'Descending',
+                  }
+                },
+              ),
+              const SizedBox(width: 4),
+              // Sort direction toggle
+              IconButton(
+                icon: Icon(
+                  _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
                 ),
-              ],
-            ),
+                onPressed: () {
+                  setState(() => _isAscending = !_isAscending);
+                  _loadTasks();
+                },
+                tooltip: _isAscending ? 'Ascending' : 'Descending',
+              ),
+            ],
           ),
-          // Task list view
-          Expanded(
-            child: TaskListView(
-              incompleteTasks: _incompleteTasks,
-              completedTasks: _completedTasks,
-              onEditTask: _openEditTask,
-              onTaskChanged: _loadTasks,
-            ),
+        ),
+        // Task list view
+        Expanded(
+          child: TaskListView(
+            incompleteTasks: _incompleteTasks,
+            completedTasks: _completedTasks,
+            onEditTask: _openEditTask,
+            onTaskChanged: _loadTasks,
           ),
-        ],
-      ),
-      // FAB to add new task
-      floatingActionButton: FloatingActionButton(
-        onPressed: _openAddTask,
-        child: const Icon(Icons.add),
-      ),
+        ),
+      ],
     );
   }
 }

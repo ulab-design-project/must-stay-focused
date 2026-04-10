@@ -5,6 +5,24 @@
 
 ## Getting Started
 
+## Java/Gradle setup (important for all developers)
+
+Use JDK 17 for Flutter Android builds.
+
+Do not commit machine-specific `org.gradle.java.home` in [android/gradle.properties](android/gradle.properties).
+Set it per developer in user-level Gradle config instead:
+
+- Linux/macOS: `~/.gradle/gradle.properties`
+- Windows: `%USERPROFILE%\\.gradle\\gradle.properties`
+
+Add this line there:
+
+`org.gradle.java.home=<your-local-jdk-17-path>`
+
+Example Linux path:
+
+`org.gradle.java.home=/usr/lib/jvm/java-17-openjdk`
+
 Create emulator
 flutter emulators --create test_device
 
