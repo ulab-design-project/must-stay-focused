@@ -1,20 +1,43 @@
 import 'package:isar/isar.dart';
 import '../db/isar_service.dart';
 import '../models/flash_card.dart';
-import '../models/deck.dart';
+
+final FlashcardRepository flashcardRepo = FlashcardRepository();
 
 class FlashcardRepository {
  
-  Future<void> createDeck(Deck deck) async {
-    await idb.writeTxn(() async {
-      await idb.decks.put(deck);
+  Future<int> upsertDeck(Deck deck) async {
+    return await idb.writeTxn(() async {
+      return await idb.decks.put(deck);
     });
   }
 
- 
-  Future<void> addCard(FlashCard card) async {
+  Future<void> deleteDeck(int id) async {
     await idb.writeTxn(() async {
-      await idb.flashCards.put(card);
+      await idb.decks.delete(id);
+    });
+  }
+
+  Future<Deck?> getDeckByName(String deckName) async {
+    return await idb.decks.filter().nameEqualTo(deckName).findFirst();
+  }
+
+  Future<List<Deck>> getAllDecks() async {
+    return await idb.decks.where().findAll();
+  }
+
+ 
+  Future<int> upsertFlashCard(FlashCard card) async {
+    return await idb.writeTxn(() async {
+      final id = await idb.flashCards.put(card);
+      await card.deck.save();
+      return id;
+    });
+  }
+
+  Future<void> deleteFlashCard(int id) async {
+    await idb.writeTxn(() async {
+      await idb.flashCards.delete(id);
     });
   }
 
@@ -30,9 +53,7 @@ class FlashcardRepository {
 
   
   Future<void> saveReviewSession(FlashCard updatedCard) async {
-    await idb.writeTxn(() async {
-      await idb.flashCards.put(updatedCard);
-    });
+    await upsertFlashCard(updatedCard);
   }
 
   
@@ -43,20 +64,21 @@ class FlashcardRepository {
     bool showFullDeck = false,
   }) async {
     final now = DateTime.now();
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
-    
-    List<FlashCard> cards = await idb.flashCards
-        .filter()
-        .deckNameEqualTo(deckName)
-        .findAll();
+    List<FlashCard> cards;
 
-    
     if (!showFullDeck) {
-      cards = cards.where((card) {
-        return card.nextReviewDate.year == now.year &&
-            card.nextReviewDate.month == now.month &&
-            card.nextReviewDate.day == now.day;
-      }).toList();
+      cards = await idb.flashCards
+          .filter()
+          .deck((q) => q.nameEqualTo(deckName))
+          .nextReviewDateLessThan(todayEnd)
+          .findAll();
+    } else {
+      cards = await idb.flashCards
+          .filter()
+          .deck((q) => q.nameEqualTo(deckName))
+          .findAll();
     }
 
     

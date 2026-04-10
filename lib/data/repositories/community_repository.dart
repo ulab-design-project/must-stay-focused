@@ -74,8 +74,8 @@ class CommunityRepository
   {
     final payload = { //TODO : add name for the deck     
       "cards": cards.map((c) => {
-        "frontText": c.frontText,
-        "backText": c.backText,
+        "frontText": c.front,
+        "backText": c.back,
       }).toList()
     };
 

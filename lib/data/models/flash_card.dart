@@ -1,56 +1,93 @@
+import 'package:isar/isar.dart';
+
+part 'flash_card.g.dart';
+
+@collection
+class Deck {
+  Id id = Isar.autoIncrement;
+
+  @Index()
+  late String name;
+
+  String? description;
+
+  late List<String> tags = ['default'];
+
+  @Backlink(to: 'deck')
+  final flashcards = IsarLinks<FlashCard>();
+
+  Deck();
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'tags': tags,
+    };
+  }
+
+  factory Deck.fromJson(Map<String, dynamic> json) {
+    return Deck()
+      ..id = json['id'] ?? Isar.autoIncrement
+      ..name = json['name']
+      ..description = json['description']
+      ..tags = (json['tags'] as List?)?.map((e) => e as String).toList() ?? ['default'];
+  }
+}
+
+@collection
 class FlashCard {
-  String front;
-  String back;
+  Id id = Isar.autoIncrement;
 
-  
-  String deckId;
+  late String front;
+  late String back;
 
-  DateTime creationDate;
+  final deck = IsarLink<Deck>();
 
-  double easeFactor;
-  int repetition;
-  int interval;
-  DateTime nextReviewDate;
+  late DateTime creationDate;
 
-  FlashCard({
+  double easeFactor = 2.5;
+  int repetition = 0;
+  int interval = 1;
+  late DateTime nextReviewDate;
+
+  FlashCard();
+
+  FlashCard.make({
     required this.front,
     required this.back,
-    required this.deckId,
+    required Deck deck,
     required this.creationDate,
     this.easeFactor = 2.5,
     this.repetition = 0,
     this.interval = 1,
     DateTime? nextReviewDate,
-  }) : nextReviewDate = nextReviewDate ?? DateTime.now();
+  }) {
+    this.deck.value = deck;
+    this.nextReviewDate = nextReviewDate ?? DateTime.now();
+  }
 
  
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'front': front,
       'back': back,
-      'deckId': deckId,
+      'deckId': deck.value?.id,
       'creationDate': creationDate.toIso8601String(),
-      'easeFactor': easeFactor,
-      'repetition': repetition,
-      'interval': interval,
-      'nextReviewDate': nextReviewDate.toIso8601String(),
     };
   }
 
   
   factory FlashCard.fromJson(Map<String, dynamic> json) {
-    return FlashCard(
-      front: json['front'],
-      back: json['back'],
-      deckId: json['deckId'],
-      creationDate: DateTime.parse(json['creationDate']),
-      easeFactor: json['easeFactor'] ?? 2.5,
-      repetition: json['repetition'] ?? 0,
-      interval: json['interval'] ?? 1,
-      nextReviewDate: json['nextReviewDate'] != null
-          ? DateTime.parse(json['nextReviewDate'])
-          : DateTime.now(),
-    );
+    return FlashCard()
+      ..id = json['id'] ?? Isar.autoIncrement
+      ..front = json['front']
+      ..back = json['back']
+      ..creationDate = json['creationDate'] != null 
+          ? DateTime.parse(json['creationDate'])
+          : DateTime.now();
   }
 
  
