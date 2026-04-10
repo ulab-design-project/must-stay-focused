@@ -44,7 +44,7 @@ class Home extends StatelessWidget {
             const SizedBox(width: 8),
           ],
         ),
-        body: const Stack(children: [TasksPage()]),
+        body: TasksPage(),
       ),
     );
   }

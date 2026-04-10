@@ -7,6 +7,8 @@ class GlassDropdown<T> extends StatefulWidget {
   final T value;
   final ValueChanged<T> onChanged;
   final String Function(T) itemBuilder;
+  final Widget Function(T item)? selectedItemBuilder;
+  final Widget Function(T item, bool isSelected)? dropdownItemBuilder;
   final bool isTransparent;
   final bool isPrimary;
   final EdgeInsetsGeometry? padding;
@@ -17,6 +19,8 @@ class GlassDropdown<T> extends StatefulWidget {
     required this.value,
     required this.onChanged,
     required this.itemBuilder,
+    this.selectedItemBuilder,
+    this.dropdownItemBuilder,
     this.isTransparent = false,
     this.isPrimary = false,
     this.padding,
@@ -157,12 +161,14 @@ class _GlassDropdownState<T> extends State<GlassDropdown<T>> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  widget.itemBuilder(item),
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                                  ),
-                                ),
+                                child: widget.dropdownItemBuilder != null
+                                    ? widget.dropdownItemBuilder!(item, isSelected)
+                                    : Text(
+                                        widget.itemBuilder(item),
+                                        style: theme.textTheme.bodyMedium?.copyWith(
+                                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                        ),
+                                      ),
                               ),
                               if (isSelected)
                                 Icon(
@@ -202,10 +208,12 @@ class _GlassDropdownState<T> extends State<GlassDropdown<T>> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    widget.itemBuilder(widget.value),
-                    style: theme.textTheme.bodyMedium,
-                  ),
+                  widget.selectedItemBuilder != null
+                      ? widget.selectedItemBuilder!(widget.value)
+                      : Text(
+                          widget.itemBuilder(widget.value),
+                          style: theme.textTheme.bodyMedium,
+                        ),
                   const SizedBox(width: 8),
                   AnimatedRotation(
                     turns: _isOpen ? 0.5 : 0,
@@ -283,10 +291,12 @@ class _GlassDropdownState<T> extends State<GlassDropdown<T>> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          widget.itemBuilder(widget.value),
-                          style: theme.textTheme.bodyMedium,
-                        ),
+                        widget.selectedItemBuilder != null
+                            ? widget.selectedItemBuilder!(widget.value)
+                            : Text(
+                                widget.itemBuilder(widget.value),
+                                style: theme.textTheme.bodyMedium,
+                              ),
                         const SizedBox(width: 8),
                         AnimatedRotation(
                           turns: _isOpen ? 0.5 : 0,

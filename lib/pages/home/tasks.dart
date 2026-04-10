@@ -9,6 +9,7 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
+import 'package:must_stay_focused/style/dropdown.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
@@ -153,24 +154,29 @@ class _TasksPageState extends State<TasksPage> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButton<String>(
+                  GlassDropdown<String>(
                     value: _sortBy,
-                    underline: const SizedBox(),
-                    items: const [
-                      DropdownMenuItem(value: 'creationTime', child: Text('Date')),
-                      DropdownMenuItem(value: 'priority', child: Text('Priority')),
-                      DropdownMenuItem(value: 'dueSoon', child: Text('Urgency')),
-                    ],
-                    onChanged: (v) {
-                      if (v != null) {
-                        setState(() => _sortBy = v);
-                        _loadTasks();
+                    items: const ['creationTime', 'priority', 'dueSoon'],
+                    itemBuilder: (sortBy) {
+                      switch (sortBy) {
+                        case 'creationTime':
+                          return 'Date';
+                        case 'priority':
+                          return 'Priority';
+                        case 'dueSoon':
+                          return 'Urgency';
+                        default:
+                          return sortBy;
                       }
                     },
+                    onChanged: (v) {
+                      setState(() => _sortBy = v);
+                      _loadTasks();
+                    },
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 8),
                   // Sort direction toggle
-                  IconButton(
+                  GlassElevatedButton(
                     icon: Icon(
                       _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
                     ),
@@ -178,7 +184,7 @@ class _TasksPageState extends State<TasksPage> {
                       setState(() => _isAscending = !_isAscending);
                       _loadTasks();
                     },
-                    tooltip: _isAscending ? 'Ascending' : 'Descending',
+                    // tooltip: _isAscending ? 'Ascending' : 'Descending',
                   ),
                 ],
               ),
