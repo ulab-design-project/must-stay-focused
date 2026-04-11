@@ -4,10 +4,12 @@
 // Dialog for creating, editing, and deleting tasks.
 // Uses TaskListSelectorDialog for simple list selection.
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/theme.dart';
 import '../../utils/logging.dart';
 import 'task_list_selector_dialog.dart';
 
@@ -174,26 +176,66 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               // List selector
               Align(
                 alignment: Alignment.centerLeft,
-                child: InkWell(
-                  onTap: _showListSelector,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Task List',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.arrow_drop_down),
-                    ),
-                    child: Row(
-                      children: [
-                        if (_selectedList != null)
-                          Icon(
-                            IconData(_selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
-                            size: 20,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Task List', style: TextStyle(fontSize: 16)),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: _showListSelector,
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: themeController.glassBlur, sigmaY: themeController.glassBlur),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface.withValues(alpha: themeController.glassOpacity),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  width: 1,
+                                ),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.white.withValues(alpha: 0.2),
+                                    Colors.white.withValues(alpha: 0.0),
+                                  ],
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  if (_selectedList != null)
+                                    Icon(
+                                      IconData(_selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
+                                      size: 20,
+                                    ),
+                                  if (_selectedList != null) const SizedBox(width: 8),
+                                  Expanded(child: Text(_selectedList?.name ?? 'Select a list')),
+                                  const Icon(Icons.expand_more, size: 18),
+                                ],
+                              ),
+                            ),
                           ),
-                        if (_selectedList != null) const SizedBox(width: 8),
-                        Text(_selectedList?.name ?? 'Select a list'),
-                      ],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
@@ -207,15 +249,153 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               const SizedBox(height: 16),
 
               // Priority dropdown
-              DropdownButtonFormField<TaskPriority>(
-                initialValue: _priority,
-                decoration: const InputDecoration(labelText: 'Priority'),
-                items: TaskPriority.values.map((p) {
-                  return DropdownMenuItem(value: p, child: Text(p.name));
-                }).toList(),
-                onChanged: (v) {
-                  if (v != null) setState(() => _priority = v);
-                },
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Priority', style: TextStyle(fontSize: 16)),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () {
+                      // Open priority selector
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) {
+                          final theme = Theme.of(context);
+                          return Container(
+                            margin: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: themeController.glassBlur, sigmaY: themeController.glassBlur),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surface.withValues(alpha: themeController.glassOpacity),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(alpha: 0.2),
+                                      width: 1,
+                                    ),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Colors.white.withValues(alpha: 0.2),
+                                        Colors.white.withValues(alpha: 0.0),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: TaskPriority.values.asMap().entries.map((entry) {
+                                      final index = entry.key;
+                                      final p = entry.value;
+                                      final isSelected = p == _priority;
+                                      final isLast = index == TaskPriority.values.length - 1;
+                                      
+                                      return InkWell(
+                                        onTap: () {
+                                          setState(() => _priority = p);
+                                          Navigator.pop(ctx);
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                          decoration: BoxDecoration(
+                                            border: isLast
+                                                ? null
+                                                : Border(
+                                                    bottom: BorderSide(
+                                                      color: theme.dividerColor.withValues(alpha: 0.1),
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  p.name,
+                                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (isSelected)
+                                                Icon(
+                                                  Icons.check,
+                                                  size: 18,
+                                                  color: theme.colorScheme.primary,
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: themeController.glassBlur, sigmaY: themeController.glassBlur),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface.withValues(alpha: themeController.glassOpacity),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  Colors.white.withValues(alpha: 0.2),
+                                  Colors.white.withValues(alpha: 0.0),
+                                ],
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(child: Text(_priority.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500))),
+                                const Icon(Icons.expand_more, size: 18),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
 
