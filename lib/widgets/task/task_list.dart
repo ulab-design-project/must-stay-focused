@@ -70,45 +70,69 @@ class TaskListView extends StatelessWidget {
     final hasCompletedTasks = completedTasks.isNotEmpty;
     final totalItems = incompleteTasks.length + (hasCompletedTasks ? 1 : 0) + completedTasks.length;
     
-    // Build task list with cards
-    return ListView.builder(
-      itemCount: totalItems,
-      addRepaintBoundaries: false, // Fixes BackdropFilter blur disappearing during scroll
-      itemBuilder: (context, index) {
-        // First, show all incomplete tasks
-        if (index < incompleteTasks.length) {
-          final task = incompleteTasks[index];
-          return TaskCard(
-            task: task,
-            onEdit: () => onEditTask(task),
-            onTaskChanged: onTaskChanged,
-          );
-        }
-        
-        // Then, show "Completed Tasks" header if there are completed tasks
-        final headerIndex = incompleteTasks.length;
-        if (hasCompletedTasks && index == headerIndex) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Completed Tasks',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+    // Build task grid with Google Keep style cards
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Incomplete tasks grid
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75,
+            ),
+            itemCount: incompleteTasks.length,
+            itemBuilder: (context, index) {
+              final task = incompleteTasks[index];
+              return TaskCard(
+                task: task,
+                onEdit: () => onEditTask(task),
+                onTaskChanged: onTaskChanged,
+              );
+            },
+          ),
+          
+          // Completed tasks header
+          if (hasCompletedTasks)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'Completed Tasks',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
             ),
-          );
-        }
-        
-        // Finally, show completed tasks
-        final completedIndex = index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
-        final task = completedTasks[completedIndex];
-        return TaskCard(
-          task: task,
-          onEdit: () => onEditTask(task),
-          onTaskChanged: onTaskChanged,
-        );
-      },
+          
+          // Completed tasks grid
+          if (hasCompletedTasks)
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.75,
+              ),
+              itemCount: completedTasks.length,
+              itemBuilder: (context, index) {
+                final task = completedTasks[index];
+                return TaskCard(
+                  task: task,
+                  onEdit: () => onEditTask(task),
+                  onTaskChanged: onTaskChanged,
+                );
+              },
+            ),
+        ],
+      ),
     );
   }
 }

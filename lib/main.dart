@@ -26,7 +26,7 @@ class MSF extends StatelessWidget {
           theme: themeController.currentTheme,
           home: const Home(),
         );
-      }
+      },
     );
   }
 }
