@@ -168,8 +168,8 @@ class Task {
         (e) => e.name == json['priority'],
         orElse: () => TaskPriority.medium,
       )
-      ..isCompleted = json['is_completed'] ?? false;
-      ..isArchived = json['is_archived'] ?? false
+      ..isCompleted = json['is_completed'] ?? false
+      ..isArchived = json['is_archived'] ?? false;
   }
 
   Map<String, dynamic> toJson() {
