@@ -21,13 +21,13 @@ import 'task_card.dart';
 class TaskListView extends StatelessWidget {
   // List of incomplete tasks to display first
   final List<Task> incompleteTasks;
-  
+
   // List of completed tasks to display after the header
   final List<Task> completedTasks;
-  
+
   // Callback fired when a task card is tapped for editing
   final ValueChanged<Task> onEditTask;
-  
+
   // Callback fired when a task is modified (for parent to refresh list)
   final VoidCallback? onTaskChanged;
 
@@ -42,23 +42,31 @@ class TaskListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     // Show empty state if no tasks at all
     if (incompleteTasks.isEmpty && completedTasks.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.task_alt, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+            Icon(
+              Icons.task_alt,
+              size: 64,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'No tasks yet',
-              style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Tap + to add your first task',
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -68,12 +76,17 @@ class TaskListView extends StatelessWidget {
     // Calculate total items and positions
     // Structure: [incomplete tasks] + [optional header] + [completed tasks]
     final hasCompletedTasks = completedTasks.isNotEmpty;
-    final totalItems = incompleteTasks.length + (hasCompletedTasks ? 1 : 0) + completedTasks.length;
-    
+    final totalItems =
+        incompleteTasks.length +
+        (hasCompletedTasks ? 1 : 0) +
+        completedTasks.length;
+
     // Build task list with cards
     return ListView.builder(
       itemCount: totalItems,
-      addRepaintBoundaries: false, // Fixes BackdropFilter blur disappearing during scroll
+      addRepaintBoundaries: false,
+      // Grouped glass is provided by AdaptiveLiquidGlassLayer in TasksPage.
+      // TODO: Convert empty-state icon/text block into a reusable liquid empty-state widget.
       itemBuilder: (context, index) {
         // First, show all incomplete tasks
         if (index < incompleteTasks.length) {
@@ -84,7 +97,7 @@ class TaskListView extends StatelessWidget {
             onTaskChanged: onTaskChanged,
           );
         }
-        
+
         // Then, show "Completed Tasks" header if there are completed tasks
         final headerIndex = incompleteTasks.length;
         if (hasCompletedTasks && index == headerIndex) {
@@ -99,9 +112,10 @@ class TaskListView extends StatelessWidget {
             ),
           );
         }
-        
+
         // Finally, show completed tasks
-        final completedIndex = index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
+        final completedIndex =
+            index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
         final task = completedTasks[completedIndex];
         return TaskCard(
           task: task,

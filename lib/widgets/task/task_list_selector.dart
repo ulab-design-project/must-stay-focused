@@ -10,9 +10,12 @@
 //    - All DB operations via global taskRepo instance
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/buttons.dart';
+import '../../style/theme.dart';
 import 'task_list_edit_dialog.dart';
 
 /// A dropdown selector widget for choosing a task list.
@@ -21,15 +24,16 @@ import 'task_list_edit_dialog.dart';
 class TaskListSelector extends StatefulWidget {
   // Currently selected task list (null = no selection or archived view)
   final TaskList? selectedList;
-  
+
   // Callback fired when a list is selected
   final ValueChanged<TaskList> onListSelected;
-  
+
   // Callback fired when a list is added/edited/deleted (for parent to refresh)
   final VoidCallback? onListChanged;
-  
+
   // Callback fired when Archived button is tapped
   final VoidCallback? onArchivedToggled;
+  final double? width;
 
   const TaskListSelector({
     super.key,
@@ -37,6 +41,7 @@ class TaskListSelector extends StatefulWidget {
     required this.onListSelected,
     this.onListChanged,
     this.onArchivedToggled,
+    this.width = 120,
   });
 
   @override
@@ -46,10 +51,10 @@ class TaskListSelector extends StatefulWidget {
 class _TaskListSelectorState extends State<TaskListSelector> {
   // All loaded task lists from database
   List<TaskList> _allLists = [];
-  
+
   // Filtered lists based on search query
   List<TaskList> _filteredLists = [];
-  
+
   // Current search text
   String _searchQuery = '';
 
@@ -71,9 +76,11 @@ class _TaskListSelectorState extends State<TaskListSelector> {
     if (_searchQuery.isEmpty) {
       _filteredLists = List.from(_allLists);
     } else {
-      _filteredLists = _allLists.where(
-        (l) => l.name.toLowerCase().contains(_searchQuery.toLowerCase()),
-      ).toList();
+      _filteredLists = _allLists
+          .where(
+            (l) => l.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+          )
+          .toList();
     }
   }
 
@@ -90,55 +97,54 @@ class _TaskListSelectorState extends State<TaskListSelector> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => _showDropdown(context),
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          border: Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.3)),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child:  Text(widget.selectedList?.name ?? 'Archived', softWrap: false,), //TODO auto scroll name
-        // Row(
-        //   mainAxisSize: MainAxisSize.min,
-        //   children: [
-        //     if (widget.selectedList != null)
-        //       Icon(
-        //         IconData(widget.selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
-        //         size: 20,
-        //       )
-        //     else
-        //       const Icon(Icons.archive, size: 20),
-        //     const SizedBox(width: 8),
-        //     Text(widget.selectedList?.name ?? 'Archived'),
-        //     const Icon(Icons.arrow_drop_down),
-        //   ],
-        // ),
+
+    return GlassPicker(
+      width: widget.width,
+      height: 36,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      value: widget.selectedList?.name ?? 'Archived',
+      textStyle: TextStyle(
+        fontSize: AppTextSizes.small,
+        color: theme.colorScheme.onSurface,
       ),
+      placeholderStyle: TextStyle(
+        fontSize: AppTextSizes.small,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+      ),
+      icon: Icon(
+        Icons.expand_more,
+        size: 16,
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+      ),
+      onTap: () => _showDropdown(context),
     );
   }
 
   /// Shows the dropdown dialog with search and list options.
   void _showDropdown(BuildContext context) {
+    final theme = Theme.of(context);
+
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => AlertDialog(
-          contentPadding: EdgeInsets.zero,
-          content: SizedBox(
-            width: 300,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Search field
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Search...',
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
+        builder: (ctx, setDialogState) => Dialog(
+          backgroundColor: Colors.transparent,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: GlassCard(
+              useOwnLayer: true,
+              padding: const EdgeInsets.all(AppElementSizes.spacingMd),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  GlassTextField(
+                    placeholder: 'Search...',
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.75,
+                      ),
+                      size: 18,
                     ),
                     onChanged: (v) {
                       _searchQuery = v;
@@ -146,59 +152,81 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                       setDialogState(() {});
                     },
                   ),
-                ),
-                // List of task lists
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _filteredLists.length,
-                    itemBuilder: (ctx, i) {
-                      final list = _filteredLists[i];
-                      // Only Default list is protected (cannot be edited/deleted)
-                      final isProtectedList = list.isDefault;
-                      return ListTile(
-                        leading: Icon(
-                          IconData(list.iconCodePoint, fontFamily: 'MaterialIcons'),
-                        ),
-                        title: Text(list.name),
-                        trailing: isProtectedList
-                            ? null // No edit button for protected lists
-                            : IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  Navigator.pop(ctx);
-                                  _openEditDialog(list: list);
-                                },
-                              ),
-                        onTap: () {
-                          Navigator.pop(ctx);
-                          widget.onListSelected(list);
-                        },
-                      );
-                    },
+                  const SizedBox(height: AppElementSizes.spacingSm),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 260),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _filteredLists.length,
+                      itemBuilder: (ctx, i) {
+                        final list = _filteredLists[i];
+                        final isProtectedList = list.isDefault;
+                        return GlassListTile(
+                          leading: Icon(
+                            IconData(
+                              list.iconCodePoint,
+                              fontFamily: 'MaterialIcons',
+                            ),
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          title: Text(
+                            list.name,
+                            style: TextStyle(
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                          trailing: isProtectedList
+                              ? null
+                              : GlassSquircleIconButton(
+                                  size: 30,
+                                  icon: const Icon(Icons.edit, size: 16),
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    _openEditDialog(list: list);
+                                  },
+                                ),
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            widget.onListSelected(list);
+                          },
+                          isLast: i == _filteredLists.length - 1,
+                        );
+                      },
+                    ),
                   ),
-                ),
-                // Archived button
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.archive),
-                  title: const Text('Archived'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    widget.onArchivedToggled?.call();
-                  },
-                ),
-                const Divider(height: 1),
-                // Add new list button
-                ListTile(
-                  leading: const Icon(Icons.add),
-                  title: const Text('Add List'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    _openEditDialog();
-                  },
-                ),
-              ],
+                  const SizedBox(height: AppElementSizes.spacingSm),
+                  GlassListTile(
+                    leading: Icon(
+                      Icons.archive,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      'Archived',
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      widget.onArchivedToggled?.call();
+                    },
+                    isLast: false,
+                  ),
+                  GlassListTile(
+                    leading: Icon(
+                      Icons.add,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      'Add List',
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _openEditDialog();
+                    },
+                    isLast: true,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

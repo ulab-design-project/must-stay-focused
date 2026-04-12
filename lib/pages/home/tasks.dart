@@ -9,15 +9,15 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
-import 'package:must_stay_focused/style/dropdown.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/buttons.dart';
+import '../../style/theme.dart';
 import '../../widgets/task/task_edit_dialog.dart';
 import '../../widgets/task/task_list.dart';
 import '../../widgets/task/task_list_selector.dart';
-
-import '../../style/buttons.dart';
 
 /// Main task management page with full CRUD functionality.
 /// Displays tasks from the selected list with sorting options.
@@ -112,95 +112,162 @@ class _TasksPageState extends State<TasksPage> {
     ).then((_) => _loadTasks());
   }
 
+  String get _sortByLabel {
+    switch (_sortBy) {
+      case 'creationTime':
+        return 'Date';
+      case 'priority':
+        return 'Priority';
+      case 'dueSoon':
+        return 'Urgency';
+      default:
+        return _sortBy;
+    }
+  }
+
+  Future<void> _openSortPicker() async {
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          const options = [
+            ('Date', 'creationTime'),
+            ('Priority', 'priority'),
+            ('Urgency', 'dueSoon'),
+          ];
+
+          return Padding(
+            padding: const EdgeInsets.all(AppElementSizes.spacingLg),
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...options.map((option) {
+                    final isSelected = _sortBy == option.$2;
+                    return GlassListTile(
+                      title: Text(
+                        option.$1,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () => Navigator.of(context).pop(option.$2),
+                      isLast: option == options.last,
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      if (selected == null || !mounted) {
+        return;
+      }
+
+      setState(() => _sortBy = selected);
+      await _loadTasks();
+    } catch (e, stackTrace) {
+      debugPrint('TasksPage _openSortPicker error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return Column(
-      children: [
-        // Top bar with list selector and sort controls
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            spacing: 8,
-            // runSpacing: 8,
-            // crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              GlassElevatedButton(
-                onPressed: _openAddTask,
-                isPrimary: true,
-                icon: const Icon(Icons.add),
-              ),
-              // Task list selector with archived button
-              TaskListSelector(
-                selectedList: _showArchived ? null : _selectedList,
-                onListSelected: (list) {
-                  setState(() {
-                    _showArchived = false;
-                    _selectedList = list;
-                  });
-                  _loadTasks();
-                },
-                onListChanged: _loadTasks,
-                onArchivedToggled: () {
-                  setState(() => _showArchived = true);
-                  _loadTasks();
-                },
-              ),
-              // Sort controls grouped
-              Spacer(),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GlassDropdown<String>(
-                    value: _sortBy,
-                    items: const ['creationTime', 'priority', 'dueSoon'],
-                    itemBuilder: (sortBy) {
-                      switch (sortBy) {
-                        case 'creationTime':
-                          return 'Date';
-                        case 'priority':
-                          return 'Priority';
-                        case 'dueSoon':
-                          return 'Urgency';
-                        default:
-                          return sortBy;
-                      }
+    return AdaptiveLiquidGlassLayer(
+      child: Column(
+        children: [
+          // Top bar with list selector and sort controls
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                GlassSquircleIconButton(
+                  onPressed: _openAddTask,
+                  icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
+                  isPrimary: true,
+                ),
+                const SizedBox(width: AppElementSizes.spacingSm),
+                Expanded(
+                  child: TaskListSelector(
+                    width: null,
+                    selectedList: _showArchived ? null : _selectedList,
+                    onListSelected: (list) {
+                      setState(() {
+                        _showArchived = false;
+                        _selectedList = list;
+                      });
+                      _loadTasks();
                     },
-                    onChanged: (v) {
-                      setState(() => _sortBy = v);
+                    onListChanged: _loadTasks,
+                    onArchivedToggled: () {
+                      setState(() => _showArchived = true);
                       _loadTasks();
                     },
                   ),
-                  const SizedBox(width: 8),
-                  // Sort direction toggle
-                  GlassElevatedButton(
-                    icon: Icon(
-                      _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                    ),
-                    onPressed: () {
-                      setState(() => _isAscending = !_isAscending);
-                      _loadTasks();
-                    },
-                    // tooltip: _isAscending ? 'Ascending' : 'Descending',
+                ),
+                const SizedBox(width: AppElementSizes.spacingSm),
+                GlassPicker(
+                  width: 92,
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  value: _sortByLabel,
+                  placeholder: 'Sort',
+                  textStyle: TextStyle(
+                    fontSize: AppTextSizes.small,
+                    color: theme.colorScheme.onSurface,
                   ),
-                ],
-              ),
-            ],
+                  placeholderStyle: TextStyle(
+                    fontSize: AppTextSizes.small,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                  ),
+                  icon: Icon(
+                    Icons.expand_more,
+                    size: 16,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                  ),
+                  onTap: _openSortPicker,
+                ),
+                const SizedBox(width: AppElementSizes.spacingSm),
+                GlassSquircleIconButton(
+                  onPressed: () {
+                    setState(() => _isAscending = !_isAscending);
+                    _loadTasks();
+                  },
+                  icon: Icon(
+                    _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        // Task list view
-        Expanded(
-          child: TaskListView(
-            incompleteTasks: _incompleteTasks,
-            completedTasks: _completedTasks,
-            onEditTask: _openEditTask,
-            onTaskChanged: _loadTasks,
+          // Task list view
+          Expanded(
+            child: TaskListView(
+              incompleteTasks: _incompleteTasks,
+              completedTasks: _completedTasks,
+              onEditTask: _openEditTask,
+              onTaskChanged: _loadTasks,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

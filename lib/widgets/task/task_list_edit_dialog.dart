@@ -5,9 +5,12 @@
 // Only the Default list is protected from deletion.
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/buttons.dart';
+import '../../style/theme.dart';
 import '../../utils/logging.dart';
 
 // Available icons for task list selection
@@ -62,12 +65,22 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
       list.name = _nameController.text;
       list.iconCodePoint = _selectedIcon;
       await taskRepo.upsertTaskList(list);
-      await logger(LogLevel.info, 'TaskList saved: ${list.name}', source: 'task_list_edit_dialog.dart');
+      await logger(
+        LogLevel.info,
+        'TaskList saved: ${list.name}',
+        source: 'task_list_edit_dialog.dart',
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      await logger(LogLevel.error, 'Failed to save list: $e', source: 'task_list_edit_dialog.dart');
+      await logger(
+        LogLevel.error,
+        'Failed to save list: $e',
+        source: 'task_list_edit_dialog.dart',
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -77,32 +90,53 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
     if (widget.existingList == null) return;
     if (widget.existingList!.isDefault) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Can't delete default list")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Can't delete default list")),
+        );
       }
       return;
     }
 
-    final merge = await showDialog<bool>(
+    final merge = await GlassDialog.show<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete List'),
-        content: const Text('Move tasks to Default list?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Delete tasks')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Move to Default')),
-        ],
-      ),
+      title: 'Delete List',
+      message: 'Move tasks to Default list?',
+      actions: [
+        GlassDialogAction(
+          label: 'Delete tasks',
+          isDestructive: true,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        GlassDialogAction(
+          label: 'Move to Default',
+          isPrimary: true,
+          onPressed: () => Navigator.pop(context, true),
+        ),
+      ],
     );
     if (merge == null) return;
 
     try {
-      await taskRepo.deleteTaskList(widget.existingList!, mergeToDefault: merge);
-      await logger(LogLevel.info, 'TaskList deleted: ${widget.existingList!.name}', source: 'task_list_edit_dialog.dart');
+      await taskRepo.deleteTaskList(
+        widget.existingList!,
+        mergeToDefault: merge,
+      );
+      await logger(
+        LogLevel.info,
+        'TaskList deleted: ${widget.existingList!.name}',
+        source: 'task_list_edit_dialog.dart',
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      await logger(LogLevel.error, 'Failed to delete list: $e', source: 'task_list_edit_dialog.dart');
+      await logger(
+        LogLevel.error,
+        'Failed to delete list: $e',
+        source: 'task_list_edit_dialog.dart',
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -110,64 +144,111 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isProtectedList = widget.existingList != null && widget.existingList!.isDefault;
+    final isProtectedList =
+        widget.existingList != null && widget.existingList!.isDefault;
 
-    return AlertDialog(
-      title: Text(widget.existingList == null ? 'New List' : 'Edit List'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isProtectedList)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'This is a system list and cannot be edited.',
-                  style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 380),
+        child: GlassCard(
+          useOwnLayer: true,
+          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.existingList == null ? 'New List' : 'Edit List',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
-            ),
-          TextField(
-            controller: _nameController,
-            enabled: !isProtectedList,
-            decoration: const InputDecoration(labelText: 'List Name'),
-          ),
-          const SizedBox(height: 16),
-          const Text('Select Icon'),
-          Wrap(
-            spacing: 8,
-            children: availableIcons.map((icon) {
-              final isSelected = icon.codePoint == _selectedIcon;
-              return GestureDetector(
-                onTap: isProtectedList ? null : () => setState(() => _selectedIcon = icon.codePoint),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: isSelected ? theme.colorScheme.primary : Colors.transparent,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: AppElementSizes.spacingMd),
+              if (isProtectedList)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: AppElementSizes.spacingSm,
                   ),
-                  child: Icon(icon),
+                  child: Text(
+                    'This is a system list and cannot be edited.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                    ),
+                  ),
                 ),
-              );
-            }).toList(),
+              GlassTextField(
+                controller: _nameController,
+                enabled: !isProtectedList,
+                placeholder: 'List Name',
+              ),
+              const SizedBox(height: AppElementSizes.spacingMd),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Select Icon',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppElementSizes.spacingSm),
+              Wrap(
+                spacing: AppElementSizes.spacingSm,
+                runSpacing: AppElementSizes.spacingSm,
+                children: availableIcons.map((icon) {
+                  final isSelected = icon.codePoint == _selectedIcon;
+                  return GlassChip(
+                    label: '',
+                    icon: Icon(
+                      icon,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                    ),
+                    selected: isSelected,
+                    onTap: isProtectedList
+                        ? null
+                        : () => setState(() => _selectedIcon = icon.codePoint),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: AppElementSizes.spacingMd),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  GlassSquircleButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                  ),
+                  const SizedBox(width: AppElementSizes.spacingSm),
+                  if (widget.existingList != null && !isProtectedList)
+                    GlassSquircleButton(
+                      onPressed: _delete,
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                    ),
+                  if (!isProtectedList) ...[
+                    const SizedBox(width: AppElementSizes.spacingSm),
+                    GlassSquircleButton(
+                      onPressed: _save,
+                      isPrimary: true,
+                      child: Text(
+                        'Save',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        if (widget.existingList != null && !isProtectedList)
-          TextButton(onPressed: _delete, child: const Text('Delete')),
-        if (!isProtectedList)
-          ElevatedButton(onPressed: _save, child: const Text('Save')),
-      ],
     );
   }
 }

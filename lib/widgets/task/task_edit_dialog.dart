@@ -5,9 +5,12 @@
 // Uses TaskListSelectorDialog for simple list selection.
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/buttons.dart';
+import '../../style/theme.dart';
 import '../../utils/logging.dart';
 import 'task_list_selector_dialog.dart';
 
@@ -27,7 +30,6 @@ class TaskEditDialog extends StatefulWidget {
 }
 
 class _TaskEditDialogState extends State<TaskEditDialog> {
-  final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
 
@@ -60,6 +62,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
 
   /// Shows date and time picker for start time.
   Future<void> _pickStartTime() async {
+    // TODO: Convert to liquid glass date/time picker components.
     final date = await showDatePicker(
       context: context,
       initialDate: _startTime ?? DateTime.now(),
@@ -75,12 +78,19 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
     if (time == null || !mounted) return;
 
     setState(() {
-      _startTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _startTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
   /// Shows time picker for end time (requires start time to be set).
   Future<void> _pickEndTime() async {
+    // TODO: Convert to liquid glass date/time picker components.
     if (_startTime == null) return;
 
     final time = await showTimePicker(
@@ -90,7 +100,13 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
     if (time == null || !mounted) return;
 
     setState(() {
-      _endTime = DateTime(_startTime!.year, _startTime!.month, _startTime!.day, time.hour, time.minute);
+      _endTime = DateTime(
+        _startTime!.year,
+        _startTime!.month,
+        _startTime!.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
@@ -105,20 +121,73 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
     }
   }
 
+  Future<void> _openPriorityPicker() async {
+    final selected = await showModalBottomSheet<TaskPriority>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return Padding(
+          padding: const EdgeInsets.all(AppElementSizes.spacingLg),
+          child: GlassCard(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: TaskPriority.values.map((priority) {
+                return GlassListTile(
+                  leading: Icon(
+                    Icons.flag,
+                    color: theme.colorScheme.onSurface,
+                    size: 18,
+                  ),
+                  title: Text(
+                    priority.name,
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                  trailing: priority == _priority
+                      ? Icon(Icons.check, color: theme.colorScheme.primary)
+                      : null,
+                  onTap: () => Navigator.of(ctx).pop(priority),
+                  isLast: priority == TaskPriority.values.last,
+                );
+              }).toList(),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (selected != null && mounted) {
+      setState(() => _priority = selected);
+    }
+  }
+
   /// Saves the task to the database.
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    final trimmedTitle = _titleController.text.trim();
+    if (trimmedTitle.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Title is required')));
+      }
+      return;
+    }
+
     if (_selectedList == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Select a list')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Select a list')));
       }
       return;
     }
 
     try {
       final task = widget.existingTask ?? Task();
-      task.title = _titleController.text;
-      task.description = _descController.text.isEmpty ? null : _descController.text;
+      task.title = trimmedTitle;
+      task.description = _descController.text.isEmpty
+          ? null
+          : _descController.text;
       task.priority = _priority;
       task.startTime = _startTime;
       task.endTime = _endTime;
@@ -127,12 +196,22 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
       if (widget.existingTask == null) task.creationTime = DateTime.now();
 
       await taskRepo.upsertTask(task);
-      await logger(LogLevel.info, 'Task saved: ${task.title}', source: 'task_edit_dialog.dart');
+      await logger(
+        LogLevel.info,
+        'Task saved: ${task.title}',
+        source: 'task_edit_dialog.dart',
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      await logger(LogLevel.error, 'Failed to save task: $e', source: 'task_edit_dialog.dart');
+      await logger(
+        LogLevel.error,
+        'Failed to save task: $e',
+        source: 'task_edit_dialog.dart',
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -143,144 +222,269 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
 
     try {
       await taskRepo.deleteTask(widget.existingTask!.id);
-      await logger(LogLevel.info, 'Task deleted: ${widget.existingTask!.title}', source: 'task_edit_dialog.dart');
+      await logger(
+        LogLevel.info,
+        'Task deleted: ${widget.existingTask!.title}',
+        source: 'task_edit_dialog.dart',
+      );
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      await logger(LogLevel.error, 'Failed to delete task: $e', source: 'task_edit_dialog.dart');
+      await logger(
+        LogLevel.error,
+        'Failed to delete task: $e',
+        source: 'task_edit_dialog.dart',
+      );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
 
+  String _timeLabel(DateTime? value, String fallback) {
+    if (value == null) return fallback;
+    final hh = value.hour.toString().padLeft(2, '0');
+    final mm = value.minute.toString().padLeft(2, '0');
+    return '$hh:$mm';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.existingTask == null ? 'New Task' : 'Edit Task'),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Title field (required)
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title *'),
-                validator: (v) => v!.isEmpty ? 'Title is required' : null,
-              ),
-              const SizedBox(height: 16),
+    final theme = Theme.of(context);
 
-              // List selector
-              Align(
-                alignment: Alignment.centerLeft,
-                child: InkWell(
-                  onTap: _showListSelector,
-                  child: InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Task List',
-                      border: OutlineInputBorder(),
-                      suffixIcon: Icon(Icons.arrow_drop_down),
-                    ),
-                    child: Row(
-                      children: [
-                        if (_selectedList != null)
-                          Icon(
-                            IconData(_selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
-                            size: 20,
-                          ),
-                        if (_selectedList != null) const SizedBox(width: 8),
-                        Text(_selectedList?.name ?? 'Select a list'),
-                      ],
-                    ),
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: GlassCard(
+          useOwnLayer: true,
+          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.existingTask == null ? 'New Task' : 'Edit Task',
+                  style: TextStyle(
+                    fontSize: AppTextSizes.title,
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-
-              // Description field (optional)
-              TextFormField(
-                controller: _descController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-
-              // Priority dropdown
-              DropdownButtonFormField<TaskPriority>(
-                initialValue: _priority,
-                decoration: const InputDecoration(labelText: 'Priority'),
-                items: TaskPriority.values.map((p) {
-                  return DropdownMenuItem(value: p, child: Text(p.name));
-                }).toList(),
-                onChanged: (v) {
-                  if (v != null) setState(() => _priority = v);
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Time range selection
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _pickStartTime,
-                      icon: const Icon(Icons.access_time),
-                      label: Text(
-                        _startTime != null
-                            ? '${_startTime!.hour.toString().padLeft(2, '0')}:${_startTime!.minute.toString().padLeft(2, '0')}'
-                            : 'Start Time',
+                const SizedBox(height: AppElementSizes.spacingMd),
+                GlassTextField(
+                  controller: _titleController,
+                  placeholder: 'Title *',
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Priority',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.88,
+                          ),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    GlassPicker(
+                      width: 128,
+                      height: 36,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      value: _priority.name,
+                      textStyle: TextStyle(
+                        fontSize: AppTextSizes.small,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      placeholderStyle: TextStyle(
+                        fontSize: AppTextSizes.small,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.65,
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.expand_more,
+                        size: 14,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.85,
+                        ),
+                      ),
+                      onTap: _openPriorityPicker,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                GlassListTile(
+                  leading: Icon(
+                    Icons.flag,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                    size: 18,
+                  ),
+                  title: Row(
+                    children: [
+                      Text(
+                        _priority.name,
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                    ],
+                  ),
+                  subtitle: Text(
+                    'Tap picker to change',
+                    style: TextStyle(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.65,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _startTime != null ? _pickEndTime : null,
-                      icon: const Icon(Icons.access_time),
-                      label: Text(
-                        _endTime != null
-                            ? '${_endTime!.hour.toString().padLeft(2, '0')}:${_endTime!.minute.toString().padLeft(2, '0')}'
-                            : 'End Time',
+                  onTap: _openPriorityPicker,
+                  isLast: true,
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                GlassListTile(
+                  leading: _selectedList == null
+                      ? Icon(
+                          Icons.list_alt,
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
+                        )
+                      : Icon(
+                          IconData(
+                            _selectedList!.iconCodePoint,
+                            fontFamily: 'MaterialIcons',
+                          ),
+                          color: theme.colorScheme.onSurface,
+                        ),
+                  title: Text(
+                    _selectedList?.name ?? 'Select task list',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                  trailing: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 14,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                  ),
+                  onTap: _showListSelector,
+                  isLast: true,
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                GlassTextField(
+                  controller: _descController,
+                  placeholder: 'Description',
+                  maxLines: 2,
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GlassSquircleButton(
+                        onPressed: _pickStartTime,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                _timeLabel(_startTime, 'Start time'),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(width: AppElementSizes.spacingSm),
+                    Expanded(
+                      child: GlassSquircleButton(
+                        onPressed: _startTime != null ? _pickEndTime : null,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 16,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                _timeLabel(_endTime, 'End time'),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppElementSizes.spacingMd),
+                Text(
+                  'Recurring Days',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.88),
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Recurring days selection
-              const Text('Recurring Days'),
-              Wrap(
-                spacing: 4,
-                children: List.generate(7, (i) {
-                  final dayNum = i + 1;
-                  final isSelected = _selectedDays.contains(dayNum);
-                  return FilterChip(
-                    label: Text(_days[i]),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        if (selected) {
-                          _selectedDays.add(dayNum);
-                        } else {
-                          _selectedDays.remove(dayNum);
-                        }
-                      });
-                    },
-                  );
-                }),
-              ),
-            ],
+                ),
+                const SizedBox(height: AppElementSizes.spacingSm),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: List.generate(7, (i) {
+                    final dayNum = i + 1;
+                    final isSelected = _selectedDays.contains(dayNum);
+                    return GlassChip(
+                      label: _days[i],
+                      selected: isSelected,
+                      onTap: () {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedDays.remove(dayNum);
+                          } else {
+                            _selectedDays.add(dayNum);
+                          }
+                        });
+                      },
+                    );
+                  }),
+                ),
+                const SizedBox(height: AppElementSizes.spacingLg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GlassSquircleButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                    if (widget.existingTask != null) ...[
+                      const SizedBox(width: AppElementSizes.spacingSm),
+                      GlassSquircleButton(
+                        onPressed: _delete,
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                    const SizedBox(width: AppElementSizes.spacingSm),
+                    GlassSquircleButton(
+                      onPressed: _save,
+                      child: const Text('Save'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-        if (widget.existingTask != null)
-          TextButton(onPressed: _delete, child: const Text('Delete')),
-        ElevatedButton(onPressed: _save, child: const Text('Save')),
-      ],
     );
   }
 }

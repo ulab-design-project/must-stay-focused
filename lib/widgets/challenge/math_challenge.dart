@@ -1,15 +1,9 @@
 // File: lib/widgets/challenge/math_challenge.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
-import '../../style/buttons.dart';
-import '../../style/cards.dart';
-import '../../style/textfield.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
-enum DifficultySettings {
-  easy,
-  medium,
-  hard,
-}
+enum DifficultySettings { easy, medium, hard }
 
 class MathChallengeWidget extends StatefulWidget {
   final VoidCallback onSuccess;
@@ -101,9 +95,9 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
       }
 
       if (input == _correctAnswer) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Continuing to app')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Continuing to app')));
         widget.onSuccess.call();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -114,9 +108,9 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
       }
     } catch (e) {
       debugPrint('Error validating answer: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.toString()}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
     }
   }
 
@@ -154,14 +148,16 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
             const SizedBox(height: 16),
             GlassTextField(
               controller: _answerController,
-              hintText: 'Write Answer',
+              placeholder: 'Write Answer',
               keyboardType: TextInputType.number,
               onChanged: (_) {},
             ),
             const SizedBox(height: 16),
-            GlassPrimaryElevatedButton(
-              onPressed: _validateAnswer,
-              label: const Text('Submit'),
+            GlassButton.custom(
+              onTap: _validateAnswer,
+              width: 140,
+              height: 48,
+              child: const Text('Submit'),
             ),
           ],
         ),
@@ -175,4 +171,3 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
     super.dispose();
   }
 }
-

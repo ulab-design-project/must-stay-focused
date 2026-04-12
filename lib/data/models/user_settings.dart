@@ -18,8 +18,7 @@ import 'app_usage.dart';
 part 'user_settings.g.dart';
 
 @collection
-class UserSettings
-{
+class UserSettings {
   Id id = 1;
 
   String? pinHash;
@@ -29,6 +28,7 @@ class UserSettings
   String preferredChallengeType = 'math';
 
   bool strictModeEnabled = false;
+  bool gyroscopeGlassLightingEnabled = false;
   List<String> blockedPackages = [];
 
   bool notificationsEnabled = true;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'tasks.dart';
-import '../../style/background.dart';
 import '../../style/buttons.dart';
+import '../../style/background.dart';
 import '../settings.dart';
 
 class Home extends StatelessWidget {
@@ -20,7 +20,7 @@ class Home extends StatelessWidget {
           actions: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassElevatedButton(
+              child: GlassSquircleIconButton(
                 icon: const Icon(Icons.store),
                 onPressed: () {
                   // TODO: Navigate to community template store
@@ -29,7 +29,7 @@ class Home extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassElevatedButton(
+              child: GlassSquircleIconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () {
                   Navigator.push(

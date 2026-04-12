@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 import '../utils/theme_helpers.dart';
 
+// TODO: Convert to liquid glass widgets.
+
 class BackgroundDrop extends StatelessWidget {
   final Scaffold scaffold;
   final double filterStrength = 70.0;
@@ -15,18 +17,14 @@ class BackgroundDrop extends StatelessWidget {
     final theme = Theme.of(context);
     final bgColor = theme.scaffoldBackgroundColor;
     final primaryColor = theme.primaryColor;
-    
+
     final screenWidth = getScreenWidth(context);
     final screenHeight = getScreenHeight(context);
 
     return Stack(
       children: [
         // Base BG Box
-        Container(
-          width: screenWidth,
-          height: screenHeight,
-          color: bgColor,
-        ),
+        Container(width: screenWidth, height: screenHeight, color: bgColor),
         // Big Circle (top left, so only bottom right piece is visible)
         Positioned(
           top: -screenWidth,
@@ -57,13 +55,14 @@ class BackgroundDrop extends StatelessWidget {
         // Blur Filter
         Positioned.fill(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: filterStrength, sigmaY: filterStrength),
-            child: Container(
-              color: Colors.transparent,
+            filter: ImageFilter.blur(
+              sigmaX: filterStrength,
+              sigmaY: filterStrength,
             ),
+            child: Container(color: Colors.transparent),
           ),
         ),
-        // Positioned(child: Container(height: 100, width: 400, color: primaryColor,),top: screenHeight*0.4,),
+        // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
           data: theme.copyWith(
@@ -73,34 +72,34 @@ class BackgroundDrop extends StatelessWidget {
               elevation: 0,
             ),
           ),
-          child: BackdropGroup(
-            child: Scaffold(
-              key: scaffold.key,
-              appBar: scaffold.appBar,
-              body: scaffold.body,
-              floatingActionButton: scaffold.floatingActionButton,
-              floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
-              floatingActionButtonAnimator: scaffold.floatingActionButtonAnimator,
-              persistentFooterButtons: scaffold.persistentFooterButtons,
-              persistentFooterAlignment: scaffold.persistentFooterAlignment,
-              drawer: scaffold.drawer,
-              onDrawerChanged: scaffold.onDrawerChanged,
-              endDrawer: scaffold.endDrawer,
-              onEndDrawerChanged: scaffold.onEndDrawerChanged,
-              bottomNavigationBar: scaffold.bottomNavigationBar,
-              bottomSheet: scaffold.bottomSheet,
-              backgroundColor: Colors.transparent, // force transparent bg
-              resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
-              primary: scaffold.primary,
-              drawerDragStartBehavior: scaffold.drawerDragStartBehavior,
-              extendBody: scaffold.extendBody,
-              extendBodyBehindAppBar: scaffold.extendBodyBehindAppBar,
-              drawerScrimColor: scaffold.drawerScrimColor,
-              drawerEdgeDragWidth: scaffold.drawerEdgeDragWidth,
-              drawerEnableOpenDragGesture: scaffold.drawerEnableOpenDragGesture,
-              endDrawerEnableOpenDragGesture: scaffold.endDrawerEnableOpenDragGesture,
-              restorationId: scaffold.restorationId,
-            ),
+          child: Scaffold(
+            key: scaffold.key,
+            appBar: scaffold.appBar,
+            body: scaffold.body,
+            floatingActionButton: scaffold.floatingActionButton,
+            floatingActionButtonLocation:
+                scaffold.floatingActionButtonLocation,
+            floatingActionButtonAnimator: scaffold.floatingActionButtonAnimator,
+            persistentFooterButtons: scaffold.persistentFooterButtons,
+            persistentFooterAlignment: scaffold.persistentFooterAlignment,
+            drawer: scaffold.drawer,
+            onDrawerChanged: scaffold.onDrawerChanged,
+            endDrawer: scaffold.endDrawer,
+            onEndDrawerChanged: scaffold.onEndDrawerChanged,
+            bottomNavigationBar: scaffold.bottomNavigationBar,
+            bottomSheet: scaffold.bottomSheet,
+            backgroundColor: Colors.transparent, // force transparent bg
+            resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
+            primary: scaffold.primary,
+            drawerDragStartBehavior: scaffold.drawerDragStartBehavior,
+            extendBody: scaffold.extendBody,
+            extendBodyBehindAppBar: scaffold.extendBodyBehindAppBar,
+            drawerScrimColor: scaffold.drawerScrimColor,
+            drawerEdgeDragWidth: scaffold.drawerEdgeDragWidth,
+            drawerEnableOpenDragGesture: scaffold.drawerEnableOpenDragGesture,
+            endDrawerEnableOpenDragGesture:
+                scaffold.endDrawerEnableOpenDragGesture,
+            restorationId: scaffold.restorationId,
           ),
         ),
       ],

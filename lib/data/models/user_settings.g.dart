@@ -22,33 +22,38 @@ const UserSettingsSchema = CollectionSchema(
       name: r'blockedPackages',
       type: IsarType.stringList,
     ),
-    r'notificationsEnabled': PropertySchema(
+    r'gyroscopeGlassLightingEnabled': PropertySchema(
       id: 1,
+      name: r'gyroscopeGlassLightingEnabled',
+      type: IsarType.bool,
+    ),
+    r'notificationsEnabled': PropertySchema(
+      id: 2,
       name: r'notificationsEnabled',
       type: IsarType.bool,
     ),
     r'pinHash': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'pinHash',
       type: IsarType.string,
     ),
     r'preferredChallengeType': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'preferredChallengeType',
       type: IsarType.string,
     ),
     r'salt': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'salt',
       type: IsarType.string,
     ),
     r'strictModeEnabled': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'strictModeEnabled',
       type: IsarType.bool,
     ),
     r'themeMode': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'themeMode',
       type: IsarType.string,
     )
@@ -112,12 +117,13 @@ void _userSettingsSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeStringList(offsets[0], object.blockedPackages);
-  writer.writeBool(offsets[1], object.notificationsEnabled);
-  writer.writeString(offsets[2], object.pinHash);
-  writer.writeString(offsets[3], object.preferredChallengeType);
-  writer.writeString(offsets[4], object.salt);
-  writer.writeBool(offsets[5], object.strictModeEnabled);
-  writer.writeString(offsets[6], object.themeMode);
+  writer.writeBool(offsets[1], object.gyroscopeGlassLightingEnabled);
+  writer.writeBool(offsets[2], object.notificationsEnabled);
+  writer.writeString(offsets[3], object.pinHash);
+  writer.writeString(offsets[4], object.preferredChallengeType);
+  writer.writeString(offsets[5], object.salt);
+  writer.writeBool(offsets[6], object.strictModeEnabled);
+  writer.writeString(offsets[7], object.themeMode);
 }
 
 UserSettings _userSettingsDeserialize(
@@ -128,13 +134,14 @@ UserSettings _userSettingsDeserialize(
 ) {
   final object = UserSettings();
   object.blockedPackages = reader.readStringList(offsets[0]) ?? [];
+  object.gyroscopeGlassLightingEnabled = reader.readBool(offsets[1]);
   object.id = id;
-  object.notificationsEnabled = reader.readBool(offsets[1]);
-  object.pinHash = reader.readStringOrNull(offsets[2]);
-  object.preferredChallengeType = reader.readString(offsets[3]);
-  object.salt = reader.readStringOrNull(offsets[4]);
-  object.strictModeEnabled = reader.readBool(offsets[5]);
-  object.themeMode = reader.readString(offsets[6]);
+  object.notificationsEnabled = reader.readBool(offsets[2]);
+  object.pinHash = reader.readStringOrNull(offsets[3]);
+  object.preferredChallengeType = reader.readString(offsets[4]);
+  object.salt = reader.readStringOrNull(offsets[5]);
+  object.strictModeEnabled = reader.readBool(offsets[6]);
+  object.themeMode = reader.readString(offsets[7]);
   return object;
 }
 
@@ -150,14 +157,16 @@ P _userSettingsDeserializeProp<P>(
     case 1:
       return (reader.readBool(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
-    case 3:
-      return (reader.readString(offset)) as P;
-    case 4:
-      return (reader.readStringOrNull(offset)) as P;
-    case 5:
       return (reader.readBool(offset)) as P;
+    case 3:
+      return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readBool(offset)) as P;
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -484,6 +493,16 @@ extension UserSettingsQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      gyroscopeGlassLightingEnabledEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'gyroscopeGlassLightingEnabled',
+        value: value,
+      ));
     });
   }
 
@@ -1210,6 +1229,20 @@ extension UserSettingsQueryLinks
 extension UserSettingsQuerySortBy
     on QueryBuilder<UserSettings, UserSettings, QSortBy> {
   QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByGyroscopeGlassLightingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gyroscopeGlassLightingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByGyroscopeGlassLightingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gyroscopeGlassLightingEnabled', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
       sortByNotificationsEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'notificationsEnabled', Sort.asc);
@@ -1290,6 +1323,20 @@ extension UserSettingsQuerySortBy
 
 extension UserSettingsQuerySortThenBy
     on QueryBuilder<UserSettings, UserSettings, QSortThenBy> {
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByGyroscopeGlassLightingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gyroscopeGlassLightingEnabled', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByGyroscopeGlassLightingEnabledDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'gyroscopeGlassLightingEnabled', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserSettings, UserSettings, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1391,6 +1438,13 @@ extension UserSettingsQueryWhereDistinct
   }
 
   QueryBuilder<UserSettings, UserSettings, QDistinct>
+      distinctByGyroscopeGlassLightingEnabled() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'gyroscopeGlassLightingEnabled');
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QDistinct>
       distinctByNotificationsEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'notificationsEnabled');
@@ -1446,6 +1500,13 @@ extension UserSettingsQueryProperty
       blockedPackagesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'blockedPackages');
+    });
+  }
+
+  QueryBuilder<UserSettings, bool, QQueryOperations>
+      gyroscopeGlassLightingEnabledProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'gyroscopeGlassLightingEnabled');
     });
   }
 

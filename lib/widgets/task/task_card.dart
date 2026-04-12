@@ -13,12 +13,13 @@
 //    - Logging for all operations.
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
-import '../../utils/logging.dart';
-import '../../style/cards.dart';
+import '../../style/liquid_glass_style.dart';
 import '../../utils/theme_helpers.dart';
+import '../../utils/logging.dart';
 
 /// A swipeable card widget representing a single task.
 /// Provides quick actions: toggle complete, move to Archived (swipe left), delete (swipe right).
@@ -26,10 +27,10 @@ import '../../utils/theme_helpers.dart';
 class TaskCard extends StatelessWidget {
   // The task data to display
   final Task task;
-  
+
   // Callback fired when the card body is tapped (opens edit dialog)
   final VoidCallback onEdit;
-  
+
   // Callback fired when task is modified (for parent to refresh list)
   final VoidCallback? onTaskChanged;
 
@@ -75,9 +76,9 @@ class TaskCard extends StatelessWidget {
         source: 'task_card.dart',
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -100,9 +101,9 @@ class TaskCard extends StatelessWidget {
         source: 'task_card.dart',
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -123,9 +124,9 @@ class TaskCard extends StatelessWidget {
         source: 'task_card.dart',
       );
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
       }
     }
   }
@@ -137,7 +138,7 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
       child: Dismissible(
@@ -179,7 +180,7 @@ class TaskCard extends StatelessWidget {
         background: Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(16)
+            borderRadius: BorderRadius.circular(16),
           ),
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(left: 16),
@@ -189,60 +190,79 @@ class TaskCard extends StatelessWidget {
         secondaryBackground: Container(
           decoration: BoxDecoration(
             color: theme.colorScheme.tertiaryContainer,
-            borderRadius: BorderRadius.circular(16)
+            borderRadius: BorderRadius.circular(16),
           ),
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 16),
-          child: Icon(Icons.archive, color: theme.colorScheme.onTertiaryContainer),
+          child: Icon(
+            Icons.archive,
+            color: theme.colorScheme.onTertiaryContainer,
+          ),
         ),
-        child: GlassListTile(
-          isPrimary: task.priority == TaskPriority.critical,
-          leading: GestureDetector(
-            onTap: () => _toggleComplete(context),
-            child: Checkbox(
-              visualDensity: VisualDensity.compact,
-              // materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: task.isCompleted,
-              onChanged: null,
-              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.disabled)) {
-                  return task.isCompleted ? theme.colorScheme.primary : theme.colorScheme.secondary.withValues(alpha: 0.2);
-                }
-                return theme.colorScheme.primary;
-              }),
-            ),
+        child: GlassCard(
+          padding: EdgeInsets.zero,
+          useOwnLayer: true,
+          settings: glassSettingsFor(
+            context,
+            isPrimary: task.priority == TaskPriority.critical,
           ),
-          title: Text(
-            task.title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-              color: task.isCompleted ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : theme.colorScheme.onSurface,
-            ),
-          ),
-          subtitle: Text(
-            task.startTime != null
-                ? '${_formatTime(task.startTime!)}${task.endTime != null ? ' - ${_formatTime(task.endTime!)}' : ''}'
-                : (task.description ?? ''),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _getPriorityColor(context).withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.5)),
-            ),
-            child: Text(
-              task.priority.name.toUpperCase(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
+          child: GlassListTile(
+            leading: GestureDetector(
+              onTap: () => _toggleComplete(context),
+              child: Checkbox(
+                visualDensity: VisualDensity.compact,
+                // TODO: Convert to liquid glass checkbox when available.
+                value: task.isCompleted,
+                onChanged: null,
+                fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                  if (states.contains(WidgetState.disabled)) {
+                    return task.isCompleted
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.secondary.withValues(alpha: 0.2);
+                  }
+                  return theme.colorScheme.primary;
+                }),
               ),
             ),
+            title: Text(
+              task.title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                decoration: task.isCompleted
+                    ? TextDecoration.lineThrough
+                    : null,
+                color: task.isCompleted
+                    ? theme.colorScheme.onSurface.withValues(alpha: 0.5)
+                    : theme.colorScheme.onSurface,
+              ),
+            ),
+            subtitle: Text(
+              task.startTime != null
+                  ? '${_formatTime(task.startTime!)}${task.endTime != null ? ' - ${_formatTime(task.endTime!)}' : ''}'
+                  : (task.description ?? ''),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              ),
+            ),
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _getPriorityColor(context).withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Text(
+                task.priority.name.toUpperCase(),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            onTap: onEdit,
+            isLast: true,
           ),
-          onTap: onEdit,
         ),
       ),
     );
