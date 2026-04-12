@@ -114,7 +114,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surface.withValues(alpha: op),
                 borderRadius: BorderRadius.circular(16),
@@ -135,13 +135,13 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (widget.selectedList != null)
-                    Icon(
-                      IconData(widget.selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
-                      size: 18,
-                    )
-                  else
-                    const Icon(Icons.archive, size: 18),
-                  const SizedBox(width: 8),
+                  //   Icon(
+                  //     IconData(widget.selectedList!.iconCodePoint, fontFamily: 'MaterialIcons'),
+                  //     size: 18,
+                  //   )
+                  // else
+                  //   const Icon(Icons.archive, size: 18),
+                  // const SizedBox(width: 8),
                   Text(
                     widget.selectedList?.name ?? 'Archived',
                     style: theme.textTheme.bodyMedium,

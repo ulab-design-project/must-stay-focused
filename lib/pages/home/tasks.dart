@@ -44,6 +44,9 @@ class _TasksPageState extends State<TasksPage> {
   // Sort direction: true = ascending, false = descending
   bool _isAscending = true;
 
+  // View mode: grouped (Keep style) or single tasks
+  bool _useGroupedView = true;
+
   // Currently loaded incomplete tasks
   List<Task> _incompleteTasks = [];
 
@@ -233,29 +236,38 @@ class _TasksPageState extends State<TasksPage> {
               ),
               // Sort controls grouped
               Spacer(),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GlassDropdown<String>(
-                    value: _sortBy,
-                    items: const ['creationTime', 'priority', 'dueSoon'],
-                    itemBuilder: (sortBy) {
-                      switch (sortBy) {
-                        case 'creationTime':
-                          return 'Date';
-                        case 'priority':
-                          return 'Priority';
-                        case 'dueSoon':
-                          return 'Urgency';
-                        default:
-                          return sortBy;
-                      }
-                    },
-                    onChanged: (v) {
-                      setState(() => _sortBy = v);
-                      _loadTasks();
-                    },
-                  ),
+               Row(
+                 mainAxisSize: MainAxisSize.min,
+                 children: [
+                   GlassElevatedButton(
+                     icon: Icon(
+                       _useGroupedView ? Icons.grid_view : Icons.view_module,
+                     ),
+                     onPressed: () {
+                       setState(() => _useGroupedView = !_useGroupedView);
+                     },
+                   ),
+                   const SizedBox(width: 8),
+                   GlassDropdown<String>(
+                     value: _sortBy,
+                     items: const ['creationTime', 'priority', 'dueSoon'],
+                     itemBuilder: (sortBy) {
+                       switch (sortBy) {
+                         case 'creationTime':
+                           return 'Date';
+                         case 'priority':
+                           return 'Priority';
+                         case 'dueSoon':
+                           return 'Urgency';
+                         default:
+                           return sortBy;
+                       }
+                     },
+                     onChanged: (v) {
+                       setState(() => _sortBy = v);
+                       _loadTasks();
+                     },
+                   ),
                   const SizedBox(width: 8),
                   // Sort direction toggle
                   GlassElevatedButton(
@@ -274,14 +286,15 @@ class _TasksPageState extends State<TasksPage> {
           ),
         ),
         // Task list view
-        Expanded(
-          child: TaskListView(
-            incompleteTasks: _incompleteTasks,
-            completedTasks: _completedTasks,
-            onEditTask: _openEditTask,
-            onTaskChanged: _loadTasks,
-          ),
-        ),
+         Expanded(
+           child: TaskListView(
+             incompleteTasks: _incompleteTasks,
+             completedTasks: _completedTasks,
+             onEditTask: _openEditTask,
+             onTaskChanged: _loadTasks,
+             useGroupedView: _useGroupedView,
+           ),
+         ),
       ],
     );
   }

@@ -11,9 +11,11 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../data/models/task.dart';
 import 'task_card.dart';
+import 'grouped_task_card.dart';
 
 /// A ListView widget that displays a list of tasks.
 /// Shows incomplete tasks first, then a "Completed Tasks" header, then completed tasks.
@@ -31,13 +33,28 @@ class TaskListView extends StatelessWidget {
   // Callback fired when a task is modified (for parent to refresh list)
   final VoidCallback? onTaskChanged;
 
+  // Whether to use Keep-style grouped view
+  final bool useGroupedView;
+
   const TaskListView({
     super.key,
     required this.incompleteTasks,
     required this.completedTasks,
     required this.onEditTask,
     this.onTaskChanged,
+    this.useGroupedView = true,
   });
+
+  Map<TaskPriority, List<Task>> _groupTasksByPriority(List<Task> tasks) {
+    final Map<TaskPriority, List<Task>> groups = {};
+    for (final task in tasks) {
+      if (!groups.containsKey(task.priority)) {
+        groups[task.priority] = [];
+      }
+      groups[task.priority]!.add(task);
+    }
+    return groups;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,37 +82,19 @@ class TaskListView extends StatelessWidget {
       );
     }
 
-    // Calculate total items and positions
-    // Structure: [incomplete tasks] + [optional header] + [completed tasks]
     final hasCompletedTasks = completedTasks.isNotEmpty;
-    final totalItems = incompleteTasks.length + (hasCompletedTasks ? 1 : 0) + completedTasks.length;
-    
-    // Build task grid with Google Keep style cards
+
+    // Build task grid with Google Keep style staggered cards
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Incomplete tasks grid
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 0.75,
-            ),
-            itemCount: incompleteTasks.length,
-            itemBuilder: (context, index) {
-              final task = incompleteTasks[index];
-              return TaskCard(
-                task: task,
-                onEdit: () => onEditTask(task),
-                onTaskChanged: onTaskChanged,
-              );
-            },
-          ),
+          // Incomplete tasks staggered grid
+          if (useGroupedView)
+            _buildGroupedView(context)
+          else
+            _buildSingleTaskView(context),
           
           // Completed tasks header
           if (hasCompletedTasks)
@@ -112,27 +111,57 @@ class TaskListView extends StatelessWidget {
           
           // Completed tasks grid
           if (hasCompletedTasks)
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 0.75,
-              ),
-              itemCount: completedTasks.length,
-              itemBuilder: (context, index) {
-                final task = completedTasks[index];
-                return TaskCard(
-                  task: task,
-                  onEdit: () => onEditTask(task),
-                  onTaskChanged: onTaskChanged,
-                );
-              },
-            ),
+            _buildSingleTaskView(context, tasks: completedTasks),
         ],
       ),
+    );
+  }
+
+  Widget _buildGroupedView(BuildContext context) {
+    final groups = _groupTasksByPriority(incompleteTasks);
+    final sortedPriorities = TaskPriority.values.reversed; // Highest first
+
+    return MasonryGridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      itemCount: groups.length,
+      itemBuilder: (context, index) {
+        final priority = sortedPriorities.elementAt(index);
+        final tasks = groups[priority];
+        
+        if (tasks == null || tasks.isEmpty) return const SizedBox.shrink();
+        
+        return GroupedTaskCard(
+          tasks: tasks,
+          priority: priority,
+          onEditTask: onEditTask,
+          onTaskChanged: onTaskChanged,
+        );
+      },
+    );
+  }
+
+  Widget _buildSingleTaskView(BuildContext context, {List<Task>? tasks}) {
+    final displayTasks = tasks ?? incompleteTasks;
+
+    return MasonryGridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      itemCount: displayTasks.length,
+      itemBuilder: (context, index) {
+        final task = displayTasks[index];
+        return TaskCard(
+          task: task,
+          onEdit: () => onEditTask(task),
+          onTaskChanged: onTaskChanged,
+        );
+      },
     );
   }
 }

@@ -2,11 +2,11 @@
 // Reusable Task Card Item with swipe actions
 //
 // Requirements:
-// 1. class TaskCard extends StatelessWidget:
+// 1. class TaskCard extends StatefulWidget:
 //    - Properties: final Task task, final VoidCallback onEdit, final VoidCallback? onTaskChanged
 //    - UI:
 //      - Checkbox leading icon for quick complete toggle.
-//      - Title and time/description as subtitle.
+//      - Tap to expand/collapse full details, long press to edit.
 //      - Priority indicator with color-coded trailing badge.
 //      - Swipe left to move to Archived list, swipe right to delete with confirmation.
 //    - All DB operations via global taskRepo instance.
@@ -17,17 +17,18 @@ import 'package:flutter/material.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../utils/logging.dart';
-import '../../style/cards.dart';
 import '../../utils/theme_helpers.dart';
+import 'task_detail_view.dart';
 
 /// A swipeable card widget representing a single task.
+/// Tap to expand/collapse details, long press to edit.
 /// Provides quick actions: toggle complete, move to Archived (swipe left), delete (swipe right).
 /// All database operations are performed via the global taskRepo instance.
-class TaskCard extends StatelessWidget {
+class TaskCard extends StatefulWidget {
   // The task data to display
   final Task task;
   
-  // Callback fired when the card body is tapped (opens edit dialog)
+  // Callback fired when the card is long pressed (opens edit dialog)
   final VoidCallback onEdit;
   
   // Callback fired when task is modified (for parent to refresh list)
@@ -40,11 +41,18 @@ class TaskCard extends StatelessWidget {
     this.onTaskChanged,
   });
 
+  @override
+  State<TaskCard> createState() => _TaskCardState();
+}
+
+class _TaskCardState extends State<TaskCard> {
+  bool _isExpanded = false;
+
   /// Returns the background color based on task priority.
   Color _getPriorityColor(BuildContext context) {
     final theme = Theme.of(context);
     final priorityColors = generatePriorityColors(theme.colorScheme.primary);
-    switch (task.priority) {
+    switch (widget.task.priority) {
       case TaskPriority.critical:
         return priorityColors[0];
       case TaskPriority.high:
@@ -59,15 +67,15 @@ class TaskCard extends StatelessWidget {
   /// Toggles the task completion status and updates via repository.
   Future<void> _toggleComplete(BuildContext context) async {
     try {
-      task.isCompleted = !task.isCompleted;
-      task.completionTime = task.isCompleted ? DateTime.now() : null;
-      await taskRepo.upsertTask(task);
+      widget.task.isCompleted = !widget.task.isCompleted;
+      widget.task.completionTime = widget.task.isCompleted ? DateTime.now() : null;
+      await taskRepo.upsertTask(widget.task);
       await logger(
         LogLevel.info,
-        'Task toggled: ${task.title}',
+        'Task toggled: ${widget.task.title}',
         source: 'task_card.dart',
       );
-      onTaskChanged?.call();
+      widget.onTaskChanged?.call();
     } catch (e) {
       await logger(
         LogLevel.error,
@@ -85,14 +93,14 @@ class TaskCard extends StatelessWidget {
   /// Toggles the task archived status and updates via repository.
   Future<void> _toggleArchive(BuildContext context) async {
     try {
-      task.isArchived = !task.isArchived;
-      await taskRepo.upsertTask(task);
+      widget.task.isArchived = !widget.task.isArchived;
+      await taskRepo.upsertTask(widget.task);
       await logger(
         LogLevel.info,
-        'Task archived: ${task.title}',
+        'Task archived: ${widget.task.title}',
         source: 'task_card.dart',
       );
-      onTaskChanged?.call();
+      widget.onTaskChanged?.call();
     } catch (e) {
       await logger(
         LogLevel.error,
@@ -110,10 +118,10 @@ class TaskCard extends StatelessWidget {
   /// Deletes the task from the database via repository.
   Future<void> _delete(BuildContext context) async {
     try {
-      await taskRepo.deleteTask(task.id);
+      await taskRepo.deleteTask(widget.task.id);
       await logger(
         LogLevel.info,
-        'Task deleted: ${task.title}',
+        'Task deleted: ${widget.task.title}',
         source: 'task_card.dart',
       );
     } catch (e) {
@@ -140,7 +148,7 @@ class TaskCard extends StatelessWidget {
     final priorityColor = _getPriorityColor(context);
     
     return Dismissible(
-      key: ValueKey(task.id),
+      key: ValueKey(widget.task.id),
       direction: DismissDirection.horizontal,
       confirmDismiss: (direction) async {
         // Swipe left (endToStart) = toggle archive
@@ -195,10 +203,11 @@ class TaskCard extends StatelessWidget {
         child: Icon(Icons.archive, color: theme.colorScheme.onTertiaryContainer),
       ),
       child: GestureDetector(
-        onTap: onEdit,
+        onTap: () => setState(() => _isExpanded = !_isExpanded),
+        onLongPress: widget.onEdit,
         child: Container(
           decoration: BoxDecoration(
-            color: task.priority == TaskPriority.critical 
+            color: widget.task.priority == TaskPriority.critical 
                 ? priorityColor.withValues(alpha: 0.15)
                 : theme.cardColor,
             borderRadius: BorderRadius.circular(24),
@@ -210,6 +219,7 @@ class TaskCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Top row with checkbox and priority
               Row(
@@ -219,11 +229,11 @@ class TaskCard extends StatelessWidget {
                     onTap: () => _toggleComplete(context),
                     child: Checkbox(
                       visualDensity: VisualDensity.compact,
-                      value: task.isCompleted,
+                      value: widget.task.isCompleted,
                       onChanged: null,
                       fillColor: WidgetStateProperty.resolveWith<Color>((states) {
                         if (states.contains(WidgetState.disabled)) {
-                          return task.isCompleted ? theme.colorScheme.primary : theme.colorScheme.secondary.withValues(alpha: 0.2);
+                          return widget.task.isCompleted ? theme.colorScheme.primary : theme.colorScheme.secondary.withValues(alpha: 0.2);
                         }
                         return theme.colorScheme.primary;
                       }),
@@ -238,7 +248,7 @@ class TaskCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      task.priority.name.toUpperCase(),
+                      widget.task.priority.name.toUpperCase(),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: priorityColor,
                         fontWeight: FontWeight.bold,
@@ -251,32 +261,36 @@ class TaskCard extends StatelessWidget {
               const SizedBox(height: 8),
               // Task title
               Text(
-                task.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                widget.task.title,
+                maxLines: _isExpanded ? null : 2,
+                overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-                  color: task.isCompleted ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : theme.colorScheme.onSurface,
+                  decoration: widget.task.isCompleted ? TextDecoration.lineThrough : null,
+                  color: widget.task.isCompleted ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 8),
               // Task description/time
-              Expanded(
-                child: Text(
-                  task.startTime != null
-                      ? '${_formatTime(task.startTime!)}${task.endTime != null ? ' - ${_formatTime(task.endTime!)}' : ''}'
-                      : (task.description ?? ''),
-                  maxLines: 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    fontSize: 14,
-                    height: 1.3,
+              if (widget.task.startTime != null || widget.task.description != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    widget.task.startTime != null
+                        ? '${_formatTime(widget.task.startTime!)}${widget.task.endTime != null ? ' - ${_formatTime(widget.task.endTime!)}' : ''}'
+                        : (widget.task.description ?? ''),
+                    maxLines: _isExpanded ? null : 4,
+                    overflow: _isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontSize: 14,
+                      height: 1.3,
+                    ),
                   ),
                 ),
-              ),
+              // Expanded details
+              if (_isExpanded)
+                TaskDetailView(task: widget.task),
             ],
           ),
         ),
