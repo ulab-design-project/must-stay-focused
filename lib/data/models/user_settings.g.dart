@@ -59,7 +59,15 @@ const UserSettingsSchema = CollectionSchema(
   deserializeProp: _userSettingsDeserializeProp,
   idName: r'id',
   indexes: {},
-  links: {},
+  links: {
+    r'appUsages': LinkSchema(
+      id: 4530552292416782436,
+      name: r'appUsages',
+      target: r'AppUsage',
+      single: false,
+      linkName: r'user',
+    )
+  },
   embeddedSchemas: {},
   getId: _userSettingsGetId,
   getLinks: _userSettingsGetLinks,
@@ -161,12 +169,14 @@ Id _userSettingsGetId(UserSettings object) {
 }
 
 List<IsarLinkBase<dynamic>> _userSettingsGetLinks(UserSettings object) {
-  return [];
+  return [object.appUsages];
 }
 
 void _userSettingsAttach(
     IsarCollection<dynamic> col, Id id, UserSettings object) {
   object.id = id;
+  object.appUsages
+      .attach(col, col.isar.collection<AppUsage>(), r'appUsages', id);
 }
 
 extension UserSettingsQueryWhereSort
@@ -1134,7 +1144,68 @@ extension UserSettingsQueryObject
     on QueryBuilder<UserSettings, UserSettings, QFilterCondition> {}
 
 extension UserSettingsQueryLinks
-    on QueryBuilder<UserSettings, UserSettings, QFilterCondition> {}
+    on QueryBuilder<UserSettings, UserSettings, QFilterCondition> {
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition> appUsages(
+      FilterQuery<AppUsage> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.link(q, r'appUsages');
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'appUsages', length, true, length, true);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'appUsages', 0, true, 0, true);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'appUsages', 0, false, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'appUsages', 0, true, length, include);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(r'appUsages', length, include, 999999, true);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      appUsagesLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.linkLength(
+          r'appUsages', lower, includeLower, upper, includeUpper);
+    });
+  }
+}
 
 extension UserSettingsQuerySortBy
     on QueryBuilder<UserSettings, UserSettings, QSortBy> {

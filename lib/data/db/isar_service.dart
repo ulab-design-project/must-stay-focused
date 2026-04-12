@@ -6,6 +6,7 @@
 // The global `idb` getter provides access to the initialized database.
 
 import 'package:isar/isar.dart';
+import 'package:must_stay_focused/data/models/app_usage.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/task.dart';
@@ -38,6 +39,7 @@ class IsarService {
         TaskListSchema,
         DeckSchema,
         FlashCardSchema,
+        AppUsageSchema,
         UserSettingsSchema,
       ],
       directory: dir.path,

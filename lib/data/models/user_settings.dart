@@ -13,6 +13,7 @@
 //    - `List<String> blockedPackages = [];`
 //    - `bool notificationsEnabled = true;`
 import 'package:isar/isar.dart'; // TODO use shared prefs for user settings.
+import 'app_usage.dart';
 
 part 'user_settings.g.dart';
 
@@ -31,4 +32,7 @@ class UserSettings
   List<String> blockedPackages = [];
 
   bool notificationsEnabled = true;
+
+  @Backlink(to: 'user')
+  final appUsages = IsarLinks<AppUsage>();
 }
