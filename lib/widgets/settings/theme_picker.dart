@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:must_stay_focused/style/cards.dart';
-import 'package:must_stay_focused/style/dropdown.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../style/theme.dart';
+import 'gyroscope_glass_toggle.dart';
 
 class ThemePicker extends StatefulWidget {
   const ThemePicker({super.key});
@@ -12,77 +12,138 @@ class ThemePicker extends StatefulWidget {
 }
 
 class _ThemePickerState extends State<ThemePicker> {
-  @override
-  Widget build(BuildContext context) {
-    return GlassListTile(
-      title: const Text('Theme'),
-      trailing: AnimatedBuilder(
-        animation: themeController,
-        builder: (context, _) {
-          return Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GlassDropdown<String>(
-                value: themeController.currentThemeKey,
-                items: themes.keys.toList(),
-                itemBuilder: (value) => value,
-                selectedItemBuilder: (value) {
-                  final themeObj = themes[value]!;
-                  final isLight = themeObj.brightness == Brightness.light;
-                  final primaryColor = themeObj.primaryColor;
-
-                  return Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        isLight ? Icons.wb_sunny : Icons.nightlight_round,
-                        color: primaryColor,
-                        size: 14,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(value),
-                    ],
-                  );
-                },
-                dropdownItemBuilder: (value, isSelected) {
-                  final themeObj = themes[value]!;
-                  final isLight = themeObj.brightness == Brightness.light;
-                  final bgColor = themeObj.scaffoldBackgroundColor;
-                  final primaryColor = themeObj.primaryColor;
-
-                  return Row(
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 24,
+  Future<void> _openThemePicker() async {
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) {
+          final entries = themes.entries.toList();
+          return Padding(
+            padding: const EdgeInsets.all(AppElementSizes.spacingLg),
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...entries.map((entry) {
+                    final isSelected =
+                        entry.key == themeController.currentThemeKey;
+                    final isLightMode =
+                        entry.value.brightness == Brightness.light;
+                    return GlassListTile(
+                      leading: Container(
+                        width: 30,
+                        height: 30,
                         decoration: BoxDecoration(
-                          color: bgColor,
+                          color: isLightMode ? Colors.white : Colors.black87,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Icon(
-                            isLight ? Icons.wb_sunny : Icons.nightlight_round,
-                            color: primaryColor,
-                            size: 14,
+                            isLightMode ? Icons.wb_sunny : Icons.nightlight_round,
+                            color: entry.value.primaryColor,
+                            size: 20,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          value,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                              ),
+                      title: Text(
+                        entry.key,
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
                       ),
-                    ],
-                  );
-                },
-                onChanged: (newValue) {
-                  themeController.setTheme(newValue);
-                },
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Colors.white,
+                            )
+                          : null,
+                      onTap: () => Navigator.of(context).pop(entry.key),
+                      isLast: entry == entries.last,
+                    );
+                  }),
+                ],
               ),
+            ),
+          );
+        },
+      );
+
+      if (selected != null && mounted) {
+        await themeController.setTheme(selected);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('ThemePicker _openThemePicker error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      child: AnimatedBuilder(
+        animation: themeController,
+        builder: (context, _) {
+          final selectedTheme = themeController.currentThemeKey;
+          final selectedThemeData =
+              themes[selectedTheme] ?? themes.values.first;
+          final isLight = selectedThemeData.brightness == Brightness.light;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GlassListTile(
+                leading: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: isLight ? Colors.white : Colors.black87,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isLight ? Icons.wb_sunny : Icons.nightlight_round,
+                      color: selectedThemeData.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  'Theme',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                ),
+                subtitle: Text(
+                  selectedTheme,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  ),
+                ),
+                trailing: GlassPicker(
+                  width: 96,
+                  height: 36,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  value: selectedTheme,
+                  textStyle: TextStyle(
+                    fontSize: AppTextSizes.compact,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  placeholderStyle: TextStyle(
+                    fontSize: AppTextSizes.compact,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                  ),
+                  icon: Icon(
+                    Icons.expand_more,
+                    size: 14,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                  ),
+                  onTap: _openThemePicker,
+                ),
+                isLast: false,
+              ),
+              const GyroscopeGlassToggle(),
             ],
           );
         },

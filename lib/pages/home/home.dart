@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'tasks.dart';
-import '../../style/background.dart';
 import '../../style/buttons.dart';
+import '../../style/background.dart';
 import '../settings.dart';
+import '../../widgets/flashcard/flash_card_carousel.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -20,7 +21,7 @@ class Home extends StatelessWidget {
           actions: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassElevatedButton(
+              child: GlassSquircleIconButton(
                 icon: const Icon(Icons.store),
                 onPressed: () {
                   // TODO: Navigate to community template store
@@ -29,7 +30,7 @@ class Home extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassElevatedButton(
+              child: GlassSquircleIconButton(
                 icon: const Icon(Icons.settings),
                 onPressed: () {
                   Navigator.push(
@@ -44,7 +45,17 @@ class Home extends StatelessWidget {
             const SizedBox(width: 8),
           ],
         ),
-        body: TasksPage(),
+        body: Stack(
+          children: [
+            TasksPage(),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: FlashCardCarousel(),
+            ),
+          ],
+        ),
       ),
     );
   }
