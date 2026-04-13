@@ -62,6 +62,11 @@ class BackgroundDrop extends StatelessWidget {
             child: Container(color: Colors.transparent),
           ),
         ),
+        Positioned(
+          child: Container(color: primaryColor, width: screenWidth, height: 100,),
+          top: screenHeight * 0.5,
+        ),
+
         // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
@@ -77,8 +82,7 @@ class BackgroundDrop extends StatelessWidget {
             appBar: scaffold.appBar,
             body: scaffold.body,
             floatingActionButton: scaffold.floatingActionButton,
-            floatingActionButtonLocation:
-                scaffold.floatingActionButtonLocation,
+            floatingActionButtonLocation: scaffold.floatingActionButtonLocation,
             floatingActionButtonAnimator: scaffold.floatingActionButtonAnimator,
             persistentFooterButtons: scaffold.persistentFooterButtons,
             persistentFooterAlignment: scaffold.persistentFooterAlignment,

@@ -11,6 +11,7 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import 'task_card.dart';
@@ -82,13 +83,12 @@ class TaskListView extends StatelessWidget {
         completedTasks.length;
 
     // Build task list with cards
-    return ListView.builder(
-      itemCount: totalItems,
-      addRepaintBoundaries: false,
-      // Grouped glass is provided by AdaptiveLiquidGlassLayer in TasksPage.
-      // TODO: Convert empty-state icon/text block into a reusable liquid empty-state widget.
-      itemBuilder: (context, index) {
-        // First, show all incomplete tasks
+    return LiquidGlassBlendGroup(
+      child: ListView.builder(
+        itemCount: totalItems,
+        addRepaintBoundaries: true,
+        itemBuilder: (context, index) {
+          // First, show all incomplete tasks
         if (index < incompleteTasks.length) {
           final task = incompleteTasks[index];
           return TaskCard(
@@ -123,6 +123,6 @@ class TaskListView extends StatelessWidget {
           onTaskChanged: onTaskChanged,
         );
       },
-    );
+    ));
   }
 }

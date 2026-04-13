@@ -9,6 +9,7 @@ class GlassSquircleIconButton extends StatelessWidget {
   final Widget icon;
   final bool isPrimary;
   final double size;
+  final Color? color;
 
   const GlassSquircleIconButton({
     super.key,
@@ -16,6 +17,7 @@ class GlassSquircleIconButton extends StatelessWidget {
     this.onPressed,
     this.isPrimary = false,
     this.size = AppElementSizes.buttonSquare,
+    this.color
   });
 
   @override
@@ -33,7 +35,7 @@ class GlassSquircleIconButton extends StatelessWidget {
       child: IconTheme(
         data: IconThemeData(
           size: AppElementSizes.icon,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.92),
+          color: color ?? theme.colorScheme.onSurface.withValues(alpha: 0.92),
         ),
         child: icon,
       ),
@@ -47,6 +49,7 @@ class GlassSquircleButton extends StatelessWidget {
   final bool isPrimary;
   final double height;
   final EdgeInsetsGeometry padding;
+  final Color? color;
 
   const GlassSquircleButton({
     super.key,
@@ -55,6 +58,7 @@ class GlassSquircleButton extends StatelessWidget {
     this.isPrimary = false,
     this.height = AppElementSizes.buttonHeight,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
+    this.color
   });
 
   @override
@@ -73,7 +77,7 @@ class GlassSquircleButton extends StatelessWidget {
         child: DefaultTextStyle.merge(
           style: TextStyle(
             fontSize: AppTextSizes.body,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.92),
+            color: color ?? theme.colorScheme.onSurface.withValues(alpha: 0.92),
           ),
           child: child,
         ),

@@ -9,7 +9,6 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
-import '../../style/buttons.dart';
 import '../../style/theme.dart';
 import '../../utils/logging.dart';
 
@@ -103,12 +102,12 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
       message: 'Move tasks to Default list?',
       actions: [
         GlassDialogAction(
-          label: 'Delete tasks',
+          label: 'Delete', //TODO known issue  - the task list needs to reset to default
           isDestructive: true,
           onPressed: () => Navigator.pop(context, false),
         ),
         GlassDialogAction(
-          label: 'Move to Default',
+          label: 'Move',
           isPrimary: true,
           onPressed: () => Navigator.pop(context, true),
         ),
@@ -147,35 +146,23 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
     final isProtectedList =
         widget.existingList != null && widget.existingList!.isDefault;
 
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 380),
-        child: GlassCard(
-          useOwnLayer: true,
-          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.existingList == null ? 'New List' : 'Edit List',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
+    return GlassDialog(
+      title: widget.existingList == null ? 'New List' : 'Edit List',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isProtectedList)
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: AppElementSizes.spacingSm,
+              ),
+              child: Text(
+                'This is a system list and cannot be edited.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.8),
                 ),
               ),
-              const SizedBox(height: AppElementSizes.spacingMd),
-              if (isProtectedList)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: AppElementSizes.spacingSm,
-                  ),
-                  child: Text(
-                    'This is a system list and cannot be edited.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-                    ),
-                  ),
-                ),
+            ),
               GlassTextField(
                 controller: _nameController,
                 enabled: !isProtectedList,
@@ -187,7 +174,7 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
                 child: Text(
                   'Select Icon',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -199,12 +186,17 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
                   final isSelected = icon.codePoint == _selectedIcon;
                   return GlassChip(
                     label: '',
-                    icon: Icon(
-                      icon,
-                      color: isSelected
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface,
+                    icon: Padding(
+                      padding: const EdgeInsets.only(left: 4.0), // Alignment -_-
+                      child: Icon(
+                        icon,
+                        size: AppElementSizes.icon,
+                        color: isSelected
+                            ? theme.colorScheme.secondary
+                            : Colors.white,
+                      ),
                     ),
+                    labelStyle: TextStyle(fontSize: 0),
                     selected: isSelected,
                     onTap: isProtectedList
                         ? null
@@ -212,43 +204,26 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
                   );
                 }).toList(),
               ),
-              const SizedBox(height: AppElementSizes.spacingMd),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  GlassSquircleButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(color: theme.colorScheme.onSurface),
-                    ),
-                  ),
-                  const SizedBox(width: AppElementSizes.spacingSm),
-                  if (widget.existingList != null && !isProtectedList)
-                    GlassSquircleButton(
-                      onPressed: _delete,
-                      child: Text(
-                        'Delete',
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                  if (!isProtectedList) ...[
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    GlassSquircleButton(
-                      onPressed: _save,
-                      isPrimary: true,
-                      child: Text(
-                        'Save',
-                        style: TextStyle(color: theme.colorScheme.onSurface),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ],
-          ),
-        ),
+          ],
       ),
+      actions: [
+        GlassDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.pop(context),
+        ),
+        if (widget.existingList != null && !isProtectedList)
+          GlassDialogAction(
+            label: 'Delete',
+            isDestructive: true,
+            onPressed: _delete,
+          ),
+        if (!isProtectedList)
+          GlassDialogAction(
+            label: 'Save',
+            isPrimary: true,
+            onPressed: _save,
+          ),
+      ],
     );
   }
 }

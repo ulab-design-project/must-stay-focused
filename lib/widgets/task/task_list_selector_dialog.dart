@@ -9,7 +9,6 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
-import '../../style/buttons.dart';
 import '../../style/theme.dart';
 
 /// A simple searchable dialog for selecting a task list.
@@ -51,29 +50,23 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 360),
-        child: GlassCard(
-          useOwnLayer: true,
-          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Select Task List',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurface,
-                  fontSize: AppTextSizes.title,
-                ),
-              ),
-              const SizedBox(height: AppElementSizes.spacingMd),
-              GlassTextField(
+    return GlassDialog(
+      maxWidth: 360,
+      title: 'Select Task List',
+      actions: [
+        GlassDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GlassTextField(
                 placeholder: 'Search...',
                 prefixIcon: Icon(
                   Icons.search,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  color: Colors.white.withValues(alpha: 0.75),
                   size: 18,
                 ),
                 onChanged: (v) => setState(() => _searchQuery = v),
@@ -99,11 +92,11 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
                             list.iconCodePoint,
                             fontFamily: 'MaterialIcons',
                           ),
-                          color: theme.colorScheme.onSurface,
+                          color: Colors.white,
                         ),
                         title: Text(
                           list.name,
-                          style: TextStyle(color: theme.colorScheme.onSurface),
+                          style: TextStyle(color: Colors.white),
                         ),
                         trailing: isSelected
                             ? Icon(
@@ -117,21 +110,8 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
                     },
                   ),
                 ),
-              const SizedBox(height: AppElementSizes.spacingMd),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GlassSquircleButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                ),
-              ),
             ],
           ),
-        ),
-      ),
     );
   }
 }

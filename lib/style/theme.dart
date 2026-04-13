@@ -5,6 +5,7 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import '../data/db/isar_service.dart';
 import '../data/models/user_settings.dart';
+import '../utils/theme_helpers.dart';
 
 final Map<String, ThemeData> themes = {
   'Purple Light': ThemeData(
@@ -85,6 +86,9 @@ class ThemeController extends ChangeNotifier {
   bool _isGyroscopeEnabled = false;
   bool _initialized = false;
 
+  late List<Color> lightColorSteps;
+  late List<Color> darkColorSteps;
+
   final double glassOpacity = 0.1;
   final double glassBlur = 50.0;
 
@@ -159,7 +163,14 @@ class ThemeController extends ChangeNotifier {
   }
 
   ThemeController() {
+    _updateColorSteps();
     _loadTheme();
+  }
+
+  void _updateColorSteps() {
+    final curTheme = currentTheme;
+    lightColorSteps = generateColorSteps(curTheme.primaryColor, lighter: true);
+    darkColorSteps = generateColorSteps(curTheme.primaryColor);
   }
 
   Future<void> _loadTheme() async {
@@ -171,6 +182,7 @@ class ThemeController extends ChangeNotifier {
         }
         _isGyroscopeEnabled = settingsConfig.gyroscopeGlassLightingEnabled;
       }
+      _updateColorSteps();
     } catch (e, stackTrace) {
       debugPrint('ThemeController load error: $e');
       debugPrintStack(stackTrace: stackTrace);
@@ -182,6 +194,7 @@ class ThemeController extends ChangeNotifier {
   Future<void> setTheme(String themeKey) async {
     if (themes.containsKey(themeKey) && _currentThemeKey != themeKey) {
       _currentThemeKey = themeKey;
+      _updateColorSteps();
       notifyListeners();
 
       var settingsConfig = await idb.userSettings.get(1);

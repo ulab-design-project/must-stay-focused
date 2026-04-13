@@ -44,7 +44,7 @@ class TaskCard extends StatelessWidget {
   /// Returns the background color based on task priority.
   Color _getPriorityColor(BuildContext context) {
     final theme = Theme.of(context);
-    final priorityColors = generatePriorityColors(theme.colorScheme.primary);
+    final priorityColors = generateColorSteps(theme.colorScheme.primary);
     switch (task.priority) {
       case TaskPriority.critical:
         return priorityColors[0];
@@ -201,7 +201,7 @@ class TaskCard extends StatelessWidget {
         ),
         child: GlassCard(
           padding: EdgeInsets.zero,
-          useOwnLayer: true,
+          useOwnLayer: false,
           settings: glassSettingsFor(
             context,
             isPrimary: task.priority == TaskPriority.critical,

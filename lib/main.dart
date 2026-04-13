@@ -13,10 +13,10 @@ void main() async {
   try {
     await LiquidGlassWidgets.initialize();
     await IsarService().init();
-  } catch (e, stackTrace) {
+  } catch (e) {
     debugPrint('App initialization error: $e');
-    debugPrintStack(stackTrace: stackTrace);
-    rethrow;
+    // debugPrintStack(stackTrace: stackTrace);
+    // rethrow;
   }
 
   runApp(LiquidGlassWidgets.wrap(const MSF()));

@@ -31,20 +31,31 @@ class _ThemePickerState extends State<ThemePicker> {
                     final isLightMode =
                         entry.value.brightness == Brightness.light;
                     return GlassListTile(
-                      leading: Icon(
-                        isLightMode ? Icons.wb_sunny : Icons.nightlight_round,
-                        color: entry.value.primaryColor,
+                      leading: Container(
+                        width: 30,
+                        height: 30,
+                        decoration: BoxDecoration(
+                          color: isLightMode ? Colors.white : Colors.black87,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Icon(
+                            isLightMode ? Icons.wb_sunny : Icons.nightlight_round,
+                            color: entry.value.primaryColor,
+                            size: 20,
+                          ),
+                        ),
                       ),
                       title: Text(
                         entry.key,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: Colors.white,
                         ),
                       ),
                       trailing: isSelected
                           ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
+                              Icons.check_circle,
+                              color: Colors.white,
                             )
                           : null,
                       onTap: () => Navigator.of(context).pop(entry.key),
@@ -85,6 +96,21 @@ class _ThemePickerState extends State<ThemePicker> {
             mainAxisSize: MainAxisSize.min,
             children: [
               GlassListTile(
+                leading: Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: isLight ? Colors.white : Colors.black87,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      isLight ? Icons.wb_sunny : Icons.nightlight_round,
+                      color: selectedThemeData.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+                ),
                 title: Text(
                   'Theme',
                   style: TextStyle(color: theme.colorScheme.onSurface),
@@ -94,10 +120,6 @@ class _ThemePickerState extends State<ThemePicker> {
                   style: TextStyle(
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
                   ),
-                ),
-                leading: Icon(
-                  isLight ? Icons.wb_sunny : Icons.nightlight_round,
-                  color: selectedThemeData.primaryColor,
                 ),
                 trailing: GlassPicker(
                   width: 96,

@@ -41,7 +41,7 @@ class TaskListSelector extends StatefulWidget {
     required this.onListSelected,
     this.onListChanged,
     this.onArchivedToggled,
-    this.width = 120,
+    this.width = 100,
   });
 
   @override
@@ -122,18 +122,22 @@ class _TaskListSelectorState extends State<TaskListSelector> {
 
   /// Shows the dropdown dialog with search and list options.
   void _showDropdown(BuildContext context) {
-    final theme = Theme.of(context);
-
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialogState) => Dialog(
-          backgroundColor: Colors.transparent,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: GlassCard(
-              useOwnLayer: true,
-              padding: const EdgeInsets.all(AppElementSizes.spacingMd),
+      builder: (ctx) {
+        _searchQuery = '';
+        _filterLists();
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => GlassDialog(
+            title: 'Select List',
+            maxWidth: 360,
+            actions: [
+              GlassDialogAction(
+                label: 'Close',
+                onPressed: () => Navigator.pop(ctx),
+              )
+            ],
+            content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -141,7 +145,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                     placeholder: 'Search...',
                     prefixIcon: Icon(
                       Icons.search,
-                      color: theme.colorScheme.onSurface.withValues(
+                      color: Colors.white.withValues(
                         alpha: 0.75,
                       ),
                       size: 18,
@@ -153,8 +157,8 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                     },
                   ),
                   const SizedBox(height: AppElementSizes.spacingSm),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 260),
+                  SizedBox(
+                    height: 200,
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: _filteredLists.length,
@@ -167,18 +171,19 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                               list.iconCodePoint,
                               fontFamily: 'MaterialIcons',
                             ),
-                            color: theme.colorScheme.onSurface,
+                            color: Colors.white,
                           ),
                           title: Text(
                             list.name,
                             style: TextStyle(
-                              color: theme.colorScheme.onSurface,
+                              color: Colors.white,
                             ),
                           ),
                           trailing: isProtectedList
                               ? null
                               : GlassSquircleIconButton(
                                   size: 30,
+                                  color: Colors.white,
                                   icon: const Icon(Icons.edit, size: 16),
                                   onPressed: () {
                                     Navigator.pop(ctx);
@@ -198,11 +203,11 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                   GlassListTile(
                     leading: Icon(
                       Icons.archive,
-                      color: theme.colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                     title: Text(
                       'Archived',
-                      style: TextStyle(color: theme.colorScheme.onSurface),
+                      style: TextStyle(color: Colors.white),
                     ),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -213,11 +218,11 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                   GlassListTile(
                     leading: Icon(
                       Icons.add,
-                      color: theme.colorScheme.onSurface,
+                      color: Colors.white,
                     ),
                     title: Text(
                       'Add List',
-                      style: TextStyle(color: theme.colorScheme.onSurface),
+                      style: TextStyle(color: Colors.white),
                     ),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -229,8 +234,8 @@ class _TaskListSelectorState extends State<TaskListSelector> {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

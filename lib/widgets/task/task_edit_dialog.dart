@@ -136,12 +136,12 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                 return GlassListTile(
                   leading: Icon(
                     Icons.flag,
-                    color: theme.colorScheme.onSurface,
+                    color: Colors.white,
                     size: 18,
                   ),
                   title: Text(
                     priority.name,
-                    style: TextStyle(color: theme.colorScheme.onSurface),
+                    style: TextStyle(color: Colors.white),
                   ),
                   trailing: priority == _priority
                       ? Icon(Icons.check, color: theme.colorScheme.primary)
@@ -251,240 +251,237 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 460),
-        child: GlassCard(
-          useOwnLayer: true,
-          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.existingTask == null ? 'New Task' : 'Edit Task',
-                  style: TextStyle(
-                    fontSize: AppTextSizes.title,
-                    fontWeight: FontWeight.w700,
-                    color: theme.colorScheme.onSurface,
+    return GlassDialog(
+      maxWidth: 460,
+      title: widget.existingTask == null ? 'New Task' : 'Edit Task',
+      content: SizedBox(
+        height: 300,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GlassTextField(
+                    controller: _titleController,
+                    placeholder: 'Title *',
                   ),
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                GlassTextField(
-                  controller: _titleController,
-                  placeholder: 'Title *',
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Priority',
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.88,
-                          ),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    GlassPicker(
-                      width: 128,
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      value: _priority.name,
-                      textStyle: TextStyle(
-                        fontSize: AppTextSizes.small,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                      placeholderStyle: TextStyle(
-                        fontSize: AppTextSizes.small,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.65,
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.expand_more,
-                        size: 14,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.85,
-                        ),
-                      ),
-                      onTap: _openPriorityPicker,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                GlassListTile(
-                  leading: Icon(
-                    Icons.flag,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                    size: 18,
-                  ),
-                  title: Row(
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  Row(
                     children: [
-                      Text(
-                        _priority.name,
-                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      Expanded(
+                        child: Text(
+                          'Priority',
+                          style: TextStyle(
+                            color: Colors.white.withValues(
+                              alpha: 0.88,
+                            ),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      GlassPicker(
+                        width: 128,
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        value: _priority.name,
+                        textStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white,
+                        ),
+                        placeholderStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white.withValues(
+                            alpha: 0.65,
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.expand_more,
+                          size: 14,
+                          color: Colors.white.withValues(
+                            alpha: 0.85,
+                          ),
+                        ),
+                        onTap: _openPriorityPicker,
                       ),
                     ],
                   ),
-                  subtitle: Text(
-                    'Tap picker to change',
-                    style: TextStyle(
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.65,
-                      ),
-                    ),
-                  ),
-                  onTap: _openPriorityPicker,
-                  isLast: true,
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                GlassListTile(
-                  leading: _selectedList == null
-                      ? Icon(
-                          Icons.list_alt,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.7,
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Task list',
+                          style: TextStyle(
+                            color: Colors.white.withValues(
+                              alpha: 0.88,
+                            ),
+                            fontWeight: FontWeight.w600,
                           ),
-                        )
-                      : Icon(
-                          IconData(
-                            _selectedList!.iconCodePoint,
-                            fontFamily: 'MaterialIcons',
+                        ),
+                      ),
+                      GlassPicker(
+                        width: 128,
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        value: _selectedList?.name ?? 'Default',
+                        textStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white,
+                        ),
+                        placeholderStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white.withValues(
+                            alpha: 0.65,
                           ),
-                          color: theme.colorScheme.onSurface,
                         ),
-                  title: Text(
-                    _selectedList?.name ?? 'Select task list',
-                    style: TextStyle(color: theme.colorScheme.onSurface),
+                        icon: Icon(
+                          Icons.expand_more,
+                          size: 14,
+                          color: Colors.white.withValues(
+                            alpha: 0.85,
+                          ),
+                        ),
+                        onTap: _showListSelector,
+                      ),
+                    ],
                   ),
-                  trailing: Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                  // GlassListTile(
+                  //   leading: _selectedList == null
+                  //       ? Icon(
+                  //           Icons.list_alt,
+                  //           color: Colors.white.withValues(
+                  //             alpha: 0.7,
+                  //           ),
+                  //         )
+                  //       : Icon(
+                  //           IconData(
+                  //             _selectedList!.iconCodePoint,
+                  //             fontFamily: 'MaterialIcons',
+                  //           ),
+                  //           color: Colors.white,
+                  //         ),
+                  //   title: Text(
+                  //     _selectedList?.name ?? 'Select task list',
+                  //     style: TextStyle(color: Colors.white),
+                  //   ),
+                  //   trailing: Icon(
+                  //     Icons.arrow_forward_ios,
+                  //     size: 14,
+                  //     color: Colors.white.withValues(alpha: 0.65),
+                  //   ),
+                  //   onTap: _showListSelector,
+                  //   isLast: true,
+                  // ),
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  GlassTextField(
+                    controller: _descController,
+                    placeholder: 'Description',
+                    maxLines: 2,
                   ),
-                  onTap: _showListSelector,
-                  isLast: true,
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                GlassTextField(
-                  controller: _descController,
-                  placeholder: 'Description',
-                  maxLines: 2,
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GlassSquircleButton(
-                        onPressed: _pickStartTime,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.schedule,
-                              size: 16,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                _timeLabel(_startTime, 'Start time'),
-                                overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GlassSquircleButton(
+                          onPressed: _pickStartTime,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Colors.white,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  _timeLabel(_startTime, 'Start time'),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    Expanded(
-                      child: GlassSquircleButton(
-                        onPressed: _startTime != null ? _pickEndTime : null,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.schedule,
-                              size: 16,
-                              color: theme.colorScheme.onSurface,
-                            ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                _timeLabel(_endTime, 'End time'),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppElementSizes.spacingMd),
-                Text(
-                  'Recurring Days',
-                  style: TextStyle(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.88),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: AppElementSizes.spacingSm),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: List.generate(7, (i) {
-                    final dayNum = i + 1;
-                    final isSelected = _selectedDays.contains(dayNum);
-                    return GlassChip(
-                      label: _days[i],
-                      selected: isSelected,
-                      onTap: () {
-                        setState(() {
-                          if (isSelected) {
-                            _selectedDays.remove(dayNum);
-                          } else {
-                            _selectedDays.add(dayNum);
-                          }
-                        });
-                      },
-                    );
-                  }),
-                ),
-                const SizedBox(height: AppElementSizes.spacingLg),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GlassSquircleButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    if (widget.existingTask != null) ...[
                       const SizedBox(width: AppElementSizes.spacingSm),
-                      GlassSquircleButton(
-                        onPressed: _delete,
-                        child: const Text('Delete'),
+                      Expanded(
+                        child: GlassSquircleButton(
+                          onPressed: _startTime != null ? _pickEndTime : null,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  _timeLabel(_endTime, 'End time'),
+                                  style: TextStyle(color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    GlassSquircleButton(
-                      onPressed: _save,
-                      child: const Text('Save'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  // Text(
+                  //   'Recurring Days',
+                  //   style: TextStyle(
+                  //     color: Colors.white.withValues(alpha: 0.88),
+                  //     fontWeight: FontWeight.w600,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: AppElementSizes.spacingSm),
+                  // Wrap(
+                  //   spacing: 6,
+                  //   runSpacing: 6,
+                  //   children: List.generate(7, (i) {
+                  //     final dayNum = i + 1;
+                  //     final isSelected = _selectedDays.contains(dayNum);
+                  //     return GlassChip(
+                  //       label: _days[i],
+                  //       selected: isSelected,
+                  //       onTap: () {
+                  //         setState(() {
+                  //           if (isSelected) {
+                  //             _selectedDays.remove(dayNum);
+                  //           } else {
+                  //             _selectedDays.add(dayNum);
+                  //           }
+                  //         });
+                  //       },
+                  //     );
+                  //   }),
+                  // ),
+            ],
           ),
         ),
       ),
+      actions: [
+        if (widget.existingTask != null)
+          GlassDialogAction(
+            label: 'Delete',
+            isDestructive: true,
+            onPressed: _delete,
+          ),
+        GlassDialogAction(
+          label: 'Cancel',
+          onPressed: () => Navigator.pop(context),
+        ),
+        
+        GlassDialogAction(
+          label: 'Save',
+          isPrimary: true,
+          onPressed: _save,
+        ),
+      ],
     );
   }
 }

@@ -149,13 +149,13 @@ class _TasksPageState extends State<TasksPage> {
                       title: Text(
                         option.$1,
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
+                          color: Colors.white,
                         ),
                       ),
                       trailing: isSelected
                           ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
+                              Icons.check_circle,
+                              color: Colors.white,
                             )
                           : null,
                       onTap: () => Navigator.of(context).pop(option.$2),
@@ -205,7 +205,7 @@ class _TasksPageState extends State<TasksPage> {
                 const SizedBox(width: AppElementSizes.spacingSm),
                 Expanded(
                   child: TaskListSelector(
-                    width: null,
+                    width: 100,
                     selectedList: _showArchived ? null : _selectedList,
                     onListSelected: (list) {
                       setState(() {
@@ -223,7 +223,7 @@ class _TasksPageState extends State<TasksPage> {
                 ),
                 const SizedBox(width: AppElementSizes.spacingSm),
                 GlassPicker(
-                  width: 92,
+                  width: 100,
                   height: 36,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   value: _sortByLabel,
@@ -232,10 +232,10 @@ class _TasksPageState extends State<TasksPage> {
                     fontSize: AppTextSizes.small,
                     color: theme.colorScheme.onSurface,
                   ),
-                  placeholderStyle: TextStyle(
-                    fontSize: AppTextSizes.small,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-                  ),
+                  // placeholderStyle: TextStyle(
+                  //   fontSize: AppTextSizes.small,
+                  //   color: Colors.pink,
+                  // ),
                   icon: Icon(
                     Icons.expand_more,
                     size: 16,
