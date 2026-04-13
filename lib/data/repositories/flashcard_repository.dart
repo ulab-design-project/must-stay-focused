@@ -81,12 +81,27 @@ class FlashcardRepository {
           .findAll();
     }
 
-    
     if (sortBy == 'creationTime') {
       cards.sort((a, b) => isAscending
           ? a.creationDate.compareTo(b.creationDate)
           : b.creationDate.compareTo(a.creationDate));
-    } else if (sortBy == 'difficulty') {
+    } else if (sortBy == 'sm2' && showFullDeck) {
+      cards.sort((a, b) {
+        // Step 1: compare dates (normalized to midnight)
+        final DateTime aDate = DateTime(a.nextReviewDate.year, a.nextReviewDate.month, a.nextReviewDate.day);
+        final DateTime bDate = DateTime(b.nextReviewDate.year, b.nextReviewDate.month, b.nextReviewDate.day);
+        
+        final dateCompare = aDate.compareTo(bDate);
+        if (dateCompare != 0) {
+          return isAscending ? dateCompare : -dateCompare; // or keep date ascending always? Let's use isAscending
+        }
+        
+        // Step 2: compare by ease factor within the same day
+        return isAscending
+            ? a.easeFactor.compareTo(b.easeFactor)
+            : b.easeFactor.compareTo(a.easeFactor);
+      });
+    } else if (sortBy == 'difficulty' || sortBy == 'sm2') {
       cards.sort((a, b) => isAscending
           ? a.easeFactor.compareTo(b.easeFactor)
           : b.easeFactor.compareTo(a.easeFactor));

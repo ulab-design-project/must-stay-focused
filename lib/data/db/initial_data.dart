@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 import '../models/task.dart';
+import '../models/flash_card.dart';
 import 'isar_service.dart';
 
 /// Creates the default task list and sample tasks if they don't exist.
@@ -91,5 +92,75 @@ Future<void> prepareDefaultData() async {
     task5.taskList.value = defaultList;
     await idb.tasks.put(task5);
     await task5.taskList.save();
+
+    // ------------------------------------
+    // Flashcard Decks
+    // ------------------------------------
+
+    // 1) Default Deck
+    final defaultDeck = Deck()
+      ..name = 'Default'
+      ..description = 'Default flashcard deck';
+    await idb.decks.put(defaultDeck);
+
+    // 2) Organic Chemistry Deck
+    final orgChemDeck = Deck()
+      ..name = 'Organic Chemistry'
+      ..description = 'Organic Chemistry Formulas';
+    await idb.decks.put(orgChemDeck);
+
+    final orgChemCards = [
+      {'f': 'Benzene', 'b': 'C6H6'},
+      {'f': 'Methane', 'b': 'CH4'},
+      {'f': 'Ethane', 'b': 'C2H6'},
+      {'f': 'Propane', 'b': 'C3H8'},
+      {'f': 'Butane', 'b': 'C4H10'},
+      {'f': 'Pentane', 'b': 'C5H12'},
+      {'f': 'Ethene', 'b': 'C2H4'},
+      {'f': 'Ethyne', 'b': 'C2H2'},
+      {'f': 'Methanol', 'b': 'CH3OH'},
+      {'f': 'Ethanol', 'b': 'C2H5OH'},
+    ];
+
+    for (var c in orgChemCards) {
+      final fc = FlashCard.make(
+        front: c['f']!,
+        back: c['b']!,
+        deck: orgChemDeck,
+        creationDate: DateTime.now(),
+      );
+      await idb.flashCards.put(fc);
+      await fc.deck.save();
+    }
+
+    // 3) Physics Deck
+    final physDeck = Deck()
+      ..name = 'Physics'
+      ..description = 'Physics Equations';
+    await idb.decks.put(physDeck);
+
+    final physCards = [
+      {'f': 'Newton\'s Second Law', 'b': 'F = ma'},
+      {'f': 'Mass-Energy Equivalence', 'b': 'E = mc²'},
+      {'f': 'Ohm\'s Law', 'b': 'V = IR'},
+      {'f': 'Kinetic Energy', 'b': 'KE = 1/2 mv²'},
+      {'f': 'Potential Energy', 'b': 'PE = mgh'},
+      {'f': 'Ideal Gas Law', 'b': 'PV = nRT'},
+      {'f': 'Wave Equation', 'b': 'v = fλ'},
+      {'f': 'Hooke\'s Law', 'b': 'F = -kx'},
+      {'f': 'Law of Universal Gravitation', 'b': 'F = G(m1m2)/r²'},
+      {'f': 'Work', 'b': 'W = Fd cos(θ)'},
+    ];
+
+    for (var c in physCards) {
+      final fc = FlashCard.make(
+        front: c['f']!,
+        back: c['b']!,
+        deck: physDeck,
+        creationDate: DateTime.now(),
+      );
+      await idb.flashCards.put(fc);
+      await fc.deck.save();
+    }
   });
 }

@@ -4,6 +4,7 @@ import 'tasks.dart';
 import '../../style/buttons.dart';
 import '../../style/background.dart';
 import '../settings.dart';
+import '../../widgets/flashcard/flash_card_carousel.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -44,7 +45,17 @@ class Home extends StatelessWidget {
             const SizedBox(width: 8),
           ],
         ),
-        body: Stack(children: [TasksPage()]),
+        body: Stack(
+          children: [
+            TasksPage(),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: FlashCardCarousel(),
+            ),
+          ],
+        ),
       ),
     );
   }

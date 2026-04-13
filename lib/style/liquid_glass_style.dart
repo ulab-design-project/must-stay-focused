@@ -16,7 +16,7 @@ LiquidGlassSettings glassSettingsFor(
     return base;
   }
 
-  final tintedPrimary = theme.colorScheme.primary.withValues(alpha: 0.20);
+  final tintedPrimary = theme.colorScheme.primary.withValues(alpha: 0.5);
   return base.copyWith(
     glassColor:
         Color.lerp(base.glassColor, tintedPrimary, ratio) ?? tintedPrimary,

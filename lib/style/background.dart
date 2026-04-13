@@ -72,7 +72,7 @@ class BackgroundDrop extends StatelessWidget {
           ),
           top: screenHeight * 0.5,
         ),
-// const _LoopingRotatedBackgroundVideo(),
+const _LoopingRotatedBackgroundVideo(),
         // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
