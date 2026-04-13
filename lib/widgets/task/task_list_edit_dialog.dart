@@ -97,9 +97,10 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
     }
 
     final merge = await GlassDialog.show<bool>(
+      barrierDismissible: true,
       context: context,
       title: 'Delete List',
-      message: 'Move tasks to Default list?',
+      message: 'Move tasks to Default list before deleting?',
       actions: [
         GlassDialogAction(
           label: 'Delete', //TODO known issue  - the task list needs to reset to default

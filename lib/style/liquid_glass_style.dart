@@ -10,7 +10,9 @@ LiquidGlassSettings glassSettingsFor(
   final theme = Theme.of(context);
   final base =
       GlassThemeData.of(context).settingsFor(context) ??
-      const LiquidGlassSettings();
+      const LiquidGlassSettings(
+        
+      );
 
   if (!isPrimary) {
     return base;

@@ -64,15 +64,8 @@ class BackgroundDrop extends StatelessWidget {
             child: Container(color: Colors.transparent),
           ),
         ),
-        Positioned(
-          child: Container(
-            color: primaryColor,
-            width: screenWidth,
-            height: 100,
-          ),
-          top: screenHeight * 0.5,
-        ),
-const _LoopingRotatedBackgroundVideo(),
+        // Positioned(child: Container(color: primaryColor,width: screenWidth,height: 100,),top: screenHeight * 0.5,),
+        const _LoopingBackgroundVideo(),
         // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
@@ -112,76 +105,107 @@ const _LoopingRotatedBackgroundVideo(),
             restorationId: scaffold.restorationId,
           ),
         ),
-        
       ],
     );
   }
 }
 
-class _LoopingRotatedBackgroundVideo extends StatefulWidget {
-  const _LoopingRotatedBackgroundVideo();
+class _LoopingBackgroundVideo extends StatefulWidget {
+  const _LoopingBackgroundVideo();
 
   @override
-  State<_LoopingRotatedBackgroundVideo> createState() =>
-      _LoopingRotatedBackgroundVideoState();
+  State<_LoopingBackgroundVideo> createState() =>
+      _LoopingBackgroundVideoState();
 }
 
-class _LoopingRotatedBackgroundVideoState
-    extends State<_LoopingRotatedBackgroundVideo> {
-  late final VideoPlayerController _controller;
-  bool _isReady = false;
+class _LoopingBackgroundVideoState extends State<_LoopingBackgroundVideo>
+    with WidgetsBindingObserver {
+  static VideoPlayerController? _controller;
+  static Future<void>? _initFuture;
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.asset('assets/bgvid/2.mp4');
-    _initializeVideo();
+    WidgetsBinding.instance.addObserver(this);
+    _initVideo();
   }
 
-  Future<void> _initializeVideo() async {
-    try {
-      await _controller.setLooping(true);
-      await _controller.setVolume(0);
-      await _controller.initialize();
-      await _controller.play();
-
-      if (!mounted) {
-        return;
-      }
-
-      setState(() => _isReady = true);
-    } catch (e, stackTrace) {
-      debugPrint('Background video initialization failed: $e');
-      debugPrintStack(stackTrace: stackTrace);
+  Future<void> _initVideo() async {
+    if (_controller == null) {
+      _controller = VideoPlayerController.asset(
+        'assets/bgvid/3.mp4', //TODO bg video
+        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+      );
+      _initFuture = _controller!
+          .initialize()
+          .then((_) async {
+            await _controller!.setLooping(true);
+            await _controller!.setVolume(0);
+            await _controller!.play();
+          })
+          .catchError((e, stackTrace) {
+            debugPrint('Background video initialization failed: $e');
+          });
     }
+
+    if (_initFuture != null) {
+      await _initFuture;
+    }
+
+    if (mounted) setState(() {});
+    _controller?.play(); // Ensure it's playing when returning to screen
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    // Note: Intentionally not disposing _controller so the video stays loaded and loops continuously across app navigation.
     super.dispose();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _controller?.play();
+    } else if (state == AppLifecycleState.paused) {
+      _controller?.pause();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (!_isReady) {
+    if (_controller == null || !_controller!.value.isInitialized) {
       return const SizedBox.shrink();
     }
 
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Transform.rotate(
-          angle: math.pi / 2,
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: _controller.value.size.width,
-              height: _controller.value.size.height,
-              child: VideoPlayer(_controller),
-            ),
-          ),
+    final theme = Theme.of(context);
+    // const double darkBrightness = 0.4; // 0.0 is completely black, 1.0 is full brightness
+
+    Widget videoWidget = Transform.rotate(
+      angle: math.pi / 2,
+      child: FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: _controller!.value.size.width,
+          height: _controller!.value.size.height,
+          child: VideoPlayer(_controller!),
         ),
       ),
     );
+
+    videoWidget = ColorFiltered(
+      colorFilter: theme.brightness == Brightness.light
+          ? ColorFilter.mode(
+              theme.colorScheme.secondary.withValues(alpha: 0.6),
+              BlendMode.hardLight,
+            )
+          : ColorFilter.mode(
+              theme.colorScheme.primary.withValues(alpha: 0.8),
+              BlendMode.multiply,
+            ),
+      child: videoWidget,
+    );
+
+    return Positioned.fill(child: IgnorePointer(child: videoWidget));
   }
 }

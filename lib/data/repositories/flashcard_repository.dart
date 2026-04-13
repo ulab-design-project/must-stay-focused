@@ -12,10 +12,29 @@ class FlashcardRepository {
     });
   }
 
-  Future<void> deleteDeck(int id) async {
-    await idb.writeTxn(() async {
-      await idb.decks.delete(id);
-    });
+  Future<void> deleteDeck(Deck deck, {bool mergeToDefault = false}) async {
+    if (deck.name == 'Default') {
+      throw Exception('Cannot delete default deck');
+    }
+    
+    if (mergeToDefault) {
+      await idb.writeTxn(() async {
+        await deck.flashcards.load();
+        final defaultDeck = await idb.decks.filter().nameEqualTo('Default').findFirst();
+        if (defaultDeck != null) {
+          for (final card in deck.flashcards) {
+            card.deck.value = defaultDeck;
+            await idb.flashCards.put(card);
+            await card.deck.save();
+          }
+        }
+        await idb.decks.delete(deck.id);
+      });
+    } else {
+      await idb.writeTxn(() async {
+        await idb.decks.delete(deck.id);
+      });
+    }
   }
 
   Future<Deck?> getDeckByName(String deckName) async {

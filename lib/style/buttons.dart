@@ -24,6 +24,7 @@ class GlassSquircleIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return GlassButton.custom(
+      useOwnLayer: true,
       onTap: onPressed ?? () {},
       enabled: onPressed != null,
       width: size,
@@ -65,6 +66,7 @@ class GlassSquircleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return GlassButton.custom(
+      useOwnLayer: true,
       onTap: onPressed ?? () {},
       enabled: onPressed != null,
       height: height,

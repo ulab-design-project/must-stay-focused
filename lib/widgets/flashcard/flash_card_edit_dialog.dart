@@ -47,6 +47,50 @@ class _FlashCardEditDialogState extends State<FlashCardEditDialog> {
     if (mounted) Navigator.pop(context);
   }
 
+  Future<void> _delete() async {
+    try {
+      if (widget.existingCard == null) {
+        if (mounted) Navigator.pop(context);
+        return;
+      }
+
+      final shouldDelete = await showDialog<bool>(
+        context: context,
+        builder: (context) => GlassDialog(
+          title: 'Delete Flashcard?',
+          content: const Text(
+            'This action cannot be undone.',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            GlassDialogAction(
+              label: 'Cancel',
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            GlassDialogAction(
+              label: 'Delete',
+              isDestructive: true,
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldDelete != true) return;
+
+      await flashcardRepo.deleteFlashCard(widget.existingCard!.id);
+      if (mounted) Navigator.pop(context);
+    } catch (error, stackTrace) {
+      debugPrint('Failed to delete flashcard: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete flashcard. Please try again.')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GlassDialog(
@@ -67,17 +111,20 @@ class _FlashCardEditDialogState extends State<FlashCardEditDialog> {
           ),
         ],
       ),
-      actions: [
+      actions: [        
+        GlassDialogAction(
+          label: widget.existingCard != null ? 'Delete' : 'Cancel',
+          isDestructive: widget.existingCard != null,
+          onPressed: () => widget.existingCard != null ? _delete() : Navigator.pop(context),
+        ),
         GlassDialogAction(
           label: 'Save',
           onPressed: _save,
           isPrimary: true,
         ),
-        GlassDialogAction(
-          label: 'Cancel',
-          onPressed: () => Navigator.pop(context),
-        ),
       ],
     );
   }
+  
+  
 }

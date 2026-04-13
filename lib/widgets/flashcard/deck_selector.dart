@@ -109,7 +109,7 @@ class _DeckSelectorState extends State<DeckSelector> {
                             widget.onDeckSelected(deck);
                             Navigator.pop(ctx);
                           },
-                          trailing: IconButton(
+                          trailing: deck.name == 'Default' ? null : IconButton(
                             icon: const Icon(Icons.edit, color: Colors.white70, size: 18),
                             onPressed: () {
                               Navigator.pop(ctx);

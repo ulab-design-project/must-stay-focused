@@ -140,7 +140,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                     size: 18,
                   ),
                   title: Text(
-                    priority.name,
+                    priority.name.toUpperCase(),
                     style: TextStyle(color: Colors.white),
                   ),
                   trailing: priority == _priority
@@ -270,46 +270,6 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Priority',
-                          style: TextStyle(
-                            color: Colors.white.withValues(
-                              alpha: 0.88,
-                            ),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      GlassPicker(
-                        width: 128,
-                        height: 36,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        value: _priority.name,
-                        textStyle: TextStyle(
-                          fontSize: AppTextSizes.small,
-                          color: Colors.white,
-                        ),
-                        placeholderStyle: TextStyle(
-                          fontSize: AppTextSizes.small,
-                          color: Colors.white.withValues(
-                            alpha: 0.65,
-                          ),
-                        ),
-                        icon: Icon(
-                          Icons.expand_more,
-                          size: 14,
-                          color: Colors.white.withValues(
-                            alpha: 0.85,
-                          ),
-                        ),
-                        onTap: _openPriorityPicker,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppElementSizes.spacingMd),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
                           'Task list',
                           style: TextStyle(
                             color: Colors.white.withValues(
@@ -345,33 +305,46 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                       ),
                     ],
                   ),
-                  // GlassListTile(
-                  //   leading: _selectedList == null
-                  //       ? Icon(
-                  //           Icons.list_alt,
-                  //           color: Colors.white.withValues(
-                  //             alpha: 0.7,
-                  //           ),
-                  //         )
-                  //       : Icon(
-                  //           IconData(
-                  //             _selectedList!.iconCodePoint,
-                  //             fontFamily: 'MaterialIcons',
-                  //           ),
-                  //           color: Colors.white,
-                  //         ),
-                  //   title: Text(
-                  //     _selectedList?.name ?? 'Select task list',
-                  //     style: TextStyle(color: Colors.white),
-                  //   ),
-                  //   trailing: Icon(
-                  //     Icons.arrow_forward_ios,
-                  //     size: 14,
-                  //     color: Colors.white.withValues(alpha: 0.65),
-                  //   ),
-                  //   onTap: _showListSelector,
-                  //   isLast: true,
-                  // ),
+                  const SizedBox(height: AppElementSizes.spacingMd),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Priority',
+                          style: TextStyle(
+                            color: Colors.white.withValues(
+                              alpha: 0.88,
+                            ),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      GlassPicker(
+                        width: 128,
+                        height: 36,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        value: _priority.name,
+                        textStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white,
+                        ),
+                        placeholderStyle: TextStyle(
+                          fontSize: AppTextSizes.small,
+                          color: Colors.white.withValues(
+                            alpha: 0.65,
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.expand_more,
+                          size: 14,
+                          color: Colors.white.withValues(
+                            alpha: 0.85,
+                          ),
+                        ),
+                        onTap: _openPriorityPicker,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: AppElementSizes.spacingMd),
                   GlassTextField(
                     controller: _descController,
@@ -469,12 +442,12 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
         ),
       ),
       actions: [
-        if (widget.existingTask != null)
-          GlassDialogAction(
-            label: 'Delete',
-            isDestructive: true,
-            onPressed: _delete,
-          ),
+        // if (widget.existingTask != null)
+        //   GlassDialogAction(
+        //     label: 'Delete',
+        //     isDestructive: true,
+        //     onPressed: _delete,
+        //   ),
         GlassDialogAction(
           label: 'Cancel',
           onPressed: () => Navigator.pop(context),

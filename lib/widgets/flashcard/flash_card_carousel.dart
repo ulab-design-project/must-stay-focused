@@ -51,7 +51,6 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
   }
 
   Future<void> _openSortPicker() async {
-    final theme = Theme.of(context);
     final value = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -62,7 +61,9 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
         ];
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).padding.bottom + AppElementSizes.spacingMd,
+            bottom:
+                MediaQuery.of(context).padding.bottom +
+                AppElementSizes.spacingMd,
             left: AppElementSizes.spacingMd,
             right: AppElementSizes.spacingMd,
           ),
@@ -72,11 +73,13 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
               children: options.map((option) {
                 final isSelected = _sortBy == option.$2;
                 return GlassListTile(
-                  leading: isSelected ? const Icon(Icons.check_circle, size: 20) : const SizedBox(width: 20),
+                  leading: isSelected
+                      ? const Icon(Icons.check_circle, size: 20)
+                      : const SizedBox(width: 20),
                   title: Text(
                     option.$1,
                     style: TextStyle(
-                      color: Colors.white, 
+                      color: Colors.white,
                       // primary : theme.colorScheme.onSurface,
                     ),
                   ),
@@ -104,8 +107,9 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
         behavior: HitTestBehavior.opaque,
         onTap: () {}, // Blocks touches from passing through manually
         child: Container(
-          
-          padding: const EdgeInsets.symmetric(horizontal: AppElementSizes.spacingSm),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppElementSizes.spacingSm,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min, // Constrains it to natural height
@@ -118,11 +122,15 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                         if (_selectedDeck != null) {
                           showDialog(
                             context: context,
-                            builder: (ctx) => FlashCardEditDialog(deck: _selectedDeck),
+                            builder: (ctx) =>
+                                FlashCardEditDialog(deck: _selectedDeck),
                           ).then((_) => _loadCards());
                         }
                       },
-                      icon: Icon(Icons.add, color: Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(
+                        Icons.add,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       isPrimary: false,
                     ),
                     const SizedBox(width: AppElementSizes.spacingSm),
@@ -142,7 +150,8 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                     ),
                     const SizedBox(width: AppElementSizes.spacingSm),
                     GlassPicker(
-                      width: 80, // Give sufficient rigid space for text rendering
+                      width:
+                          80, // Give sufficient rigid space for text rendering
                       height: 36,
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       value: _sortBy == 'sm2' ? 'SM2' : 'Creation Date',
@@ -154,7 +163,9 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                       icon: Icon(
                         Icons.expand_more,
                         size: 16,
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.85),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.85),
                       ),
                       onTap: _openSortPicker,
                     ),
@@ -165,50 +176,63 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                         _loadCards();
                       },
                       icon: Icon(
-                        _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                        _isAscending
+                            ? Icons.arrow_upward
+                            : Icons.arrow_downward,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(width: AppElementSizes.spacingSm),
                   ] else ...[
-                    const Spacer(), 
+                    const Spacer(),
                   ],
                   GlassSquircleIconButton(
-                    onPressed: () => setState(() => _isCollapsed = !_isCollapsed),
+                    onPressed: () =>
+                        setState(() => _isCollapsed = !_isCollapsed),
                     icon: Icon(
-                      _isCollapsed ? Icons.card_membership : Icons.keyboard_arrow_down,
+                      _isCollapsed
+                          ? Icons.card_membership
+                          : Icons.keyboard_arrow_down,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
               if (!_isCollapsed) ...[
-                const SizedBox(height: AppElementSizes.spacingMd),
+                const SizedBox(height: AppElementSizes.spacingSm),
                 GlassCard(
                   child: SizedBox(
                     height: height,
                     child: _cards.isEmpty
                         ? Center(
                             child: Text(
-                              _showFullDeck ? 'No cards found.' : 'No cards due. Show all or add new.',
+                              _showFullDeck
+                                  ? 'No cards found.'
+                                  : 'No cards due. Show all or add new.',
                               style: const TextStyle(color: Colors.white70),
                             ),
                           )
                         : ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: _cards.length + 1, // +1 for the end button
+                            itemCount:
+                                _cards.length + 1, // +1 for the end button
                             itemBuilder: (context, index) {
                               if (index == _cards.length) {
-                                if (_showFullDeck) return const SizedBox(); // no button if already showing all
+                                if (_showFullDeck)
+                                  return const SizedBox(); // no button if already showing all
                                 return Center(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: AppElementSizes.spacingLg),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppElementSizes.spacingLg,
+                                    ),
                                     child: GlassCard(
                                       useOwnLayer: true,
                                       settings: LiquidGlassSettings(
-                  chromaticAberration: 0.5,
-                  glassColor: Theme.of(context).colorScheme.primary.withAlpha(60),
-                ),
+                                        chromaticAberration: 0.5,
+                                        glassColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withAlpha(60),
+                                      ),
                                       child: TextButton(
                                         onPressed: () {
                                           setState(() => _showFullDeck = true);
@@ -226,7 +250,6 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                               return Padding(
                                 padding: const EdgeInsets.only(
                                   left: AppElementSizes.spacingMd,
-                                  
                                 ),
                                 child: FlashCardWidget(
                                   card: _cards[index],

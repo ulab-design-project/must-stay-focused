@@ -82,7 +82,7 @@ class AppElementSizes {
 class ThemeController extends ChangeNotifier {
   static const double _primaryBlendRatio = 0.4;
 
-  String _currentThemeKey = 'Purple Dark';
+  String _currentThemeKey = 'Purple Light';
   bool _isGyroscopeEnabled = false;
   bool _initialized = false;
 

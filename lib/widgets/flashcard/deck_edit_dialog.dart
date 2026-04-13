@@ -35,6 +35,51 @@ class _DeckEditDialogState extends State<DeckEditDialog> {
     if (mounted) Navigator.pop(context);
   }
 
+  Future<void> _delete() async {
+    if (widget.existingDeck == null) return;
+    if (widget.existingDeck!.name == 'Default') {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Can't delete default deck")),
+        );
+      }
+      return;
+    }
+
+    final merge = await GlassDialog.show<bool>(
+      context: context,
+      title: 'Delete Deck',
+      message: 'Move cards to Default deck?',
+      actions: [
+        GlassDialogAction(
+          label: 'Delete',
+          isDestructive: true,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        GlassDialogAction(
+          label: 'Move',
+          isPrimary: true,
+          onPressed: () => Navigator.pop(context, true),
+        ),
+      ],
+    );
+    if (merge == null) return;
+
+    try {
+      await flashcardRepo.deleteDeck(
+        widget.existingDeck!,
+        mergeToDefault: merge,
+      );
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'))
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GlassDialog(
@@ -50,17 +95,25 @@ class _DeckEditDialogState extends State<DeckEditDialog> {
           GlassTextField(
             controller: _descController,
             placeholder: 'Description',
+            maxLines: 3,
           ),
         ],
       ),
       actions: [
         GlassDialogAction(
-          label: 'Save',
-          onPressed: _save,
-        ),
-        GlassDialogAction(
           label: 'Cancel',
           onPressed: () => Navigator.pop(context),
+        ),
+        if (widget.existingDeck != null)
+          GlassDialogAction(
+            label: 'Delete',
+            isDestructive: true,
+            onPressed: _delete,
+          ),
+        GlassDialogAction(
+          label: 'Save',
+          isPrimary: true,
+          onPressed: _save,
         ),
       ],
     );

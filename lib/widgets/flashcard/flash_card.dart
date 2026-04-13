@@ -120,8 +120,8 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
           context: context,
           builder: (ctx) => FlashCardEditDialog(existingCard: widget.card),
         ).then((_) {
-          // You might want to notify parent or rely on riverpod/setstate
-          setState(() {});
+          // Notify the parent carousel to reload the cards (e.g. if edited or deleted)
+          widget.onRated();
         });
       },
       onPanUpdate: _onPanUpdate,
@@ -149,6 +149,9 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
                 useOwnLayer: true,
                 settings: LiquidGlassSettings( // TODO make singular origin for Glass Settings
                   chromaticAberration: 0.5,
+                  thickness: 20,
+                  ambientStrength: 0.5,
+                  refractiveIndex: 1.33,
                   glassColor: theme.colorScheme.primary.withAlpha(60),
                 ),
                 child: Container(

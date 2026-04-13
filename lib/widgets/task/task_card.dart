@@ -349,6 +349,15 @@ class _TaskCardState extends State<TaskCard> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: theme.colorScheme.secondary.withValues(
+                                  alpha: 0.3,
+                                ),
+                                // offset: const Offset(0, 0),
+                                blurRadius: 7,
+                              ),
+                            ],
                             color: _getPriorityColor(
                               context,
                             ).withValues(alpha: 0.2),
