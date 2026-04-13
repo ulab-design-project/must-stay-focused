@@ -397,7 +397,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                                 child: Text(
                                   _timeLabel(_startTime, 'Start time'),
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    fontSize: AppTextSizes.small,
+                                    color: Colors.white),
                                 ),
                               ),
                             ],
@@ -420,7 +422,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
                               Flexible(
                                 child: Text(
                                   _timeLabel(_endTime, 'End time'),
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    fontSize: AppTextSizes.small,
+                                    color: Colors.white),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),

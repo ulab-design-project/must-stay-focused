@@ -1,5 +1,7 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 import '../utils/theme_helpers.dart';
 
@@ -63,10 +65,14 @@ class BackgroundDrop extends StatelessWidget {
           ),
         ),
         Positioned(
-          child: Container(color: primaryColor, width: screenWidth, height: 100,),
+          child: Container(
+            color: primaryColor,
+            width: screenWidth,
+            height: 100,
+          ),
           top: screenHeight * 0.5,
         ),
-
+// const _LoopingRotatedBackgroundVideo(),
         // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
@@ -106,7 +112,76 @@ class BackgroundDrop extends StatelessWidget {
             restorationId: scaffold.restorationId,
           ),
         ),
+        
       ],
+    );
+  }
+}
+
+class _LoopingRotatedBackgroundVideo extends StatefulWidget {
+  const _LoopingRotatedBackgroundVideo();
+
+  @override
+  State<_LoopingRotatedBackgroundVideo> createState() =>
+      _LoopingRotatedBackgroundVideoState();
+}
+
+class _LoopingRotatedBackgroundVideoState
+    extends State<_LoopingRotatedBackgroundVideo> {
+  late final VideoPlayerController _controller;
+  bool _isReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset('assets/bgvid/2.mp4');
+    _initializeVideo();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      await _controller.setLooping(true);
+      await _controller.setVolume(0);
+      await _controller.initialize();
+      await _controller.play();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() => _isReady = true);
+    } catch (e, stackTrace) {
+      debugPrint('Background video initialization failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isReady) {
+      return const SizedBox.shrink();
+    }
+
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Transform.rotate(
+          angle: math.pi / 2,
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: SizedBox(
+              width: _controller.value.size.width,
+              height: _controller.value.size.height,
+              child: VideoPlayer(_controller),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

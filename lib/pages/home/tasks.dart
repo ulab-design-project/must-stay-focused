@@ -51,6 +51,9 @@ class _TasksPageState extends State<TasksPage> {
   // Loading state
   bool _isLoading = true;
 
+  // Last task moved into completed list (used for entry animation)
+  int? _animatedCompletedTaskId;
+
   @override
   void initState() {
     super.initState();
@@ -148,15 +151,10 @@ class _TasksPageState extends State<TasksPage> {
                     return GlassListTile(
                       title: Text(
                         option.$1,
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
                       trailing: isSelected
-                          ? Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                            )
+                          ? Icon(Icons.check_circle, color: Colors.white)
                           : null,
                       onTap: () => Navigator.of(context).pop(option.$2),
                       isLast: option == options.last,
@@ -177,6 +175,28 @@ class _TasksPageState extends State<TasksPage> {
       await _loadTasks();
     } catch (e, stackTrace) {
       debugPrint('TasksPage _openSortPicker error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _handleTaskChanged(Task task) async {
+    try {
+      if (mounted) {
+        setState(() {
+          _animatedCompletedTaskId = task.isCompleted ? task.id : null;
+        });
+      }
+
+      await _loadTasks();
+
+      if (task.isCompleted) {
+        await Future.delayed(const Duration(milliseconds: 320));
+        if (mounted && _animatedCompletedTaskId == task.id) {
+          setState(() => _animatedCompletedTaskId = null);
+        }
+      }
+    } catch (e, stackTrace) {
+      debugPrint('TasksPage _handleTaskChanged error: $e');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
@@ -263,7 +283,8 @@ class _TasksPageState extends State<TasksPage> {
               incompleteTasks: _incompleteTasks,
               completedTasks: _completedTasks,
               onEditTask: _openEditTask,
-              onTaskChanged: _loadTasks,
+              onTaskChanged: _handleTaskChanged,
+              animatedCompletedTaskId: _animatedCompletedTaskId,
             ),
           ),
         ],

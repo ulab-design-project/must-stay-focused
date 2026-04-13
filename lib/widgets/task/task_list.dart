@@ -30,7 +30,10 @@ class TaskListView extends StatelessWidget {
   final ValueChanged<Task> onEditTask;
 
   // Callback fired when a task is modified (for parent to refresh list)
-  final VoidCallback? onTaskChanged;
+  final ValueChanged<Task>? onTaskChanged;
+
+  // Task id that should play completed entry animation.
+  final int? animatedCompletedTaskId;
 
   const TaskListView({
     super.key,
@@ -38,6 +41,7 @@ class TaskListView extends StatelessWidget {
     required this.completedTasks,
     required this.onEditTask,
     this.onTaskChanged,
+    this.animatedCompletedTaskId,
   });
 
   @override
@@ -89,40 +93,44 @@ class TaskListView extends StatelessWidget {
         addRepaintBoundaries: true,
         itemBuilder: (context, index) {
           // First, show all incomplete tasks
-        if (index < incompleteTasks.length) {
-          final task = incompleteTasks[index];
+          if (index < incompleteTasks.length) {
+            final task = incompleteTasks[index];
+            return TaskCard(
+              key: ValueKey('incomplete-${task.id}'),
+              task: task,
+              onEdit: () => onEditTask(task),
+              onTaskChanged: onTaskChanged,
+            );
+          }
+
+          // Then, show "Completed Tasks" header if there are completed tasks
+          final headerIndex = incompleteTasks.length;
+          if (hasCompletedTasks && index == headerIndex) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                'Completed Tasks',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            );
+          }
+
+          // Finally, show completed tasks
+          final completedIndex =
+              index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
+          final task = completedTasks[completedIndex];
           return TaskCard(
+            key: ValueKey('completed-${task.id}'),
             task: task,
             onEdit: () => onEditTask(task),
             onTaskChanged: onTaskChanged,
+            animateEntry: task.id == animatedCompletedTaskId,
           );
-        }
-
-        // Then, show "Completed Tasks" header if there are completed tasks
-        final headerIndex = incompleteTasks.length;
-        if (hasCompletedTasks && index == headerIndex) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Text(
-              'Completed Tasks',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-              ),
-            ),
-          );
-        }
-
-        // Finally, show completed tasks
-        final completedIndex =
-            index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
-        final task = completedTasks[completedIndex];
-        return TaskCard(
-          task: task,
-          onEdit: () => onEditTask(task),
-          onTaskChanged: onTaskChanged,
-        );
-      },
-    ));
+        },
+      ),
+    );
   }
 }
