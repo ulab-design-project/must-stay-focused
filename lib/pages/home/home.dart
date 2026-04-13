@@ -4,6 +4,7 @@ import 'tasks.dart';
 import '../../style/buttons.dart';
 import '../../style/background.dart';
 import '../settings.dart';
+import '../community/community_templates.dart';
 import '../../widgets/flashcard/flash_card_carousel.dart';
 
 class Home extends StatelessWidget {
@@ -19,15 +20,20 @@ class Home extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
           actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassSquircleIconButton(
-                icon: const Icon(Icons.store),
-                onPressed: () {
-                  // TODO: Navigate to community template store
-                },
-              ),
-            ),
+             Padding(
+               padding: const EdgeInsets.symmetric(horizontal: 4.0),
+               child: GlassSquircleIconButton(
+                 icon: const Icon(Icons.store),
+                 onPressed: () {
+                   Navigator.push(
+                     context,
+                     MaterialPageRoute(
+                       builder: (context) => const CommunityTemplates(),
+                     ),
+                   );
+                 },
+               ),
+             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4.0),
               child: GlassSquircleIconButton(

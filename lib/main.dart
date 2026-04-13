@@ -5,7 +5,7 @@ import 'data/db/isar_service.dart';
 import 'pages/home/home.dart';
 import 'style/theme.dart';
 
-final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();                          
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

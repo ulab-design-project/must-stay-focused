@@ -13,6 +13,7 @@ class GlassTextField extends StatefulWidget {
   final InputBorder? border;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final int? maxLines;
 
   const GlassTextField({
     super.key,
@@ -26,6 +27,7 @@ class GlassTextField extends StatefulWidget {
     this.border,
     this.prefixIcon,
     this.suffixIcon,
+    this.maxLines = 1,
   });
 
   @override
@@ -70,6 +72,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
             decoration: inputDecoration,
             onTap: () => setState(() => _isFocused = true),
             onEditingComplete: () => setState(() => _isFocused = false),
+            maxLines: widget.maxLines,
           )
         : TextField(
             controller: widget.controller,
@@ -80,6 +83,7 @@ class _GlassTextFieldState extends State<GlassTextField> {
             decoration: inputDecoration,
             onTap: () => setState(() => _isFocused = true),
             onEditingComplete: () => setState(() => _isFocused = false),
+            maxLines: widget.maxLines,
           );
 
     return Container(
