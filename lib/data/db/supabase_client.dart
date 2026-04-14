@@ -20,15 +20,33 @@ class SupabaseService {
 
   SupabaseService._internal();
 
+  bool _isInitialized = false;
+
+  bool get isInitialized => _isInitialized;
+
   Future<void> init() async {
+    if (_isInitialized) {
+      return;
+    }
+
     const url = String.fromEnvironment('SUPABASE_URL');
     const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
     if (url.isEmpty || anonKey.isEmpty) {
-      throw Exception('Supabase env variables not set');
+      throw Exception(
+        'SupabaseService init failed: SUPABASE_URL or SUPABASE_ANON_KEY is empty. Pass them with --dart-define.',
+      );
+    }
+
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
+      throw Exception(
+        'SupabaseService init failed: SUPABASE_URL is invalid: $url',
+      );
     }
 
     await Supabase.initialize(url: url, anonKey: anonKey);
+    _isInitialized = true;
   }
 
   SupabaseClient get client => Supabase.instance.client;
