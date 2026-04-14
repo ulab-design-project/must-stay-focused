@@ -25,7 +25,6 @@ final IsarTaskRepository taskRepo = IsarTaskRepository(); // global taskRepo
 /// Repository for all Task and TaskList database operations.
 /// Use this class instead of calling idb directly.
 
-
 class IsarTaskRepository {
   // Upsert: Insert if new (no ID), Update if exists (has ID)
   Future<int> upsertTask(Task task) async {
@@ -58,8 +57,15 @@ class IsarTaskRepository {
     return await idb.taskLists.where().findAll();
   }
 
+  Stream<List<TaskList>> watchTaskLists() {
+    return idb.taskLists.where().watch(fireImmediately: true);
+  }
+
   Future<List<Task>> getTasksByListName(String listName) async {
-    final taskList = await idb.taskLists.filter().nameEqualTo(listName).findFirst();
+    final taskList = await idb.taskLists
+        .filter()
+        .nameEqualTo(listName)
+        .findFirst();
     if (taskList == null) return [];
     await taskList.tasks.load();
     return taskList.tasks.toList();
@@ -79,24 +85,27 @@ class IsarTaskRepository {
     bool isArchived = false,
   }) async {
     List<Task> tasks;
-    
+
     // Step 1: Filter by archive status
     if (isArchived) {
       // Get all archived tasks directly from the tasks collection
       tasks = await idb.tasks.filter().isArchivedEqualTo(true).findAll();
     } else {
       // Get tasks from specific list that are not archived
-      final taskList = await idb.taskLists.filter().nameEqualTo(listName).findFirst();
+      final taskList = await idb.taskLists
+          .filter()
+          .nameEqualTo(listName)
+          .findFirst();
       if (taskList == null) return [];
       await taskList.tasks.load();
       tasks = taskList.tasks.where((t) => !t.isArchived).toList();
     }
-    
+
     // Step 2: Filter by completion status if specified
     if (isCompleted != null) {
       tasks = tasks.where((t) => t.isCompleted == isCompleted).toList();
     }
-    
+
     // Step 3: Sort based on sortBy parameter
     switch (sortBy) {
       case 'priority':
@@ -105,22 +114,22 @@ class IsarTaskRepository {
           return isAscending ? comparison : -comparison;
         });
         break;
-        
+
       case 'dueSoon':
         tasks.sort((a, b) {
           final aUrgency = a.urgencyScore;
           final bUrgency = b.urgencyScore;
-          
+
           // Handle null cases: tasks with no time go to end
           if (aUrgency == null && bUrgency == null) return 0;
           if (aUrgency == null) return 1;
           if (bUrgency == null) return -1;
-          
+
           final comparison = aUrgency.compareTo(bUrgency);
           return isAscending ? comparison : -comparison;
         });
         break;
-        
+
       case 'creationTime':
       default:
         tasks.sort((a, b) {
@@ -129,7 +138,7 @@ class IsarTaskRepository {
         });
         break;
     }
-    
+
     return tasks;
   }
 
@@ -141,15 +150,21 @@ class IsarTaskRepository {
   }
 
   // Delete TaskList with optional merge to default
-  Future<void> deleteTaskList(TaskList list, {bool mergeToDefault = false}) async {
+  Future<void> deleteTaskList(
+    TaskList list, {
+    bool mergeToDefault = false,
+  }) async {
     if (list.isDefault) {
       throw Exception('Cannot delete default list');
     }
-    
+
     if (mergeToDefault) {
       await idb.writeTxn(() async {
         await list.tasks.load();
-        final defaultList = await idb.taskLists.filter().isDefaultEqualTo(true).findFirst();
+        final defaultList = await idb.taskLists
+            .filter()
+            .isDefaultEqualTo(true)
+            .findFirst();
         if (defaultList != null) {
           for (final task in list.tasks) {
             task.taskList.value = defaultList;

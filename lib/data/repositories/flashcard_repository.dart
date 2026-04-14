@@ -5,7 +5,6 @@ import '../models/flash_card.dart';
 final FlashcardRepository flashcardRepo = FlashcardRepository();
 
 class FlashcardRepository {
- 
   Future<int> upsertDeck(Deck deck) async {
     return await idb.writeTxn(() async {
       return await idb.decks.put(deck);
@@ -16,11 +15,14 @@ class FlashcardRepository {
     if (deck.name == 'Default') {
       throw Exception('Cannot delete default deck');
     }
-    
+
     if (mergeToDefault) {
       await idb.writeTxn(() async {
         await deck.flashcards.load();
-        final defaultDeck = await idb.decks.filter().nameEqualTo('Default').findFirst();
+        final defaultDeck = await idb.decks
+            .filter()
+            .nameEqualTo('Default')
+            .findFirst();
         if (defaultDeck != null) {
           for (final card in deck.flashcards) {
             card.deck.value = defaultDeck;
@@ -45,7 +47,10 @@ class FlashcardRepository {
     return await idb.decks.where().findAll();
   }
 
- 
+  Stream<List<Deck>> watchDecks() {
+    return idb.decks.where().watch(fireImmediately: true);
+  }
+
   Future<int> upsertFlashCard(FlashCard card) async {
     return await idb.writeTxn(() async {
       final id = await idb.flashCards.put(card);
@@ -60,22 +65,16 @@ class FlashcardRepository {
     });
   }
 
- 
   Future<List<FlashCard>> getCardsDueForReview() async {
     final now = DateTime.now();
 
-    return await idb.flashCards
-        .filter()
-        .nextReviewDateLessThan(now)
-        .findAll();
+    return await idb.flashCards.filter().nextReviewDateLessThan(now).findAll();
   }
 
-  
   Future<void> saveReviewSession(FlashCard updatedCard) async {
     await upsertFlashCard(updatedCard);
   }
 
-  
   Future<List<FlashCard>> getFilteredDeck({
     required String deckName,
     String? sortBy,
@@ -101,29 +100,43 @@ class FlashcardRepository {
     }
 
     if (sortBy == 'creationTime') {
-      cards.sort((a, b) => isAscending
-          ? a.creationDate.compareTo(b.creationDate)
-          : b.creationDate.compareTo(a.creationDate));
+      cards.sort(
+        (a, b) => isAscending
+            ? a.creationDate.compareTo(b.creationDate)
+            : b.creationDate.compareTo(a.creationDate),
+      );
     } else if (sortBy == 'sm2' && showFullDeck) {
       cards.sort((a, b) {
         // Step 1: compare dates (normalized to midnight)
-        final DateTime aDate = DateTime(a.nextReviewDate.year, a.nextReviewDate.month, a.nextReviewDate.day);
-        final DateTime bDate = DateTime(b.nextReviewDate.year, b.nextReviewDate.month, b.nextReviewDate.day);
-        
+        final DateTime aDate = DateTime(
+          a.nextReviewDate.year,
+          a.nextReviewDate.month,
+          a.nextReviewDate.day,
+        );
+        final DateTime bDate = DateTime(
+          b.nextReviewDate.year,
+          b.nextReviewDate.month,
+          b.nextReviewDate.day,
+        );
+
         final dateCompare = aDate.compareTo(bDate);
         if (dateCompare != 0) {
-          return isAscending ? dateCompare : -dateCompare; // or keep date ascending always? Let's use isAscending
+          return isAscending
+              ? dateCompare
+              : -dateCompare; // or keep date ascending always? Let's use isAscending
         }
-        
+
         // Step 2: compare by ease factor within the same day
         return isAscending
             ? a.easeFactor.compareTo(b.easeFactor)
             : b.easeFactor.compareTo(a.easeFactor);
       });
     } else if (sortBy == 'difficulty' || sortBy == 'sm2') {
-      cards.sort((a, b) => isAscending
-          ? a.easeFactor.compareTo(b.easeFactor)
-          : b.easeFactor.compareTo(a.easeFactor));
+      cards.sort(
+        (a, b) => isAscending
+            ? a.easeFactor.compareTo(b.easeFactor)
+            : b.easeFactor.compareTo(a.easeFactor),
+      );
     }
 
     return cards;
