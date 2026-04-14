@@ -21,6 +21,25 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
   void initState() {
     super.initState();
     _timeCtrl = TextEditingController(text: widget.appUsage.maxDailyTimeLimit.toString());
+    _selectedChallenge = _normalizeChallengeType(widget.appUsage.challengeType);
+  }
+
+  String _normalizeChallengeType(String? value) {
+    final normalized = value?.trim().toLowerCase() ?? '';
+
+    switch (normalized) {
+      case 'math':
+        return 'Math';
+      case 'flash card':
+      case 'flashcard':
+        return 'Flashcard';
+      case 'pair matching':
+      case 'pairmatching':
+      case 'puzzle':
+        return 'Pair Matching';
+      default:
+        return 'Math';
+    }
   }
 
   @override
@@ -30,17 +49,19 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
   }
 
   Future<void> _save() async {
-    final int limit = int.tryParse(_timeCtrl.text) ?? 15;
+    final int limit = (int.tryParse(_timeCtrl.text) ?? 15).clamp(1, 600);
     widget.appUsage.maxDailyTimeLimit = limit;
-    // Challenge type not explicitly in model yet, but logic is planned
+    widget.appUsage.challengeType = _selectedChallenge;
+
     await idb.writeTxn(() async {
       await idb.appUsages.put(widget.appUsage);
     });
+
     if (mounted) Navigator.pop(context);
   }
 
   Future<void> _openChallengePicker() async {
-    final types = ['Math', 'FlashCard', 'Puzzle'];
+    final types = ['Math', 'Flashcard', 'Pair Matching'];
     final selected = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,

@@ -8,8 +8,10 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import '../../../style/theme.dart';
 import '../../../data/models/app_usage.dart';
 import '../../../data/db/isar_service.dart';
+import '../../../services/app_interception_service.dart';
 import '../../../services/appUsageMonitor/android_app_usage.dart';
 import 'app_usage_card.dart';
+import 'default_interception_settings_dialog.dart';
 
 class TrackedAppsWidget extends StatefulWidget {
   const TrackedAppsWidget({super.key});
@@ -47,6 +49,7 @@ class _TrackedAppsWidgetState extends State<TrackedAppsWidget> {
 
     try {
       final existingApps = await idb.appUsages.where().findAll();
+      await AppInterceptionService().syncTrackedAppsFromDatabase();
 
       if (mounted && version == _loadVersion) {
         setState(() {
@@ -106,6 +109,13 @@ class _TrackedAppsWidgetState extends State<TrackedAppsWidget> {
     );
   }
 
+  void _openDefaultSettingsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const DefaultInterceptionSettingsDialog(),
+    );
+  }
+
   Future<void> _untrackApp(AppUsage usage) async {
     try {
       await idb.writeTxn(() async {
@@ -140,6 +150,12 @@ class _TrackedAppsWidgetState extends State<TrackedAppsWidget> {
                   ),
                 ),
               ),
+              GlassSquircleIconButton(
+                icon: Icon(Icons.tune, color: onSurface),
+                onPressed: _openDefaultSettingsDialog,
+                size: AppElementSizes.buttonSquare,
+              ),
+              const SizedBox(width: AppElementSizes.spacingSm),
               GlassSquircleIconButton(
                 icon: Icon(Icons.add, color: onSurface),
                 onPressed: _openAddDialog,

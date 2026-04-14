@@ -5,6 +5,8 @@ import 'package:liquid_glass_widgets/widgets/input/glass_text_field.dart';
 import 'package:liquid_glass_widgets/widgets/overlays/glass_dialog.dart';
 import 'package:must_stay_focused/data/db/isar_service.dart';
 import 'package:must_stay_focused/data/models/app_usage.dart';
+import 'package:must_stay_focused/data/models/user_settings.dart';
+import 'package:must_stay_focused/services/app_interception_service.dart';
 import 'package:must_stay_focused/services/appUsageMonitor/android_app_usage.dart';
 import 'package:must_stay_focused/style/theme.dart';
 
@@ -70,15 +72,22 @@ class _AddAppDialogState extends State<AddAppDialog> {
 
   Future<void> _toggleAppTrack(AppInfo app, bool track) async {
     if (track) {
+      final UserSettings? settings = await idb.userSettings.get(1);
+      final String defaultChallengeType = _normalizeChallengeType(
+        settings?.preferredChallengeType,
+      );
+
       final usage = AppUsage()
         ..name = app.name
         ..appId = app.packageName
         ..maxDailyTimeLimit = 15
+        ..challengeType = defaultChallengeType
         ..isTracked = true;
 
       await idb.writeTxn(() async {
         await idb.appUsages.put(usage);
       });
+      await AppInterceptionService().syncTrackedAppsFromDatabase();
       if (mounted) setState(() { _existingAppIds.add(app.packageName); });
     } else {
       final existing = await idb.appUsages.where().appIdEqualTo(app.packageName).findFirst();
@@ -87,7 +96,26 @@ class _AddAppDialogState extends State<AddAppDialog> {
           await idb.appUsages.delete(existing.id);
         });
       }
+      await AppInterceptionService().syncTrackedAppsFromDatabase();
       if (mounted) setState(() { _existingAppIds.remove(app.packageName); });
+    }
+  }
+
+  String _normalizeChallengeType(String? value) {
+    final normalized = value?.trim().toLowerCase() ?? '';
+
+    switch (normalized) {
+      case 'math':
+        return 'Math';
+      case 'flash card':
+      case 'flashcard':
+        return 'Flashcard';
+      case 'pair matching':
+      case 'pairmatching':
+      case 'puzzle':
+        return 'Pair Matching';
+      default:
+        return 'Math';
     }
   }
 

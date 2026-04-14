@@ -1,6 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+import 'app_interception_service.dart';
+
 class PermissionService {
   static final PermissionService _instance = PermissionService._internal();
   factory PermissionService() => _instance;
@@ -32,5 +34,15 @@ class PermissionService {
   /// System Alert Window / Overlay
   Future<bool> requestOverlayPermission() async {
     return (await Permission.systemAlertWindow.request()).isGranted;
+  }
+
+  /// Accessibility service toggle used for real-time app interception.
+  Future<bool> isAccessibilityServiceEnabled() async {
+    return AppInterceptionService().isAccessibilityServiceEnabled();
+  }
+
+  /// Opens Android accessibility settings so users can enable interception.
+  Future<void> openAccessibilitySettings() async {
+    await AppInterceptionService().openAccessibilitySettings();
   }
 }

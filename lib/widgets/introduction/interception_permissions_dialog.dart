@@ -15,6 +15,7 @@ class InterceptionPermissionsDialog extends StatefulWidget {
 class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsDialog> with WidgetsBindingObserver {
   bool _notificationsEnabled = false;
   bool _usageEnabled = false; 
+  bool _accessibilityEnabled = false;
   bool _overlayEnabled = false;
   bool _batteryOptEnabled = false;
 
@@ -44,12 +45,14 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
     final overlay = await Permission.systemAlertWindow.isGranted;
     final battery = await Permission.ignoreBatteryOptimizations.isGranted;
     final usage = await PermissionService().isUsageAccessGranted();
+    final accessibility = await PermissionService().isAccessibilityServiceEnabled();
 
     setState(() {
       _notificationsEnabled = notif;
       _overlayEnabled = overlay;
       _batteryOptEnabled = battery;
       _usageEnabled = usage;
+      _accessibilityEnabled = accessibility;
     });
   }
 
@@ -78,6 +81,10 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
     await AndroidAppUsageMonitor().requestUsagePermissions();
   }
 
+  Future<void> _requestAccessibility() async {
+    await PermissionService().openAccessibilitySettings();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GlassDialog(
@@ -92,6 +99,12 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppElementSizes.spacingLg * 1.5),
+          _buildPermissionTile(
+            title: "Accessibility Service",
+            enabled: _accessibilityEnabled,
+            onTap: _requestAccessibility,
+          ),
+          const SizedBox(height: AppElementSizes.spacingMd),
           _buildPermissionTile(
             title: "App Usage Access",
             enabled: _usageEnabled,

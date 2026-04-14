@@ -173,7 +173,7 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
                     child: Text(
                       isFlipped ? widget.card.back : widget.card.front,
                       style: const TextStyle(
-                        fontSize: AppTextSizes.compact,
+                        fontSize: AppTextSizes.small,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
