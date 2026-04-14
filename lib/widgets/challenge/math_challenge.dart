@@ -2,6 +2,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:must_stay_focused/style/buttons.dart';
+import 'package:must_stay_focused/style/theme.dart';
 
 enum DifficultySettings { easy, medium, hard }
 
@@ -22,10 +24,12 @@ class MathChallengeWidget extends StatefulWidget {
 class _MathChallengeWidgetState extends State<MathChallengeWidget> {
   late int _num1;
   late int _num2;
+  late int _num3;
   late String _operator;
   late int _correctAnswer;
   final TextEditingController _answerController = TextEditingController();
   final Random _random = Random();
+  bool _isSolved = false;
 
   @override
   void initState() {
@@ -40,6 +44,7 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
           _operator = _random.nextBool() ? '+' : '-';
           _num1 = _random.nextInt(50) + 1;
           _num2 = _random.nextInt(50) + 1;
+          _num3 = 0;
           if (_operator == '-' && _num1 < _num2) {
             final temp = _num1;
             _num1 = _num2;
@@ -50,16 +55,17 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
           _operator = '*';
           _num1 = _random.nextInt(12) + 1;
           _num2 = _random.nextInt(12) + 1;
+          _num3 = 0;
           break;
         case DifficultySettings.hard:
           _operator = _random.nextBool() ? '+' : '-';
           _num1 = _random.nextInt(100) + 20;
           _num2 = _random.nextInt(50) + 10;
-          final int num3 = _random.nextInt(20) + 1;
+          _num3 = _random.nextInt(20) + 1;
           if (_operator == '-') {
-            _correctAnswer = _num1 - _num2 + num3;
+            _correctAnswer = _num1 - _num2 + _num3;
           } else {
-            _correctAnswer = _num1 + _num2 * num3;
+            _correctAnswer = _num1 + _num2 * _num3;
           }
           break;
       }
@@ -79,12 +85,17 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
       }
 
       _answerController.clear();
+      _isSolved = false;
     } catch (e) {
       debugPrint('Error generating math challenge: $e');
     }
   }
 
   void _validateAnswer() {
+    if (_isSolved) {
+      return;
+    }
+
     try {
       final input = int.tryParse(_answerController.text.trim());
       if (input == null) {
@@ -97,7 +108,12 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
       if (input == _correctAnswer) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(const SnackBar(content: Text('Continuing to app')));
+        ).showSnackBar(
+          const SnackBar(content: Text('Challenge solved. Press Continue.')),
+        );
+        setState(() {
+          _isSolved = true;
+        });
         widget.onSuccess.call();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -135,7 +151,7 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
                   const SizedBox(height: 24),
                   Text(
                     widget.difficulty == DifficultySettings.hard
-                        ? '$_num1 $_operator $_num2 * ${_random.nextInt(20) + 1}'
+                        ? '$_num1 $_operator $_num2 * $_num3 = ?'
                         : '$_num1 $_operator $_num2 = ?',
                     style: theme.textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -146,15 +162,22 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
               ),
             ),
             const SizedBox(height: 16),
-            GlassTextField(
-              controller: _answerController,
-              placeholder: 'Write Answer',
-              keyboardType: TextInputType.number,
-              onChanged: (_) {},
+            SizedBox(
+              width: 200,
+              child: GlassTextField(
+                textStyle: TextStyle(color: theme.colorScheme.onSurface, ),
+                controller: _answerController,
+                placeholder: 'Write Answer',
+                placeholderStyle: TextStyle(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                ),
+                keyboardType: TextInputType.number,
+                onChanged: (_) {},
+              ),
             ),
             const SizedBox(height: 16),
-            GlassButton.custom(
-              onTap: _validateAnswer,
+            GlassSquircleButton(
+              onPressed: _validateAnswer,
               width: 140,
               height: 48,
               child: const Text('Submit'),

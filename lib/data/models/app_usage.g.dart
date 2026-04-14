@@ -22,28 +22,38 @@ const AppUsageSchema = CollectionSchema(
       name: r'appId',
       type: IsarType.string,
     ),
-    r'isLimitedToday': PropertySchema(
+    r'challengeType': PropertySchema(
       id: 1,
+      name: r'challengeType',
+      type: IsarType.string,
+    ),
+    r'isLimitedToday': PropertySchema(
+      id: 2,
       name: r'isLimitedToday',
       type: IsarType.bool,
     ),
     r'isTracked': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'isTracked',
       type: IsarType.bool,
     ),
     r'maxDailyTimeLimit': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'maxDailyTimeLimit',
       type: IsarType.long,
     ),
     r'name': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'name',
       type: IsarType.string,
     ),
+    r'overTimeLimitToday': PropertySchema(
+      id: 6,
+      name: r'overTimeLimitToday',
+      type: IsarType.long,
+    ),
     r'totalUsedTime': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'totalUsedTime',
       type: IsarType.long,
     )
@@ -90,6 +100,7 @@ int _appUsageEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.appId.length * 3;
+  bytesCount += 3 + object.challengeType.length * 3;
   bytesCount += 3 + object.name.length * 3;
   return bytesCount;
 }
@@ -101,11 +112,13 @@ void _appUsageSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeString(offsets[0], object.appId);
-  writer.writeBool(offsets[1], object.isLimitedToday);
-  writer.writeBool(offsets[2], object.isTracked);
-  writer.writeLong(offsets[3], object.maxDailyTimeLimit);
-  writer.writeString(offsets[4], object.name);
-  writer.writeLong(offsets[5], object.totalUsedTime);
+  writer.writeString(offsets[1], object.challengeType);
+  writer.writeBool(offsets[2], object.isLimitedToday);
+  writer.writeBool(offsets[3], object.isTracked);
+  writer.writeLong(offsets[4], object.maxDailyTimeLimit);
+  writer.writeString(offsets[5], object.name);
+  writer.writeLong(offsets[6], object.overTimeLimitToday);
+  writer.writeLong(offsets[7], object.totalUsedTime);
 }
 
 AppUsage _appUsageDeserialize(
@@ -116,12 +129,14 @@ AppUsage _appUsageDeserialize(
 ) {
   final object = AppUsage();
   object.appId = reader.readString(offsets[0]);
+  object.challengeType = reader.readString(offsets[1]);
   object.id = id;
-  object.isLimitedToday = reader.readBool(offsets[1]);
-  object.isTracked = reader.readBool(offsets[2]);
-  object.maxDailyTimeLimit = reader.readLong(offsets[3]);
-  object.name = reader.readString(offsets[4]);
-  object.totalUsedTime = reader.readLong(offsets[5]);
+  object.isLimitedToday = reader.readBool(offsets[2]);
+  object.isTracked = reader.readBool(offsets[3]);
+  object.maxDailyTimeLimit = reader.readLong(offsets[4]);
+  object.name = reader.readString(offsets[5]);
+  object.overTimeLimitToday = reader.readLong(offsets[6]);
+  object.totalUsedTime = reader.readLong(offsets[7]);
   return object;
 }
 
@@ -135,14 +150,18 @@ P _appUsageDeserializeProp<P>(
     case 0:
       return (reader.readString(offset)) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readLong(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 4:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readLong(offset)) as P;
+    case 7:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -468,6 +487,140 @@ extension AppUsageQueryFilter
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      challengeTypeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'challengeType',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      challengeTypeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'challengeType',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> challengeTypeMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'challengeType',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      challengeTypeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'challengeType',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      challengeTypeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'challengeType',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -726,6 +879,62 @@ extension AppUsageQueryFilter
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      overTimeLimitTodayEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'overTimeLimitToday',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      overTimeLimitTodayGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'overTimeLimitToday',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      overTimeLimitTodayLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'overTimeLimitToday',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition>
+      overTimeLimitTodayBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'overTimeLimitToday',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QAfterFilterCondition> totalUsedTimeEqualTo(
       int value) {
     return QueryBuilder.apply(this, (query) {
@@ -813,6 +1022,18 @@ extension AppUsageQuerySortBy on QueryBuilder<AppUsage, AppUsage, QSortBy> {
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> sortByChallengeType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'challengeType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> sortByChallengeTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'challengeType', Sort.desc);
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QAfterSortBy> sortByIsLimitedToday() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isLimitedToday', Sort.asc);
@@ -861,6 +1082,19 @@ extension AppUsageQuerySortBy on QueryBuilder<AppUsage, AppUsage, QSortBy> {
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> sortByOverTimeLimitToday() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'overTimeLimitToday', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy>
+      sortByOverTimeLimitTodayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'overTimeLimitToday', Sort.desc);
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QAfterSortBy> sortByTotalUsedTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalUsedTime', Sort.asc);
@@ -885,6 +1119,18 @@ extension AppUsageQuerySortThenBy
   QueryBuilder<AppUsage, AppUsage, QAfterSortBy> thenByAppIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'appId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> thenByChallengeType() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'challengeType', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> thenByChallengeTypeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'challengeType', Sort.desc);
     });
   }
 
@@ -948,6 +1194,19 @@ extension AppUsageQuerySortThenBy
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy> thenByOverTimeLimitToday() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'overTimeLimitToday', Sort.asc);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QAfterSortBy>
+      thenByOverTimeLimitTodayDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'overTimeLimitToday', Sort.desc);
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QAfterSortBy> thenByTotalUsedTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'totalUsedTime', Sort.asc);
@@ -967,6 +1226,14 @@ extension AppUsageQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'appId', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<AppUsage, AppUsage, QDistinct> distinctByChallengeType(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'challengeType',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -995,6 +1262,12 @@ extension AppUsageQueryWhereDistinct
     });
   }
 
+  QueryBuilder<AppUsage, AppUsage, QDistinct> distinctByOverTimeLimitToday() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'overTimeLimitToday');
+    });
+  }
+
   QueryBuilder<AppUsage, AppUsage, QDistinct> distinctByTotalUsedTime() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'totalUsedTime');
@@ -1013,6 +1286,12 @@ extension AppUsageQueryProperty
   QueryBuilder<AppUsage, String, QQueryOperations> appIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'appId');
+    });
+  }
+
+  QueryBuilder<AppUsage, String, QQueryOperations> challengeTypeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'challengeType');
     });
   }
 
@@ -1037,6 +1316,12 @@ extension AppUsageQueryProperty
   QueryBuilder<AppUsage, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<AppUsage, int, QQueryOperations> overTimeLimitTodayProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'overTimeLimitToday');
     });
   }
 

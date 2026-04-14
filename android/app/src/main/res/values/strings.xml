@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="interception_accessibility_service_description">Detect tracked apps and return to Must Stay Focused for review/challenge flow.</string>
+    <string name="interception_accessibility_service_summary">Intercept tracked apps</string>
+</resources>

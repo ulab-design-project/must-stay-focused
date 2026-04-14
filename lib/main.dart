@@ -3,6 +3,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'data/db/isar_service.dart';
 import 'pages/home/home.dart';
+import 'services/app_interception_service.dart';
 import 'style/theme.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -13,6 +14,7 @@ void main() async {
   try {
     await LiquidGlassWidgets.initialize();
     await IsarService().init();
+    await AppInterceptionService().syncTrackedAppsFromDatabase();
   } catch (e) {
     debugPrint('App initialization error: $e');
     // debugPrintStack(stackTrace: stackTrace);

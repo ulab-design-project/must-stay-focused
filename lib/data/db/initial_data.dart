@@ -15,8 +15,11 @@ import 'isar_service.dart';
 /// Called automatically during IsarService init().
 Future<void> prepareDefaultData() async {
   // Check if default list already exists
-  final existingDefault = await idb.taskLists.filter().nameEqualTo('Default').findFirst();
-  
+  final existingDefault = await idb.taskLists
+      .filter()
+      .nameEqualTo('Default')
+      .findFirst();
+
   if (existingDefault != null) return;
 
   await idb.writeTxn(() async {
@@ -72,7 +75,8 @@ Future<void> prepareDefaultData() async {
       ..description = 'Quick status update'
       ..priority = TaskPriority.critical
       ..startTime = DateTime.now().copyWith(hour: 9, minute: 30)
-      ..days = [1, 3, 5] // Mon, Wed, Fri
+      ..days =
+          [1, 3, 5] // Mon, Wed, Fri
       ..creationTime = DateTime.now()
       ..isCompleted = false
       ..isArchived = false;
@@ -102,6 +106,26 @@ Future<void> prepareDefaultData() async {
       ..name = 'Default'
       ..description = 'Default flashcard deck';
     await idb.decks.put(defaultDeck);
+
+    final defaultFacts = [
+      {'f': 'Capital of France', 'b': 'Paris'},
+      {'f': 'Largest planet in our solar system', 'b': 'Jupiter'},
+      {'f': 'Chemical symbol for water', 'b': 'H2O'},
+      {'f': 'Fastest land animal', 'b': 'Cheetah'},
+      {'f': 'Number of continents on Earth', 'b': '7'},
+      {'f': 'Author of Romeo and Juliet', 'b': 'William Shakespeare'},
+    ];
+
+    for (final c in defaultFacts) {
+      final fc = FlashCard.make(
+        front: c['f']!,
+        back: c['b']!,
+        deck: defaultDeck,
+        creationDate: DateTime.now(),
+      );
+      await idb.flashCards.put(fc);
+      await fc.deck.save();
+    }
 
     // 2) Organic Chemistry Deck
     final orgChemDeck = Deck()

@@ -22,38 +22,43 @@ const UserSettingsSchema = CollectionSchema(
       name: r'blockedPackages',
       type: IsarType.stringList,
     ),
-    r'gyroscopeGlassLightingEnabled': PropertySchema(
+    r'defaultOvertimeLimitMinutes': PropertySchema(
       id: 1,
+      name: r'defaultOvertimeLimitMinutes',
+      type: IsarType.long,
+    ),
+    r'gyroscopeGlassLightingEnabled': PropertySchema(
+      id: 2,
       name: r'gyroscopeGlassLightingEnabled',
       type: IsarType.bool,
     ),
     r'notificationsEnabled': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'notificationsEnabled',
       type: IsarType.bool,
     ),
     r'pinHash': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'pinHash',
       type: IsarType.string,
     ),
     r'preferredChallengeType': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'preferredChallengeType',
       type: IsarType.string,
     ),
     r'salt': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'salt',
       type: IsarType.string,
     ),
     r'strictModeEnabled': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'strictModeEnabled',
       type: IsarType.bool,
     ),
     r'themeMode': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'themeMode',
       type: IsarType.string,
     )
@@ -117,13 +122,14 @@ void _userSettingsSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeStringList(offsets[0], object.blockedPackages);
-  writer.writeBool(offsets[1], object.gyroscopeGlassLightingEnabled);
-  writer.writeBool(offsets[2], object.notificationsEnabled);
-  writer.writeString(offsets[3], object.pinHash);
-  writer.writeString(offsets[4], object.preferredChallengeType);
-  writer.writeString(offsets[5], object.salt);
-  writer.writeBool(offsets[6], object.strictModeEnabled);
-  writer.writeString(offsets[7], object.themeMode);
+  writer.writeLong(offsets[1], object.defaultOvertimeLimitMinutes);
+  writer.writeBool(offsets[2], object.gyroscopeGlassLightingEnabled);
+  writer.writeBool(offsets[3], object.notificationsEnabled);
+  writer.writeString(offsets[4], object.pinHash);
+  writer.writeString(offsets[5], object.preferredChallengeType);
+  writer.writeString(offsets[6], object.salt);
+  writer.writeBool(offsets[7], object.strictModeEnabled);
+  writer.writeString(offsets[8], object.themeMode);
 }
 
 UserSettings _userSettingsDeserialize(
@@ -134,14 +140,15 @@ UserSettings _userSettingsDeserialize(
 ) {
   final object = UserSettings();
   object.blockedPackages = reader.readStringList(offsets[0]) ?? [];
-  object.gyroscopeGlassLightingEnabled = reader.readBool(offsets[1]);
+  object.defaultOvertimeLimitMinutes = reader.readLong(offsets[1]);
+  object.gyroscopeGlassLightingEnabled = reader.readBool(offsets[2]);
   object.id = id;
-  object.notificationsEnabled = reader.readBool(offsets[2]);
-  object.pinHash = reader.readStringOrNull(offsets[3]);
-  object.preferredChallengeType = reader.readString(offsets[4]);
-  object.salt = reader.readStringOrNull(offsets[5]);
-  object.strictModeEnabled = reader.readBool(offsets[6]);
-  object.themeMode = reader.readString(offsets[7]);
+  object.notificationsEnabled = reader.readBool(offsets[3]);
+  object.pinHash = reader.readStringOrNull(offsets[4]);
+  object.preferredChallengeType = reader.readString(offsets[5]);
+  object.salt = reader.readStringOrNull(offsets[6]);
+  object.strictModeEnabled = reader.readBool(offsets[7]);
+  object.themeMode = reader.readString(offsets[8]);
   return object;
 }
 
@@ -155,18 +162,20 @@ P _userSettingsDeserializeProp<P>(
     case 0:
       return (reader.readStringList(offset) ?? []) as P;
     case 1:
-      return (reader.readBool(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
-    case 4:
-      return (reader.readString(offset)) as P;
-    case 5:
-      return (reader.readStringOrNull(offset)) as P;
-    case 6:
       return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readBool(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -493,6 +502,62 @@ extension UserSettingsQueryFilter
         upper,
         includeUpper,
       );
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      defaultOvertimeLimitMinutesEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'defaultOvertimeLimitMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      defaultOvertimeLimitMinutesGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'defaultOvertimeLimitMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      defaultOvertimeLimitMinutesLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'defaultOvertimeLimitMinutes',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      defaultOvertimeLimitMinutesBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'defaultOvertimeLimitMinutes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
     });
   }
 
@@ -1229,6 +1294,20 @@ extension UserSettingsQueryLinks
 extension UserSettingsQuerySortBy
     on QueryBuilder<UserSettings, UserSettings, QSortBy> {
   QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByDefaultOvertimeLimitMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'defaultOvertimeLimitMinutes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByDefaultOvertimeLimitMinutesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'defaultOvertimeLimitMinutes', Sort.desc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
       sortByGyroscopeGlassLightingEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'gyroscopeGlassLightingEnabled', Sort.asc);
@@ -1323,6 +1402,20 @@ extension UserSettingsQuerySortBy
 
 extension UserSettingsQuerySortThenBy
     on QueryBuilder<UserSettings, UserSettings, QSortThenBy> {
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByDefaultOvertimeLimitMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'defaultOvertimeLimitMinutes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByDefaultOvertimeLimitMinutesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'defaultOvertimeLimitMinutes', Sort.desc);
+    });
+  }
+
   QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
       thenByGyroscopeGlassLightingEnabled() {
     return QueryBuilder.apply(this, (query) {
@@ -1438,6 +1531,13 @@ extension UserSettingsQueryWhereDistinct
   }
 
   QueryBuilder<UserSettings, UserSettings, QDistinct>
+      distinctByDefaultOvertimeLimitMinutes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'defaultOvertimeLimitMinutes');
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QDistinct>
       distinctByGyroscopeGlassLightingEnabled() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'gyroscopeGlassLightingEnabled');
@@ -1500,6 +1600,13 @@ extension UserSettingsQueryProperty
       blockedPackagesProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'blockedPackages');
+    });
+  }
+
+  QueryBuilder<UserSettings, int, QQueryOperations>
+      defaultOvertimeLimitMinutesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'defaultOvertimeLimitMinutes');
     });
   }
 

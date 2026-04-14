@@ -48,6 +48,7 @@ class GlassSquircleButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final bool isPrimary;
+  final double width;
   final double height;
   final EdgeInsetsGeometry padding;
   final Color? color;
@@ -57,6 +58,7 @@ class GlassSquircleButton extends StatelessWidget {
     required this.child,
     this.onPressed,
     this.isPrimary = false,
+    this.width = 56,
     this.height = AppElementSizes.buttonHeight,
     this.padding = const EdgeInsets.symmetric(horizontal: 12),
     this.color
@@ -69,6 +71,7 @@ class GlassSquircleButton extends StatelessWidget {
       useOwnLayer: true,
       onTap: onPressed ?? () {},
       enabled: onPressed != null,
+      width: width,
       height: height,
       shape: const LiquidRoundedSuperellipse(
         borderRadius: AppElementSizes.cardRadius,

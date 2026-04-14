@@ -15,7 +15,7 @@ import '../../utils/logging.dart';
 import 'task_list_selector_dialog.dart';
 
 // Day abbreviations for recurring task selection
-const _days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+// const _days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU']; // Unused currently
 
 /// Dialog for creating or editing a task.
 /// Includes title, description, priority, time range, recurring days, and list selection.
@@ -216,6 +216,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
     }
   }
 
+  /* (Unused)
   /// Deletes the task from the database.
   Future<void> _delete() async {
     if (widget.existingTask == null) return;
@@ -241,6 +242,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
       }
     }
   }
+  */
 
   String _timeLabel(DateTime? value, String fallback) {
     if (value == null) return fallback;
