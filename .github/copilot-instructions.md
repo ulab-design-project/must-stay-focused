@@ -13,7 +13,6 @@ Before making a new file always make a file and folder structure plan instead of
 
 Use flutter chrome debug. dont use shared prefs, use the Isar db user settings.
 
-NEVER USE cat, ls, touch, grep or ANY TERMINAL COMMAND TO EDIT FILES! ONLY USE TOOL CALLS LIKE READ/WRITE/CREATE TO MODIFY FILES, OTHERWISE CODE WILL NEVER RUN! dont use any terminal commands
 
-BANNED terminal commands cat, ls, touch, grep, sed. 
-Use proper tool calls instead. like Read / Write/ Create/ lint / fetch url, etc.
+
+YOU MUST USE THE LATEST VERSION OF FLUTTER AND DART. ALWAYS CHECK FOR THE LATEST VERSION BEFORE STARTING TO CODE. DO NOT USE ANY DEPRECATED FEATURES OR PACKAGES. ALWAYS FOLLOW THE BEST PRACTICES AND GUIDELINES FOR FLUTTER DEVELOPMENT.

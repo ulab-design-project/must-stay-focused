@@ -14,6 +14,9 @@ class AppUsage {
   
   int totalUsedTime = 0;
   int maxDailyTimeLimit = 0;
+  int overTimeLimitToday = 0;
+
+  String challengeType = 'Math';
   
   bool isTracked = false;
   bool isLimitedToday = false;

@@ -218,8 +218,9 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                                 _cards.length + 1, // +1 for the end button
                             itemBuilder: (context, index) {
                               if (index == _cards.length) {
-                                if (_showFullDeck)
+                                if (_showFullDeck) {
                                   return const SizedBox(); // no button if already showing all
+                                }
                                 return Center(
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(

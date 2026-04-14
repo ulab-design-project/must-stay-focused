@@ -1,7 +1,6 @@
 import 'dart:ui';
-import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 import '../utils/theme_helpers.dart';
 
@@ -65,7 +64,7 @@ class BackgroundDrop extends StatelessWidget {
           ),
         ),
         // Positioned(child: Container(color: primaryColor,width: screenWidth,height: 100,),top: screenHeight * 0.5,),
-        const _LoopingBackgroundVideo(),
+        // const _LoopingBackgroundVideo(),
         // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
@@ -110,102 +109,102 @@ class BackgroundDrop extends StatelessWidget {
   }
 }
 
-class _LoopingBackgroundVideo extends StatefulWidget {
-  const _LoopingBackgroundVideo();
+// class _LoopingBackgroundVideo extends StatefulWidget {
+//   const _LoopingBackgroundVideo();
 
-  @override
-  State<_LoopingBackgroundVideo> createState() =>
-      _LoopingBackgroundVideoState();
-}
+//   @override
+//   State<_LoopingBackgroundVideo> createState() =>
+//       _LoopingBackgroundVideoState();
+// }
 
-class _LoopingBackgroundVideoState extends State<_LoopingBackgroundVideo>
-    with WidgetsBindingObserver {
-  static VideoPlayerController? _controller;
-  static Future<void>? _initFuture;
+// class _LoopingBackgroundVideoState extends State<_LoopingBackgroundVideo>
+//     with WidgetsBindingObserver {
+//   static VideoPlayerController? _controller;
+//   static Future<void>? _initFuture;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _initVideo();
-  }
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addObserver(this);
+//     _initVideo();
+//   }
 
-  Future<void> _initVideo() async {
-    if (_controller == null) {
-      _controller = VideoPlayerController.asset(
-        'assets/bgvid/3.mp4', //TODO bg video
-        videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-      );
-      _initFuture = _controller!
-          .initialize()
-          .then((_) async {
-            await _controller!.setLooping(true);
-            await _controller!.setVolume(0);
-            await _controller!.play();
-          })
-          .catchError((e, stackTrace) {
-            debugPrint('Background video initialization failed: $e');
-          });
-    }
+//   Future<void> _initVideo() async {
+//     if (_controller == null) {
+//       _controller = VideoPlayerController.asset(
+//         'assets/bgvid/3.mp4', //TODO bg video
+//         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+//       );
+//       _initFuture = _controller!
+//           .initialize()
+//           .then((_) async {
+//             await _controller!.setLooping(true);
+//             await _controller!.setVolume(0);
+//             await _controller!.play();
+//           })
+//           .catchError((e, stackTrace) {
+//             debugPrint('Background video initialization failed: $e');
+//           });
+//     }
 
-    if (_initFuture != null) {
-      await _initFuture;
-    }
+//     if (_initFuture != null) {
+//       await _initFuture;
+//     }
 
-    if (mounted) setState(() {});
-    _controller?.play(); // Ensure it's playing when returning to screen
-  }
+//     if (mounted) setState(() {});
+//     _controller?.play(); // Ensure it's playing when returning to screen
+//   }
 
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    // Note: Intentionally not disposing _controller so the video stays loaded and loops continuously across app navigation.
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     WidgetsBinding.instance.removeObserver(this);
+//     // Note: Intentionally not disposing _controller so the video stays loaded and loops continuously across app navigation.
+//     super.dispose();
+//   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _controller?.play();
-    } else if (state == AppLifecycleState.paused) {
-      _controller?.pause();
-    }
-  }
+//   @override
+//   void didChangeAppLifecycleState(AppLifecycleState state) {
+//     if (state == AppLifecycleState.resumed) {
+//       _controller?.play();
+//     } else if (state == AppLifecycleState.paused) {
+//       _controller?.pause();
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_controller == null || !_controller!.value.isInitialized) {
-      return const SizedBox.shrink();
-    }
+//   @override
+//   Widget build(BuildContext context) {
+//     if (_controller == null || !_controller!.value.isInitialized) {
+//       return const SizedBox.shrink();
+//     }
 
-    final theme = Theme.of(context);
-    // const double darkBrightness = 0.4; // 0.0 is completely black, 1.0 is full brightness
+//     final theme = Theme.of(context);
+//     // const double darkBrightness = 0.4; // 0.0 is completely black, 1.0 is full brightness
 
-    Widget videoWidget = Transform.rotate(
-      angle: math.pi / 2,
-      child: FittedBox(
-        fit: BoxFit.cover,
-        child: SizedBox(
-          width: _controller!.value.size.width,
-          height: _controller!.value.size.height,
-          child: VideoPlayer(_controller!),
-        ),
-      ),
-    );
+//     Widget videoWidget = Transform.rotate(
+//       angle: math.pi / 2,
+//       child: FittedBox(
+//         fit: BoxFit.cover,
+//         child: SizedBox(
+//           width: _controller!.value.size.width,
+//           height: _controller!.value.size.height,
+//           child: VideoPlayer(_controller!),
+//         ),
+//       ),
+//     );
 
-    videoWidget = ColorFiltered(
-      colorFilter: theme.brightness == Brightness.light
-          ? ColorFilter.mode(
-              theme.colorScheme.secondary.withValues(alpha: 0.6),
-              BlendMode.hardLight,
-            )
-          : ColorFilter.mode(
-              theme.colorScheme.primary.withValues(alpha: 0.8),
-              BlendMode.multiply,
-            ),
-      child: videoWidget,
-    );
+//     videoWidget = ColorFiltered(
+//       colorFilter: theme.brightness == Brightness.light
+//           ? ColorFilter.mode(
+//               theme.colorScheme.secondary.withValues(alpha: 0.6),
+//               BlendMode.hardLight,
+//             )
+//           : ColorFilter.mode(
+//               theme.colorScheme.primary.withValues(alpha: 0.8),
+//               BlendMode.multiply,
+//             ),
+//       child: videoWidget,
+//     );
 
-    return Positioned.fill(child: IgnorePointer(child: videoWidget));
-  }
-}
+//     return Positioned.fill(child: IgnorePointer(child: videoWidget));
+//   }
+// }

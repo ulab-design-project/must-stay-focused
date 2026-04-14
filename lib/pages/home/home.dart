@@ -14,37 +14,7 @@ class Home extends StatelessWidget {
     return BackgroundDrop(
       scaffold: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Tasks'),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassSquircleIconButton(
-                icon: const Icon(Icons.store),
-                onPressed: () {
-                  // TODO: Navigate to community template store
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: GlassSquircleIconButton(
-                icon: const Icon(Icons.settings),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SettingsPage(),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
+        appBar: defaultAppBar(context),
         body: Stack(
           children: [
             TasksPage(),
@@ -58,5 +28,39 @@ class Home extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  AppBar defaultAppBar(BuildContext context) {
+    return AppBar(
+        title: const Text('Tasks'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: GlassSquircleIconButton(
+              icon: const Icon(Icons.store),
+              onPressed: () {
+                // TODO: Navigate to community template store
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            child: GlassSquircleIconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsPage(),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
+      );
   }
 }
