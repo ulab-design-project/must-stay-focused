@@ -1,5 +1,5 @@
 // Declare download link - change this later
-const link = "github.com";
+const link = "github.com/ulab-design-project/must-stay-focused/releases/tag/Release";
 
 // Cursor follower
 const cursor = document.querySelector('.cursor-follower');

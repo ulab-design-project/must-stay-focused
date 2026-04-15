@@ -9,7 +9,7 @@
 
 
 <p align="center">
-  <a href="RELEASE DOWNLOAD LINK HERE">
+  <a href="https://github.com/ulab-design-project/must-stay-focused/releases/tag/Release">
     <img src="https://img.shields.io/badge/Download-GitHub-2ea44f?style=for-the-badge&logo=github" alt="Download Release" />
   </a>
 </p>
