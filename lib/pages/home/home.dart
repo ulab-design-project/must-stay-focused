@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:background/background.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:must_stay_focused/style/theme.dart';
 
 import '../../data/db/isar_service.dart';
 import '../../data/models/app_usage.dart';
@@ -11,6 +13,7 @@ import '../../widgets/home/default_home_app_bar.dart';
 import '../../widgets/home/interception_home_app_bar.dart';
 import '../../widgets/flashcard/flash_card_carousel.dart';
 import '../challenge.dart';
+import '../community/community_templates.dart';
 import '../settings.dart';
 import '../../style/background.dart';
 import '../../widgets/challenge/math_challenge.dart';
@@ -325,6 +328,18 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     );
   }
 
+  Future<void> _openCommunityTemplates() async {
+    try {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CommunityTemplatesPage()),
+      );
+    } catch (e, stackTrace) {
+      debugPrint('Home _openCommunityTemplates error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackgroundDrop(
@@ -342,9 +357,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             : DefaultHomeAppBar(
                 showDebugInterceptionButton: kDebugMode,
                 onDebugInterception: _debugTriggerInterception,
-                onStorePressed: () {
-                  // TODO: Navigate to community template store
-                },
+                onStorePressed: _openCommunityTemplates,
                 onSettingsPressed: _openSettings,
               ),
         body: const Stack(
@@ -360,5 +373,37 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         ),
       ),
     );
+    // return Scaffold(
+    //     // backgroundColor: Colors.transparent,
+    //     appBar: _interceptionMode
+    //         ? InterceptionHomeAppBar(
+    //             appIconBytes: _interceptedAppIcon,
+    //             isAppIconLoading: _isInterceptedAppIconLoading,
+    //             onBackPressed: _dismissInterception,
+    //             onContinuePressed: _interceptedApp == null
+    //                 ? null
+    //                 : _onContinuePressed,
+    //           )
+    //         : DefaultHomeAppBar(
+    //             showDebugInterceptionButton: kDebugMode,
+    //             onDebugInterception: _debugTriggerInterception,
+    //             onStorePressed: _openCommunityTemplates,
+    //             onSettingsPressed: _openSettings,
+    //           ),
+    //     body: Background(
+    //       path: Backgrounds.iridescent,
+    //       child: const Stack(
+    //         children: [
+    //           TasksPage(),
+    //           Positioned(
+    //             bottom: 0,
+    //             left: 0,
+    //             right: 0,
+    //             child: FlashCardCarousel(),
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   );
   }
 }
