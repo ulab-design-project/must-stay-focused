@@ -20,6 +20,38 @@ subprojects {
                 } catch (e: Exception) {
                     // Ignore - namespace might not be supported
                 }
+
+                if (project.name == "isar_flutter_libs") {
+                    try {
+                        val compileSdk = 33
+                        val setCompileSdkMethod = android.javaClass.methods.firstOrNull {
+                            it.name == "setCompileSdk" && it.parameterCount == 1
+                        }
+                        val setCompileSdkVersionMethod = android.javaClass.methods.firstOrNull {
+                            it.name == "setCompileSdkVersion" && it.parameterCount == 1
+                        }
+                        val compileSdkVersionMethod = android.javaClass.methods.firstOrNull {
+                            it.name == "compileSdkVersion" && it.parameterCount == 1
+                        }
+
+                        when {
+                            setCompileSdkMethod != null -> {
+                                setCompileSdkMethod.invoke(android, compileSdk)
+                            }
+                            setCompileSdkVersionMethod != null -> {
+                                setCompileSdkVersionMethod.invoke(android, compileSdk)
+                            }
+                            compileSdkVersionMethod != null -> {
+                                compileSdkVersionMethod.invoke(android, compileSdk)
+                            }
+                            else -> {
+                                println("Warning: Could not set compileSdk for ${project.path}; no compatible method found.")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        println("Warning: Failed to set compileSdk for ${project.path}: ${e.message}")
+                    }
+                }
             }
         }
     }

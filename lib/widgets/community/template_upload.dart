@@ -244,6 +244,14 @@ class _TemplateUploadState extends State<TemplateUpload> {
             const SizedBox(height: AppElementSizes.spacingMd),
             GlassTextField(
               controller: _authorController,
+              textStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontSize: AppTextSizes.body,
+              ),
+              placeholderStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                fontSize: AppTextSizes.body,
+              ),
               placeholder: 'Author Name',
             ),
             const SizedBox(height: AppElementSizes.spacingSm),
@@ -251,10 +259,31 @@ class _TemplateUploadState extends State<TemplateUpload> {
               controller: _descriptionController,
               placeholder: 'Description',
               maxLines: 3,
+              textStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontSize: AppTextSizes.body,
+              ),
+              placeholderStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                fontSize: AppTextSizes.body,
+              ),
             ),
             const SizedBox(height: AppElementSizes.spacingSm),
             Row(
               children: [
+                Text(
+                  'Tags',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: AppTextSizes.body,
+                  ),
+                ),
+                const SizedBox(width: AppElementSizes.spacingSm),
+                GlassSquircleIconButton(
+                  onPressed: _addTagDialog,
+                  icon: const Icon(Icons.add),
+                ),
+                const SizedBox(width: AppElementSizes.spacingSm),
                 Expanded(
                   child: SizedBox(
                     height: 42,
@@ -269,6 +298,11 @@ class _TemplateUploadState extends State<TemplateUpload> {
                           ),
                           child: GlassChip(
                             label: tag,
+                            labelStyle: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontSize: AppTextSizes.body,
+                            ),
+                            iconColor: theme.colorScheme.onSurface.withValues(alpha: 0.75),
                             selected: false,
                             onTap: () {
                               setState(() => _tags.removeAt(index));
@@ -279,11 +313,6 @@ class _TemplateUploadState extends State<TemplateUpload> {
                       },
                     ),
                   ),
-                ),
-                const SizedBox(width: AppElementSizes.spacingSm),
-                GlassSquircleIconButton(
-                  onPressed: _addTagDialog,
-                  icon: const Icon(Icons.add),
                 ),
               ],
             ),

@@ -23,7 +23,9 @@ import '../../widgets/task/task_list_selector.dart';
 /// Displays tasks from the selected list with sorting options.
 /// All database operations are performed via the global taskRepo instance.
 class TasksPage extends StatefulWidget {
-  const TasksPage({super.key});
+  final bool interceptionMode;
+
+  const TasksPage({super.key, this.interceptionMode = false});
 
   @override
   State<TasksPage> createState() => _TasksPageState();
@@ -57,7 +59,26 @@ class _TasksPageState extends State<TasksPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.interceptionMode) {
+      _applyInterceptionDefaultSort();
+    }
     _initialize();
+  }
+
+  @override
+  void didUpdateWidget(covariant TasksPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.interceptionMode && widget.interceptionMode) {
+      _applyInterceptionDefaultSort();
+    }
+    if (oldWidget.interceptionMode != widget.interceptionMode) {
+      _loadTasks();
+    }
+  }
+
+  void _applyInterceptionDefaultSort() {
+    _sortBy = 'priority';
+    _isAscending = false;
   }
 
   /// Initializes the page by loading the default task list.
@@ -282,6 +303,7 @@ class _TasksPageState extends State<TasksPage> {
             child: TaskListView(
               incompleteTasks: _incompleteTasks,
               completedTasks: _completedTasks,
+              interceptionMode: widget.interceptionMode,
               onEditTask: _openEditTask,
               onTaskChanged: _handleTaskChanged,
               animatedCompletedTaskId: _animatedCompletedTaskId,

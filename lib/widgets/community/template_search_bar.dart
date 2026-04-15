@@ -237,8 +237,26 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
     return Column(
       children: [
         GlassTextField(
+          useOwnLayer: true,
+          settings: LiquidGlassSettings(
+
+                  // TODO make singular origin for Glass Settings
+                  chromaticAberration: 0.5,
+                  thickness: 20,
+                  ambientStrength: 0.5,
+                  refractiveIndex: 1.33,
+                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
+                ),
           controller: _searchController,
           placeholder: 'Search templates',
+          placeholderStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+            fontSize: AppTextSizes.body,
+          ),
+          textStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
+
           prefixIcon: Icon(
             Icons.search,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
@@ -250,6 +268,16 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
           children: [
             Expanded(
               child: GlassPicker(
+                useOwnLayer: true,
+          glassSettings: LiquidGlassSettings(
+
+                  // TODO make singular origin for Glass Settings
+                  chromaticAberration: 0.5,
+                  thickness: 20,
+                  ambientStrength: 0.5,
+                  refractiveIndex: 1.33,
+                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
+                ),
                 value: _selectedTags.isEmpty
                     ? 'Tags'
                     : 'Tags (${_selectedTags.length})',
@@ -271,6 +299,16 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
             const SizedBox(width: AppElementSizes.spacingSm),
             Expanded(
               child: GlassPicker(
+                useOwnLayer: true,
+          glassSettings: LiquidGlassSettings(
+
+                  // TODO make singular origin for Glass Settings
+                  chromaticAberration: 0.5,
+                  thickness: 20,
+                  ambientStrength: 0.5,
+                  refractiveIndex: 1.33,
+                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
+                ),
                 value: _sortBy == 'downloads' ? 'Downloads' : 'Recent',
                 placeholder: 'Sort by',
                 height: AppElementSizes.inputHeight,

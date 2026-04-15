@@ -20,6 +20,7 @@ class FlashCardCarousel extends StatefulWidget {
 class _FlashCardCarouselState extends State<FlashCardCarousel> {
   Deck? _selectedDeck;
   List<FlashCard> _cards = [];
+  bool _hasAnyCardsInDeck = false;
   bool _showFullDeck = false;
   String _sortBy = 'sm2';
   bool _isAscending = true;
@@ -36,18 +37,80 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
     if (decks.isNotEmpty) {
       if (mounted) setState(() => _selectedDeck = decks.first);
       _loadCards();
+      return;
+    }
+
+    if (mounted) {
+      setState(() {
+        _selectedDeck = null;
+        _cards = [];
+        _hasAnyCardsInDeck = false;
+      });
     }
   }
 
   Future<void> _loadCards() async {
-    if (_selectedDeck == null) return;
+    if (_selectedDeck == null) {
+      if (mounted) {
+        setState(() {
+          _cards = [];
+          _hasAnyCardsInDeck = false;
+        });
+      }
+      return;
+    }
+
+    final fullDeckCards = await flashcardRepo.getFilteredDeck(
+      deckName: _selectedDeck!.name,
+      sortBy: _sortBy,
+      isAscending: _isAscending,
+      showFullDeck: true,
+    );
+
     final cards = await flashcardRepo.getFilteredDeck(
       deckName: _selectedDeck!.name,
       sortBy: _sortBy,
       isAscending: _isAscending,
       showFullDeck: _showFullDeck,
     );
-    if (mounted) setState(() => _cards = cards);
+
+    if (mounted) {
+      setState(() {
+        _cards = cards;
+        _hasAnyCardsInDeck = fullDeckCards.isNotEmpty;
+      });
+    }
+  }
+
+  Future<void> _toggleDeckMode() async {
+    setState(() => _showFullDeck = !_showFullDeck);
+    await _loadCards();
+  }
+
+  Widget _buildDeckModeButton(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppElementSizes.spacingLg,
+        ),
+        child: GlassCard(
+          useOwnLayer: true,
+          settings: LiquidGlassSettings(
+            chromaticAberration: 0.5,
+            glassColor: theme.colorScheme.primary.withValues(alpha: 0.25),
+          ),
+          child: TextButton(
+            onPressed: _toggleDeckMode,
+            child: Text(
+              _showFullDeck ? 'Show Today' : 'Show All',
+              style: TextStyle(color: theme.colorScheme.onSurface),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _openSortPicker() async {
@@ -98,10 +161,12 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     final height = getScreenHeight(context) * 0.2;
 
+  final theme = Theme.of(context);
     return SafeArea(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -205,11 +270,22 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                     height: height,
                     child: _cards.isEmpty
                         ? Center(
-                            child: Text(
-                              _showFullDeck
-                                  ? 'No cards found.'
-                                  : 'No cards due. Show all or add new.',
-                              style: const TextStyle(color: Colors.white70),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  _showFullDeck
+                                      ? 'No cards found.'
+                                      : 'No cards due. Show all or add new.',
+                                  style: TextStyle(color: theme.colorScheme.onSurface),
+                                ),
+                                if (_hasAnyCardsInDeck) ...[
+                                  const SizedBox(
+                                    height: AppElementSizes.spacingMd,
+                                  ),
+                                  _buildDeckModeButton(context),
+                                ],
+                              ],
                             ),
                           )
                         : ListView.builder(
@@ -218,41 +294,18 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                                 _cards.length + 1, // +1 for the end button
                             itemBuilder: (context, index) {
                               if (index == _cards.length) {
-                                if (_showFullDeck) {
-                                  return const SizedBox(); // no button if already showing all
+                                if (!_hasAnyCardsInDeck) {
+                                  return const SizedBox.shrink();
                                 }
-                                return Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppElementSizes.spacingLg,
-                                    ),
-                                    child: GlassCard(
-                                      useOwnLayer: true,
-                                      settings: LiquidGlassSettings(
-                                        chromaticAberration: 0.5,
-                                        glassColor: Theme.of(
-                                          context,
-                                        ).colorScheme.primary.withAlpha(60),
-                                      ),
-                                      child: TextButton(
-                                        onPressed: () {
-                                          setState(() => _showFullDeck = true);
-                                          _loadCards();
-                                        },
-                                        child: const Text(
-                                          'Show All',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
+
+                                return _buildDeckModeButton(context);
                               }
                               return Padding(
                                 padding: const EdgeInsets.only(
                                   left: AppElementSizes.spacingMd,
                                 ),
                                 child: FlashCardWidget(
+                                  key: ValueKey(_cards[index].id),
                                   card: _cards[index],
                                   onRated: _loadCards,
                                 ),

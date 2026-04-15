@@ -1,4 +1,4 @@
-package com.example.must_stay_focused
+package com.virtuous_volition.msf
 
 import android.accessibilityservice.AccessibilityService
 import android.app.usage.UsageEvents

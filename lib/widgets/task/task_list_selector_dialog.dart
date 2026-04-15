@@ -10,6 +10,7 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/theme.dart';
+import '../../utils/task_list_icons.dart';
 
 /// A simple searchable dialog for selecting a task list.
 /// Does not include edit or create functionality - just selection.
@@ -88,10 +89,7 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
                       final isSelected = list.id == widget.selectedList?.id;
                       return GlassListTile(
                         leading: Icon(
-                          IconData(
-                            list.iconCodePoint,
-                            fontFamily: 'MaterialIcons',
-                          ),
+                          taskListIconFromCodePoint(list.iconCodePoint),
                           color: Colors.white,
                         ),
                         title: Text(

@@ -17,6 +17,7 @@ import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/buttons.dart';
 import '../../style/theme.dart';
+import '../../utils/task_list_icons.dart';
 import 'task_list_edit_dialog.dart';
 
 /// A dropdown selector widget for choosing a task list.
@@ -178,10 +179,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                         final isProtectedList = list.isDefault;
                         return GlassListTile(
                           leading: Icon(
-                            IconData(
-                              list.iconCodePoint,
-                              fontFamily: 'MaterialIcons',
-                            ),
+                            taskListIconFromCodePoint(list.iconCodePoint),
                             color: Colors.white,
                           ),
                           title: Text(

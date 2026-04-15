@@ -10,7 +10,7 @@ class CommunityTemplateImporter {
   Future<void> importTaskListTemplate(CommunityTemplate template) async {
     try {
       final importedList = TaskList()
-        ..name = '${template.title} (Community)'
+        ..name = template.title
         ..tags = template.tags.isEmpty
             ? <String>['community']
             : List<String>.from(template.tags)
@@ -51,7 +51,7 @@ class CommunityTemplateImporter {
   Future<void> importFlashCardTemplate(CommunityTemplate template) async {
     try {
       final importedDeck = Deck()
-        ..name = '${template.title} (Community)'
+        ..name = template.title
         ..description = template.description
         ..tags = template.tags.isEmpty
             ? <String>['community']

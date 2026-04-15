@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';
@@ -94,26 +96,123 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
     }
   }
 
-  Color? _getOverlayColor(ThemeData theme) {
+  _SwipeFeedback? _getSwipeFeedback(ThemeData theme) {
     if (_panOffset.distance < 20) return null;
 
     if (_panOffset.dx < 0 && _panOffset.dy < 0) {
-      return Colors.green.withValues(alpha: 0.3); // Top-Left easy
+      return _SwipeFeedback(
+        label: 'Easy',
+        color: Colors.green.withValues(alpha: 0.50),
+        gradientCenter: const Alignment(-0.9, -0.9),
+        labelAtTop: false,
+      );
     } else if (_panOffset.dx > 0 && _panOffset.dy < 0) {
-      return Colors.yellow.withValues(alpha: 0.3); // Top-Right med
+      return _SwipeFeedback(
+        label: 'Medium',
+        color: Colors.amber.withValues(alpha: 0.50),
+        gradientCenter: const Alignment(0.9, -0.9),
+        labelAtTop: false,
+      );
     } else if (_panOffset.dx < 0 && _panOffset.dy > 0) {
-      return Colors.orange.withValues(alpha: 0.3); // Bottom-Left hard
+      return _SwipeFeedback(
+        label: 'Hard',
+        color: Colors.orange.withValues(alpha: 0.50),
+        gradientCenter: const Alignment(-0.9, 0.9),
+        labelAtTop: true,
+      );
     } else if (_panOffset.dx > 0 && _panOffset.dy > 0) {
-      return Colors.red.withValues(alpha: 0.3); // Bottom-Right forgot
+      return _SwipeFeedback(
+        label: 'Forgot',
+        color: Colors.red.withValues(alpha: 0.50),
+        gradientCenter: const Alignment(0.9, 0.9),
+        labelAtTop: true,
+      );
     }
     return null;
+  }
+
+  Widget _buildSwipeOverlay(
+    ThemeData theme,
+    _SwipeFeedback feedback,
+    double cardWidth,
+    bool isFlipped,
+  ) {
+    final labelX = _panOffset.dx < 0 ? -0.78 : 0.78;
+    final labelY = feedback.labelAtTop ? -0.84 : 0.84;
+
+    return Positioned.fill(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppElementSizes.cardRadius),
+        child: Transform(
+          alignment: Alignment.center,
+          transform: Matrix4.identity()..rotateY(isFlipped ? math.pi : 0.0),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: themeController.glassBlur, sigmaY: themeController.glassBlur),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: feedback.gradientCenter,
+                        radius: 1.05,
+                        colors: [
+                          feedback.color,
+                          feedback.color.withValues(alpha: 0.20),
+                          Colors.transparent,
+                        ],
+                        stops: const [0.0, 0.55, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment(labelX, labelY),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppElementSizes.spacingSm,
+                    vertical: 4,
+                  ),
+                  constraints: BoxConstraints(maxWidth: cardWidth * 0.55),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.25,
+                      ),
+                    ),
+                  ),
+                  child: Text(
+                    feedback.label,
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.fade,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: AppTextSizes.small,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cardWidth = getScreenWidth(context) * 0.4;
+    final swipeFeedback = _getSwipeFeedback(theme);
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: _toggleFlip,
       onLongPress: () {
         showDialog(
@@ -141,43 +240,65 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
             final transform = Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateY(angle);
+            final glassColor = isFlipped
+                ? theme.colorScheme.secondary.withValues(alpha: 0.26)
+                : theme.colorScheme.primary.withValues(alpha: 0.26);
 
             return Transform(
               alignment: Alignment.center,
               transform: transform,
+              transformHitTests: false,
               child: GlassCard(
                 useOwnLayer: true,
-                settings: LiquidGlassSettings( // TODO make singular origin for Glass Settings
+                settings: LiquidGlassSettings(
+                  // TODO make singular origin for Glass Settings
                   chromaticAberration: 0.5,
                   thickness: 20,
                   ambientStrength: 0.5,
                   refractiveIndex: 1.33,
-                  glassColor: theme.colorScheme.primary.withAlpha(60),
+                  glassColor: glassColor,
                 ),
                 child: Container(
-                  width: getScreenWidth(context) * 0.4,
-                  decoration: BoxDecoration(
-                    color: _getOverlayColor(theme),
+                  width: cardWidth,
+                  child: ClipRRect(
                     borderRadius: BorderRadius.circular(
                       AppElementSizes.cardRadius,
                     ),
-                  ),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppElementSizes.spacingMd,
-                  ),
-                  child: Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..rotateY(isFlipped ? math.pi : 0.0),
-                    child: Text(
-                      isFlipped ? widget.card.back : widget.card.front,
-                      style: const TextStyle(
-                        fontSize: AppTextSizes.small,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
+                    child: Stack(
+                      children: [
+                        if (swipeFeedback != null)
+                          _buildSwipeOverlay(
+                            theme,
+                            swipeFeedback,
+                            cardWidth,
+                            isFlipped,
+                          ),
+                        Positioned.fill(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppElementSizes.spacingMd,
+                            ),
+                            child: Center(
+                              child: Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..rotateY(isFlipped ? math.pi : 0.0),
+                                child: Text(
+                                  isFlipped
+                                      ? widget.card.back
+                                      : widget.card.front,
+                                  style: const TextStyle(
+                                    fontSize: AppTextSizes.small,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -188,4 +309,18 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
       ),
     );
   }
+}
+
+class _SwipeFeedback {
+  final String label;
+  final Color color;
+  final Alignment gradientCenter;
+  final bool labelAtTop;
+
+  const _SwipeFeedback({
+    required this.label,
+    required this.color,
+    required this.gradientCenter,
+    required this.labelAtTop,
+  });
 }

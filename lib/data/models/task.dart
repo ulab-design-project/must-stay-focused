@@ -5,6 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
+import '../../utils/task_list_icons.dart';
+
 part 'task.g.dart';
 
 enum TaskPriority { low, medium, high, critical }
@@ -26,7 +28,7 @@ class TaskList {
   
   // Helper to get Icon from codePoint (computed, not stored in DB)
   @ignore
-  Icon get icon => Icon(IconData(iconCodePoint));
+  Icon get icon => Icon(taskListIconFromCodePoint(iconCodePoint));
 
   @Backlink(to: 'taskList')
   final tasks = IsarLinks<Task>(); // one to many relation

@@ -1,4 +1,4 @@
-package com.example.must_stay_focused
+package com.virtuous_volition.msf
 
 import android.app.AppOpsManager
 import android.content.ComponentName

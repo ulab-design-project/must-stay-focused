@@ -10,21 +10,8 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/theme.dart';
+import '../../utils/task_list_icons.dart';
 import '../../utils/logging.dart';
-
-// Available icons for task list selection
-const availableIcons = [
-  Icons.list,
-  Icons.work,
-  Icons.school,
-  Icons.person,
-  Icons.home,
-  Icons.fitness_center,
-  Icons.shopping_cart,
-  Icons.book,
-  Icons.music_note,
-  Icons.flight,
-];
 
 /// Dialog for creating or editing a task list.
 /// Allows name input, icon selection, and deletion with merge option.
@@ -183,7 +170,7 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
               Wrap(
                 spacing: AppElementSizes.spacingSm,
                 runSpacing: AppElementSizes.spacingSm,
-                children: availableIcons.map((icon) {
+                children: taskListAvailableIcons.map((icon) {
                   final isSelected = icon.codePoint == _selectedIcon;
                   return GlassChip(
                     label: '',

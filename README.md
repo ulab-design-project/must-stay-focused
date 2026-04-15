@@ -3,12 +3,10 @@
 <h1 align="center">Must Stay Focused</h1>
 
 <p align="center">
-  Focus productivity app to block distractions and maintain concentration.
+  Anti Procrastination and focused productivity app to block distractions and maintain concentration.
 </p>
 
----
 
-## ⬇️ Download
 
 <p align="center">
   <a href="RELEASE DOWNLOAD LINK HERE">
@@ -16,13 +14,7 @@
   </a>
 </p>
 
-> Replace `RELEASE DOWNLOAD LINK HERE` with the actual GitHub release asset URL when publishing new versions.
 
----
-
-## 📸 Screenshots
-
-SCREENSHOTS HERE
 
 ---
 
@@ -34,6 +26,15 @@ SCREENSHOTS HERE
 - minimal clean interface
 - cross platform support
 
+---
+
+## 📸 Screenshots
+
+<img src="site/images/ss/image 1.png">
+<br> <br>
+<img src="site/images/ss/image 2.png">
+<br> <br>
+<img src="site/images/ss/image.png">
 ---
 
 ## 🛠️ Development Setup
@@ -75,6 +76,11 @@ flutter devices
 flutter run -d emulator-5554
 ```
 
+Build release APK:
+
+```bash
+flutter build apk --release --dart-define-from-file=.env
+```
 ---
 
 ## 📝 License

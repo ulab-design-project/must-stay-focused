@@ -1,16 +1,4 @@
-// File: lib/widgets/task/task_card.dart
-// Reusable Task Card Item with swipe actions
-//
-// Requirements:
-// 1. class TaskCard extends StatelessWidget:
-//    - Properties: final Task task, final VoidCallback onEdit, final VoidCallback? onTaskChanged
-//    - UI:
-//      - Checkbox leading icon for quick complete toggle.
-//      - Title and time/description as subtitle.
-//      - Priority indicator with color-coded trailing badge.
-//      - Swipe left to move to Archived list, swipe right to delete with confirmation.
-//    - All DB operations via global taskRepo instance.
-//    - Logging for all operations.
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
@@ -18,24 +6,17 @@ import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/liquid_glass_style.dart';
-import '../../utils/theme_helpers.dart';
 import '../../utils/logging.dart';
+import '../../utils/theme_helpers.dart';
 
-/// A swipeable card widget representing a single task.
-/// Provides quick actions: toggle complete, move to Archived (swipe left), delete (swipe right).
-/// All database operations are performed via the global taskRepo instance.
 class TaskCard extends StatefulWidget {
-  // The task data to display
   final Task task;
-
-  // Callback fired when the card body is tapped (opens edit dialog)
   final VoidCallback onEdit;
-
-  // Callback fired when task is modified (for parent to refresh list)
   final ValueChanged<Task>? onTaskChanged;
-
-  // Whether this card should play a small entry animation.
   final bool animateEntry;
+
+  // Plays finite glow bursts under high/critical cards in interception mode.
+  final bool showInterceptionGlow;
 
   const TaskCard({
     super.key,
@@ -43,20 +24,25 @@ class TaskCard extends StatefulWidget {
     required this.onEdit,
     this.onTaskChanged,
     this.animateEntry = false,
+    this.showInterceptionGlow = false,
   });
 
   @override
   State<TaskCard> createState() => _TaskCardState();
 }
 
-class _TaskCardState extends State<TaskCard> {
+class _TaskCardState extends State<TaskCard>
+    with SingleTickerProviderStateMixin {
   static const Duration _toggleAnimationDuration = Duration(milliseconds: 220);
+  static const Duration _glowBurstDuration = Duration(milliseconds: 360);
+  static const Duration _glowBurstGap = Duration(milliseconds: 140);
 
   bool _isExiting = false;
   bool _isCollapsed = false;
   bool _entryReady = false;
+  late final AnimationController _glowController;
+  int _remainingGlowBursts = 0;
 
-  /// Returns the background color based on task priority.
   Color _getPriorityColor(BuildContext context) {
     final theme = Theme.of(context);
     final priorityColors = generateColorSteps(theme.colorScheme.primary);
@@ -72,10 +58,31 @@ class _TaskCardState extends State<TaskCard> {
     }
   }
 
-  /// Toggles the task completion status and updates via repository.
+  int _targetGlowBursts() {
+    switch (widget.task.priority) {
+      case TaskPriority.critical:
+        return 3;
+      case TaskPriority.high:
+        return 2;
+      case TaskPriority.medium:
+      case TaskPriority.low:
+        return 0;
+    }
+  }
+
+  bool get _canGlowBurst {
+    return widget.showInterceptionGlow &&
+        !widget.task.isCompleted &&
+        _targetGlowBursts() > 0;
+  }
+
   @override
   void initState() {
     super.initState();
+    _glowController = AnimationController(
+      vsync: this,
+      duration: _glowBurstDuration,
+    );
     _entryReady = !widget.animateEntry;
 
     if (widget.animateEntry) {
@@ -86,6 +93,116 @@ class _TaskCardState extends State<TaskCard> {
         setState(() => _entryReady = true);
       });
     }
+
+    _runGlowBurstsIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant TaskCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.showInterceptionGlow != widget.showInterceptionGlow ||
+        oldWidget.task.id != widget.task.id ||
+        oldWidget.task.priority != widget.task.priority ||
+        oldWidget.task.isCompleted != widget.task.isCompleted) {
+      _runGlowBurstsIfNeeded();
+    }
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  void _runGlowBurstsIfNeeded() {
+    try {
+      _glowController.stop();
+      _glowController.value = 0;
+      _remainingGlowBursts = 0;
+
+      if (!_canGlowBurst) {
+        return;
+      }
+
+      _remainingGlowBursts = _targetGlowBursts();
+      unawaited(_playNextGlowBurst());
+    } catch (e, stackTrace) {
+      debugPrint('TaskCard _runGlowBurstsIfNeeded error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _playNextGlowBurst() async {
+    try {
+      if (!mounted || _remainingGlowBursts <= 0) {
+        return;
+      }
+
+      await _glowController.forward(from: 0);
+
+      if (!mounted) {
+        return;
+      }
+
+      _remainingGlowBursts -= 1;
+      if (_remainingGlowBursts <= 0) {
+        return;
+      }
+
+      await Future.delayed(_glowBurstGap);
+      if (!mounted) {
+        return;
+      }
+
+      unawaited(_playNextGlowBurst());
+    } catch (e, stackTrace) {
+      debugPrint('TaskCard _playNextGlowBurst error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Widget _buildGlowUnderlay(BuildContext context) {
+    final glowColor = _getPriorityColor(context);
+
+    return IgnorePointer(
+      child: AnimatedBuilder(
+        animation: _glowController,
+        builder: (context, _) {
+          if (!_canGlowBurst) {
+            return const SizedBox.shrink();
+          }
+
+          final t = Curves.easeInOut.transform(_glowController.value);
+          final burstOpacity = 1.0 - (2.0 * t - 1.0).abs();
+          if (burstOpacity <= 0) {
+            return const SizedBox.shrink();
+          }
+
+          return Opacity(
+            opacity: burstOpacity,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: glowColor.withValues(alpha: 0.45),
+                    blurRadius: 20,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: glowColor.withValues(alpha: 0.30),
+                    blurRadius: 32,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _toggleComplete(BuildContext context) async {
@@ -143,7 +260,6 @@ class _TaskCardState extends State<TaskCard> {
     }
   }
 
-  /// Toggles the task archived status and updates via repository.
   Future<void> _toggleArchive(BuildContext context) async {
     try {
       widget.task.isArchived = !widget.task.isArchived;
@@ -168,7 +284,6 @@ class _TaskCardState extends State<TaskCard> {
     }
   }
 
-  /// Deletes the task from the database via repository.
   Future<void> _delete(BuildContext context) async {
     try {
       await taskRepo.deleteTask(widget.task.id);
@@ -191,7 +306,6 @@ class _TaskCardState extends State<TaskCard> {
     }
   }
 
-  /// Formats a DateTime to HH:MM string.
   String _formatTime(DateTime time) =>
       '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
 
@@ -231,40 +345,37 @@ class _TaskCardState extends State<TaskCard> {
                     key: ValueKey(widget.task.id),
                     direction: DismissDirection.horizontal,
                     confirmDismiss: (direction) async {
-                      // Swipe left (endToStart) = toggle archive
                       if (direction == DismissDirection.endToStart) {
                         await _toggleArchive(context);
                         return true;
-                      } else {
-                        // Swipe right (startToEnd) = delete with confirmation
-                        final confirm = await showDialog<bool>(
-                          context: context,
-                          builder: (ctx) => GlassDialog(
-                            title: 'Delete Task',
-                            content: const Text(
-                              'Are you sure you want to delete this task?', style: TextStyle(color: Colors.white),
-                            ),
-                            actions: [
-                              GlassDialogAction(
-                                label: 'Cancel',
-                                onPressed: () => Navigator.pop(ctx, false),
-                                
-                              ),
-                              GlassDialogAction(
-                                label: 'Delete',
-                                onPressed: () => Navigator.pop(ctx, true),
-                          
-                              ),
-                            ],
-                          ),
-                        );
-                        if (confirm == true && context.mounted) {
-                          await _delete(context);
-                        }
-                        return confirm;
                       }
+
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => GlassDialog(
+                          title: 'Delete Task',
+                          content: const Text(
+                            'Are you sure you want to delete this task?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            GlassDialogAction(
+                              label: 'Cancel',
+                              onPressed: () => Navigator.pop(ctx, false),
+                            ),
+                            GlassDialogAction(
+                              label: 'Delete',
+                              onPressed: () => Navigator.pop(ctx, true),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true && context.mounted) {
+                        await _delete(context);
+                      }
+                      return confirm;
                     },
-                    // Background for swipe right (delete)
                     background: Container(
                       decoration: BoxDecoration(
                         color: theme.colorScheme.errorContainer,
@@ -277,7 +388,6 @@ class _TaskCardState extends State<TaskCard> {
                         color: theme.colorScheme.onErrorContainer,
                       ),
                     ),
-                    // Background for swipe left (move to Archived)
                     secondaryBackground: Container(
                       decoration: BoxDecoration(
                         color: theme.colorScheme.tertiaryContainer,
@@ -290,95 +400,97 @@ class _TaskCardState extends State<TaskCard> {
                         color: theme.colorScheme.onTertiaryContainer,
                       ),
                     ),
-                    child: GlassCard(
-                      padding: EdgeInsets.zero,
-                      useOwnLayer: false,
-                      settings: glassSettingsFor(
-                        context,
-                        isPrimary:
-                            widget.task.priority == TaskPriority.critical,
-                      ),
-                      child: GlassListTile(
-                        leading: GestureDetector(
-                          onTap: () => _toggleComplete(context),
-                          child: Checkbox(
-                            visualDensity: VisualDensity.compact,
-                            // TODO: Convert to liquid glass checkbox when available.
-                            value: widget.task.isCompleted,
-                            onChanged: null,
-                            fillColor: WidgetStateProperty.resolveWith<Color>((
-                              states,
-                            ) {
-                              if (states.contains(WidgetState.disabled)) {
-                                return widget.task.isCompleted
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.secondary.withValues(
-                                        alpha: 0.2,
-                                      );
-                              }
-                              return theme.colorScheme.primary;
-                            }),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned.fill(child: _buildGlowUnderlay(context)),
+                        GlassCard(
+                          padding: EdgeInsets.zero,
+                          useOwnLayer: false,
+                          settings: glassSettingsFor(
+                            context,
+                            isPrimary:
+                                widget.task.priority == TaskPriority.critical,
                           ),
-                        ),
-                        title: Text(
-                          widget.task.title,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            decoration: widget.task.isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
-                            color: widget.task.isCompleted
-                                ? theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.5,
-                                  )
-                                : theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        subtitle: Text(
-                          widget.task.startTime != null
-                              ? '${_formatTime(widget.task.startTime!)}${widget.task.endTime != null ? ' - ${_formatTime(widget.task.endTime!)}' : ''}'
-                              : (widget.task.description ?? ''),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.7,
+                          child: GlassListTile(
+                            leading: GestureDetector(
+                              onTap: () => _toggleComplete(context),
+                              child: Checkbox(
+                                visualDensity: VisualDensity.compact,
+                                value: widget.task.isCompleted,
+                                onChanged: null,
+                                fillColor: WidgetStateProperty.resolveWith<
+                                  Color
+                                >((states) {
+                                  if (states.contains(WidgetState.disabled)) {
+                                    return widget.task.isCompleted
+                                        ? theme.colorScheme.primary
+                                        : theme.colorScheme.secondary
+                                              .withValues(alpha: 0.2);
+                                  }
+                                  return theme.colorScheme.primary;
+                                }),
+                              ),
                             ),
-                          ),
-                        ),
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                color: theme.colorScheme.secondary.withValues(
-                                  alpha: 0.3,
+                            title: Text(
+                              widget.task.title,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                decoration: widget.task.isCompleted
+                                    ? TextDecoration.lineThrough
+                                    : null,
+                                color: widget.task.isCompleted
+                                    ? theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.5,
+                                      )
+                                    : theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            subtitle: Text(
+                              widget.task.startTime != null
+                                  ? '${_formatTime(widget.task.startTime!)}${widget.task.endTime != null ? ' - ${_formatTime(widget.task.endTime!)}' : ''}'
+                                  : (widget.task.description ?? ''),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.7,
                                 ),
-                                // offset: const Offset(0, 0),
-                                blurRadius: 7,
-                              ),
-                            ],
-                            color: _getPriorityColor(
-                              context,
-                            ).withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: 0.5,
                               ),
                             ),
-                          ),
-                          child: Text(
-                            widget.task.priority.name.toUpperCase(),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.bold,
+                            trailing: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: theme.colorScheme.secondary
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 7,
+                                  ),
+                                ],
+                                color: _getPriorityColor(
+                                  context,
+                                ).withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: theme.colorScheme.primary.withValues(
+                                    alpha: 0.5,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                widget.task.priority.name.toUpperCase(),
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                            onTap: widget.onEdit,
+                            isLast: true,
                           ),
                         ),
-                        onTap: widget.onEdit,
-                        isLast: true,
-                      ),
+                      ],
                     ),
                   ),
                 ),

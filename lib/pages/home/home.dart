@@ -360,9 +360,9 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 onStorePressed: _openCommunityTemplates,
                 onSettingsPressed: _openSettings,
               ),
-        body: const Stack(
+        body: Stack(
           children: [
-            TasksPage(),
+            TasksPage(interceptionMode: _interceptionMode),
             Positioned(
               bottom: 0,
               left: 0,

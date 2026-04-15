@@ -169,6 +169,7 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
         ? TemplateUpload(onUploaded: () {})
         : _buildListContent();
 
+    final theme = Theme.of(context);
     return BackgroundDrop(
       scaffold: Scaffold(
         appBar: AppBar(
@@ -191,6 +192,14 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
             child: GlassTabBar(
               height: 56,
               iconSize: 18,
+              indicatorColor: theme.colorScheme.secondary.withValues(alpha: 0.5),
+              selectedIconColor: theme.colorScheme.onSurface,
+              unselectedIconColor:
+                  theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              selectedLabelStyle: TextStyle(color: theme.colorScheme.onSurface),
+              unselectedLabelStyle: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              ),
               tabs: const [
                 GlassTab(label: 'TaskList', icon: Icon(Icons.checklist_rtl)),
                 GlassTab(label: 'FlashCards', icon: Icon(Icons.style)),

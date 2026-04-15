@@ -42,7 +42,10 @@ class _AddAppDialogState extends State<AddAppDialog> {
       // Exclude must_stay_focused from the allowed apps to track
       final apps = allAppsRaw.where((app) {
         final pkg = app.packageName.toLowerCase();
-        return !pkg.contains('must_stay_focused') && !pkg.contains('muststayfocused');
+        return !pkg.contains('must_stay_focused') &&
+            !pkg.contains('muststayfocused') &&
+            pkg != 'com.virtuous_volition.msf' &&
+            pkg != 'com.virtuousvolition.msf';
       }).toList();
 
       if (mounted) {

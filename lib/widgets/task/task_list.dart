@@ -35,6 +35,9 @@ class TaskListView extends StatelessWidget {
   // Task id that should play completed entry animation.
   final int? animatedCompletedTaskId;
 
+  // Whether the list is rendered in interception mode.
+  final bool interceptionMode;
+
   const TaskListView({
     super.key,
     required this.incompleteTasks,
@@ -42,6 +45,7 @@ class TaskListView extends StatelessWidget {
     required this.onEditTask,
     this.onTaskChanged,
     this.animatedCompletedTaskId,
+    this.interceptionMode = false,
   });
 
   @override
@@ -100,6 +104,7 @@ class TaskListView extends StatelessWidget {
               task: task,
               onEdit: () => onEditTask(task),
               onTaskChanged: onTaskChanged,
+              showInterceptionGlow: interceptionMode,
             );
           }
 
@@ -128,6 +133,7 @@ class TaskListView extends StatelessWidget {
             onEdit: () => onEditTask(task),
             onTaskChanged: onTaskChanged,
             animateEntry: task.id == animatedCompletedTaskId,
+            showInterceptionGlow: false,
           );
         },
       ),
