@@ -122,16 +122,16 @@ class _ThemePickerState extends State<ThemePicker> {
                   ),
                 ),
                 trailing: GlassPicker(
-                  width: 96,
+                  width: 120,
                   height: 36,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   value: selectedTheme,
                   textStyle: TextStyle(
-                    fontSize: AppTextSizes.compact,
+                    fontSize: AppTextSizes.small,
                     color: theme.colorScheme.onSurface,
                   ),
                   placeholderStyle: TextStyle(
-                    fontSize: AppTextSizes.compact,
+                    fontSize: AppTextSizes.small,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                   ),
                   icon: Icon(

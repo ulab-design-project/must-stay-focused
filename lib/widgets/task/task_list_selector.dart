@@ -11,6 +11,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'dart:async';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
@@ -57,18 +58,31 @@ class _TaskListSelectorState extends State<TaskListSelector> {
 
   // Current search text
   String _searchQuery = '';
+  StreamSubscription<List<TaskList>>? _listsSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadLists();
+    _subscribeToLists();
   }
 
-  /// Loads all task lists from the database via global taskRepo.
-  Future<void> _loadLists() async {
-    _allLists = await taskRepo.getTaskLists();
-    _filterLists();
-    if (mounted) setState(() {});
+  @override
+  void dispose() {
+    _listsSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToLists() {
+    _listsSubscription = taskRepo.watchTaskLists().listen((lists) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _allLists = lists;
+        _filterLists();
+      });
+    });
   }
 
   /// Filters the loaded lists based on current search query.
@@ -90,7 +104,6 @@ class _TaskListSelectorState extends State<TaskListSelector> {
       context: context,
       builder: (ctx) => TaskListEditDialog(existingList: list),
     );
-    await _loadLists();
     widget.onListChanged?.call();
   }
 
@@ -135,7 +148,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
               GlassDialogAction(
                 label: 'Close',
                 onPressed: () => Navigator.pop(ctx),
-              )
+              ),
             ],
             content: SingleChildScrollView(
               child: Column(
@@ -145,9 +158,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                     placeholder: 'Search...',
                     prefixIcon: Icon(
                       Icons.search,
-                      color: Colors.white.withValues(
-                        alpha: 0.75,
-                      ),
+                      color: Colors.white.withValues(alpha: 0.75),
                       size: 18,
                     ),
                     onChanged: (v) {
@@ -175,9 +186,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                           ),
                           title: Text(
                             list.name,
-                            style: TextStyle(
-                              color: Colors.white,
-                            ),
+                            style: TextStyle(color: Colors.white),
                           ),
                           trailing: isProtectedList
                               ? null
@@ -201,10 +210,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                   ),
                   const SizedBox(height: AppElementSizes.spacingSm),
                   GlassListTile(
-                    leading: Icon(
-                      Icons.archive,
-                      color: Colors.white,
-                    ),
+                    leading: Icon(Icons.archive, color: Colors.white),
                     title: Text(
                       'Archived',
                       style: TextStyle(color: Colors.white),
@@ -216,10 +222,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
                     isLast: false,
                   ),
                   GlassListTile(
-                    leading: Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
+                    leading: Icon(Icons.add, color: Colors.white),
                     title: Text(
                       'Add List',
                       style: TextStyle(color: Colors.white),
