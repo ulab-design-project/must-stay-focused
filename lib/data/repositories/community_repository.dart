@@ -1,104 +1,156 @@
-// // File: lib/data/repositories/community_repository.dart
-// // TODO: Implement Remote Templates Access
-// // Architecture: Uses `SupabaseClient` instance. Abstract interface for clean testing.
-// // Requirements:
-// // 1. Methods:
-// //    - `Future<List<CommunityTemplate>> fetchTemplates(TemplateType type, int page, int limit)`
-// //    - `Future<void> uploadTemplate(CommunityTemplate data)` (Uploads require minimal anonymous Auth).
-// //    - `Future<void> reportTemplate(String id)` (FR-39).
-// import 'dart:convert';
-// import '../db/supabase_client.dart';
-// import '../models/community_template.dart';
-// import '../models/task.dart';
-// import '../models/flash_card.dart';
+import 'package:flutter/material.dart';
 
-// class CommunityRepository
-// {
-//   final _supabase = SupabaseService().client;
+import 'community/community_payload_builder.dart';
+import 'community/community_template_importer.dart';
+import '../models/community_template.dart';
+import '../models/flash_card.dart';
+import '../models/task.dart';
+import '../supabase_services/deck_service.dart';
+import '../supabase_services/task_list_service.dart';
 
-//   Future<List<CommunityTemplate>> fetchTemplates(
-//     TemplateType type,
-//     int page,
-//     int limit,
-//   ) async
-//   {
-//     final from = page * limit;
-//     final to = from + limit - 1;
+final CommunityRepository communityRepo = CommunityRepository();
 
-//     final response = await _supabase
-//         .from('community_templates')
-//         .select()
-//         .eq('type', type.name)
-//         .order('downloads', ascending: false)
-//         .range(from, to);
+class CommunityRepository {
+  final TaskListService _taskListService;
+  final DeckService _deckService;
+  final CommunityPayloadBuilder _payloadBuilder;
+  final CommunityTemplateImporter _templateImporter;
 
-//     return (response as List)
-//         .map((e) => CommunityTemplate.fromJson(e))
-//         .toList();
-//   }
+  CommunityRepository({
+    TaskListService? taskListService,
+    DeckService? deckService,
+    CommunityPayloadBuilder? payloadBuilder,
+    CommunityTemplateImporter? templateImporter,
+  }) : _taskListService = taskListService ?? TaskListService(),
+       _deckService = deckService ?? DeckService(),
+       _payloadBuilder = payloadBuilder ?? CommunityPayloadBuilder(),
+       _templateImporter = templateImporter ?? CommunityTemplateImporter();
 
-//   Future<void> uploadTemplate(CommunityTemplate data) async
-//   {
-//     // privacy: only safe fields already included
-//     await _supabase
-//         .from('community_templates')
-//         .insert(data.toJson());
-//   }
+  Future<List<CommunityTemplate>> fetchTemplates({
+    required String type,
+    String sortBy = 'recent',
+    List<String>? tags,
+  }) async {
+    try {
+      final serviceSortBy = sortBy == 'downloads' ? 'downloads' : 'recent';
+      final rows = type == CommunityTemplateType.flashCard
+          ? await _deckService.fetchCommunityTemplates(
+              sortBy: serviceSortBy,
+              tags: tags,
+            )
+          : await _taskListService.fetchCommunityTemplates(
+              sortBy: serviceSortBy,
+              tags: tags,
+            );
 
-//   Future<void> reportTemplate(String id) async
-//   {
-//     await _supabase
-//         .from('community_templates')
-//         .update({'reported': true})
-//         .eq('id', id);
-//   }
+      final templates = rows
+          .map((row) => CommunityTemplate.fromJson(row))
+          .toList();
 
-//   // -------- Helpers (IMPORTANT) --------
+      if (sortBy == 'downloads') {
+        templates.sort((a, b) => b.downloads.compareTo(a.downloads));
+      } else {
+        templates.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      }
 
-//   String buildTodoPayload(List<Task> tasks)
-//   {
-//     final payload = {
-//       "tasks": tasks.map((t) => { //TODO : add name and other metadata like upload.
-//         "title": t.title,
-//         "description": t.description,
-//         "priority": t.priority.name,
-//       }).toList()
-//     };
+      return templates;
+    } catch (e, stackTrace) {
+      debugPrint('CommunityRepository fetchTemplates error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception('CommunityRepository fetchTemplates failed: $e');
+    }
+  }
 
-//     return jsonEncode(payload);
-//   }
+  Future<CommunityTemplate?> fetchTemplateById({
+    required String type,
+    required String id,
+  }) async {
+    try {
+      final row = type == CommunityTemplateType.flashCard
+          ? await _deckService.fetchCommunityTemplateById(id)
+          : await _taskListService.fetchCommunityTemplateById(id);
 
-//   String buildFlashcardPayload(
-//     List<FlashCard> cards,
-//   )
-//   {
-//     final payload = { //TODO : add name for the deck     
-//       "cards": cards.map((c) => {
-//         "frontText": c.front,
-//         "backText": c.back,
-//       }).toList()
-//     };
+      if (row == null) {
+        return null;
+      }
 
-//     return jsonEncode(payload);
-//   }
+      return CommunityTemplate.fromJson(row);
+    } catch (e, stackTrace) {
+      debugPrint('CommunityRepository fetchTemplateById error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception('CommunityRepository fetchTemplateById failed: $e');
+    }
+  }
 
-//   Future<void> uploadTemplateRaw({
-//     required TemplateType type,
-//     required String title,
-//     required String authorName,
-//     required String jsonPayload,
-//   }) async
-//   {
-//     final template = CommunityTemplate(
-//       id: '',
-//       type: type,
-//       title: title,
-//       authorName: authorName,
-//       downloads: 0,
-//       starRating: 0,
-//       jsonPayload: jsonPayload,
-//     );
+  Future<void> uploadTaskListTemplate({
+    required TaskList taskList,
+    required String authorName,
+    required String description,
+    required List<String> tags,
+  }) async {
+    try {
+      final payload = await _payloadBuilder.buildTaskListPayload(taskList);
+      final template = CommunityTemplate(
+        id: '',
+        type: CommunityTemplateType.taskList,
+        title: taskList.name,
+        authorName: authorName,
+        description: description,
+        tags: tags,
+        downloads: 0,
+        createdAt: DateTime.now(),
+        payload: payload,
+      );
 
-//     await uploadTemplate(template);
-//   }
-// }
+      await _taskListService.uploadCommunityTemplate(template.toJson());
+    } catch (e, stackTrace) {
+      debugPrint('CommunityRepository uploadTaskListTemplate error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception('CommunityRepository uploadTaskListTemplate failed: $e');
+    }
+  }
+
+  Future<void> uploadFlashCardTemplate({
+    required Deck deck,
+    required String authorName,
+    required String description,
+    required List<String> tags,
+  }) async {
+    try {
+      final payload = await _payloadBuilder.buildFlashCardPayload(deck);
+      final template = CommunityTemplate(
+        id: '',
+        type: CommunityTemplateType.flashCard,
+        title: deck.name,
+        authorName: authorName,
+        description: description,
+        tags: tags,
+        downloads: 0,
+        createdAt: DateTime.now(),
+        payload: payload,
+      );
+
+      await _deckService.uploadCommunityTemplate(template.toJson());
+    } catch (e, stackTrace) {
+      debugPrint('CommunityRepository uploadFlashCardTemplate error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception('CommunityRepository uploadFlashCardTemplate failed: $e');
+    }
+  }
+
+  Future<void> downloadTemplate(CommunityTemplate template) async {
+    try {
+      if (template.isTaskList) {
+        await _templateImporter.importTaskListTemplate(template);
+        await _taskListService.incrementCommunityTemplateDownloads(template.id);
+      } else {
+        await _templateImporter.importFlashCardTemplate(template);
+        await _deckService.incrementCommunityTemplateDownloads(template.id);
+      }
+    } catch (e, stackTrace) {
+      debugPrint('CommunityRepository downloadTemplate error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      throw Exception('CommunityRepository downloadTemplate failed: $e');
+    }
+  }
+}

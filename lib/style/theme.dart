@@ -79,6 +79,11 @@ class AppElementSizes {
   static const double spacingLg = 16;
 }
 
+class Backgrounds{
+  static const String iridescent = 'assets/bgvid/3.mp4';
+  static const String gradients = 'assets/bgvid/2.mp4';
+}
+
 class ThemeController extends ChangeNotifier {
   static const double _primaryBlendRatio = 0.4;
 

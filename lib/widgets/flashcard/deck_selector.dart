@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'dart:async';
 
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';
@@ -27,11 +28,30 @@ class DeckSelector extends StatefulWidget {
 class _DeckSelectorState extends State<DeckSelector> {
   List<Deck> _allDecks = [];
   String _searchQuery = '';
+  StreamSubscription<List<Deck>>? _decksSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadDecks();
+    _subscribeToDecks();
+  }
+
+  @override
+  void dispose() {
+    _decksSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _subscribeToDecks() {
+    _decksSubscription = flashcardRepo.watchDecks().listen((decks) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _allDecks = decks;
+      });
+    });
   }
 
   Future<void> _loadDecks() async {
@@ -53,7 +73,9 @@ class _DeckSelectorState extends State<DeckSelector> {
     final theme = Theme.of(context);
 
     // Fallback if empty, but still show the picker to open dropdown which has "New Deck" button
-    final valueName = widget.selectedDeck?.name ?? (_allDecks.isEmpty ? 'No Decks' : 'Select Deck');
+    final valueName =
+        widget.selectedDeck?.name ??
+        (_allDecks.isEmpty ? 'No Decks' : 'Select Deck');
 
     return GlassPicker(
       width: widget.width,
@@ -82,9 +104,15 @@ class _DeckSelectorState extends State<DeckSelector> {
     showDialog(
       context: context,
       builder: (ctx) {
+        _searchQuery = '';
         return StatefulBuilder(
           builder: (context, setStateDialog) {
-            final filtered = _allDecks.where((d) => d.name.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+            final filtered = _allDecks
+                .where(
+                  (d) =>
+                      d.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+                )
+                .toList();
             return GlassDialog(
               title: 'Select Deck',
               content: Column(
@@ -92,7 +120,11 @@ class _DeckSelectorState extends State<DeckSelector> {
                 children: [
                   GlassTextField(
                     placeholder: 'Search decks...',
-                    prefixIcon: const Icon(Icons.search, size: 18, color: Colors.white70),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      size: 18,
+                      color: Colors.white70,
+                    ),
                     onChanged: (v) => setStateDialog(() => _searchQuery = v),
                   ),
                   const SizedBox(height: AppElementSizes.spacingMd),
@@ -104,18 +136,27 @@ class _DeckSelectorState extends State<DeckSelector> {
                       itemBuilder: (c, i) {
                         final deck = filtered[i];
                         return ListTile(
-                          title: Text(deck.name, style: const TextStyle(color: Colors.white)),
+                          title: Text(
+                            deck.name,
+                            style: const TextStyle(color: Colors.white),
+                          ),
                           onTap: () {
                             widget.onDeckSelected(deck);
                             Navigator.pop(ctx);
                           },
-                          trailing: deck.name == 'Default' ? null : IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.white70, size: 18),
-                            onPressed: () {
-                              Navigator.pop(ctx);
-                              _openEditDialog(deck: deck);
-                            },
-                          ),
+                          trailing: deck.name == 'Default'
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pop(ctx);
+                                    _openEditDialog(deck: deck);
+                                  },
+                                ),
                         );
                       },
                     ),

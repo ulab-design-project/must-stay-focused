@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'data/db/isar_service.dart';
+import 'data/db/supabase_client.dart';
 import 'pages/home/home.dart';
 import 'services/app_interception_service.dart';
 import 'style/theme.dart';
@@ -13,12 +14,13 @@ void main() async {
 
   try {
     await LiquidGlassWidgets.initialize();
+    await sdb.init();
     await IsarService().init();
     await AppInterceptionService().syncTrackedAppsFromDatabase();
-  } catch (e) {
+  } catch (e, stackTrace) {
     debugPrint('App initialization error: $e');
-    // debugPrintStack(stackTrace: stackTrace);
-    // rethrow;
+    debugPrintStack(stackTrace: stackTrace);
+    rethrow;
   }
 
   runApp(LiquidGlassWidgets.wrap(const MSF()));
