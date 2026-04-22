@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+
 import '../../../data/models/app_usage.dart';
 import '../../../data/db/isar_service.dart';
+import '../../../style/containers.dart';
+import '../../../style/dialogs.dart';
+import '../../../style/forms.dart';
+import '../../../style/list_tile.dart';
+import '../../../style/picker.dart';
 import '../../../style/theme.dart';
 
 class AppUsageDataDialog extends StatefulWidget {
@@ -20,7 +25,9 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
   @override
   void initState() {
     super.initState();
-    _timeCtrl = TextEditingController(text: widget.appUsage.maxDailyTimeLimit.toString());
+    _timeCtrl = TextEditingController(
+      text: widget.appUsage.maxDailyTimeLimit.toString(),
+    );
     _selectedChallenge = _normalizeChallengeType(widget.appUsage.challengeType);
   }
 
@@ -76,10 +83,15 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
                 return GlassListTile(
                   title: Text(
                     type,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   trailing: isSelected
-                      ? const Icon(Icons.check_circle, color: Colors.greenAccent)
+                      ? const Icon(
+                          Icons.check_circle,
+                          color: Colors.greenAccent,
+                        )
                       : null,
                   onTap: () => Navigator.pop(context, type),
                 );
@@ -97,6 +109,7 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassDialog(
       title: "${widget.appUsage.name} Usage Settings",
       content: Column(
@@ -108,7 +121,10 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
               Expanded(
                 child: Text(
                   "Limit (mins):",
-                  style: TextStyle(color: Colors.white, fontSize: AppTextSizes.body),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: AppTextSizes.body,
+                  ),
                 ),
               ),
               const SizedBox(width: AppElementSizes.spacingSm),
@@ -128,7 +144,10 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
               Expanded(
                 child: Text(
                   "Challenge:",
-                  style: TextStyle(color: Colors.white, fontSize: AppTextSizes.body),
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: AppTextSizes.body,
+                  ),
                 ),
               ),
               const SizedBox(width: AppElementSizes.spacingSm),
@@ -137,14 +156,23 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
                 child: GlassPicker(
                   width: 120,
                   height: AppElementSizes.buttonHeight,
-                  padding: const EdgeInsets.symmetric(horizontal: AppElementSizes.spacingSm),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppElementSizes.spacingSm,
+                  ),
                   value: _selectedChallenge,
-                  textStyle: const TextStyle(fontSize: AppTextSizes.body, color: Colors.white),
+                  textStyle: TextStyle(
+                    fontSize: AppTextSizes.body,
+                    color: theme.colorScheme.onSurface,
+                  ),
                   placeholderStyle: TextStyle(
                     fontSize: AppTextSizes.body,
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                   ),
-                  icon: const Icon(Icons.expand_more, size: AppElementSizes.icon, color: Colors.white),
+                  icon: Icon(
+                    Icons.expand_more,
+                    size: AppElementSizes.icon,
+                    color: theme.colorScheme.onSurface,
+                  ),
                   onTap: _openChallengePicker,
                 ),
               ),
@@ -157,11 +185,7 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
           label: "Cancel",
           onPressed: () => Navigator.pop(context),
         ),
-        GlassDialogAction(
-          label: "Save",
-          isPrimary: true,
-          onPressed: _save,
-        ),
+        GlassDialogAction(label: "Save", isPrimary: true, onPressed: _save),
       ],
     );
   }

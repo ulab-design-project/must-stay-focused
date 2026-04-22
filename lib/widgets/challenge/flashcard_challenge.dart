@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
-
+import 'package:must_stay_focused/style/containers.dart';
+import 'package:must_stay_focused/style/forms.dart';
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';
 import '../../utils/theme_helpers.dart';
@@ -286,7 +286,6 @@ class _FlashcardChallengeWidgetState extends State<FlashcardChallengeWidget> {
             controller: _answerController,
             textStyle: TextStyle(color: onSurface),
             placeholder: 'Write Answer',
-            onSubmitted: (_) => _checkAnswer(),
           ),
         ),
         const SizedBox(height: AppElementSizes.spacingMd),

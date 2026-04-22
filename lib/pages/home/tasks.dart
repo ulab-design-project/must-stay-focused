@@ -9,11 +9,13 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/buttons.dart';
+import '../../style/containers.dart';
+import '../../style/list_tile.dart';
+import '../../style/picker.dart';
 import '../../style/theme.dart';
 import '../../widgets/task/task_edit_dialog.dart';
 import '../../widgets/task/task_list.dart';
@@ -160,28 +162,33 @@ class _TasksPageState extends State<TasksPage> {
             ('Priority', 'priority'),
             ('Urgency', 'dueSoon'),
           ];
-
           return Padding(
             padding: const EdgeInsets.all(AppElementSizes.spacingLg),
             child: GlassCard(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...options.map((option) {
-                    final isSelected = _sortBy == option.$2;
-                    return GlassListTile(
+                children: options.map((option) {
+                  final isSelected = _sortBy == option.$2;
+                  return Padding(
+                    padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                    child: GlassListTile(
                       title: Text(
                         option.$1,
-                        style: TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       trailing: isSelected
-                          ? Icon(Icons.check_circle, color: Colors.white)
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
                           : null,
                       onTap: () => Navigator.of(context).pop(option.$2),
                       isLast: option == options.last,
-                    );
-                  }),
-                ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           );
@@ -230,87 +237,86 @@ class _TasksPageState extends State<TasksPage> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    return AdaptiveLiquidGlassLayer(
-      child: Column(
-        children: [
-          // Top bar with list selector and sort controls
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                GlassSquircleIconButton(
-                  onPressed: _openAddTask,
-                  icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
-                  isPrimary: true,
-                ),
-                const SizedBox(width: AppElementSizes.spacingSm),
-                Expanded(
-                  child: TaskListSelector(
-                    width: 100,
-                    selectedList: _showArchived ? null : _selectedList,
-                    onListSelected: (list) {
-                      setState(() {
-                        _showArchived = false;
-                        _selectedList = list;
-                      });
-                      _loadTasks();
-                    },
-                    onListChanged: _loadTasks,
-                    onArchivedToggled: () {
-                      setState(() => _showArchived = true);
-                      _loadTasks();
-                    },
-                  ),
-                ),
-                const SizedBox(width: AppElementSizes.spacingSm),
-                GlassPicker(
+    return Column(
+      children: [
+        // Top bar with list selector and sort controls
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              GlassSquircleIconButton(
+                onPressed: _openAddTask,
+                icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
+                isPrimary: false,
+              ),
+              const SizedBox(width: AppElementSizes.spacingSm),
+              Expanded(
+                child: TaskListSelector(
                   width: 100,
-                  height: 36,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  value: _sortByLabel,
-                  placeholder: 'Sort',
-                  textStyle: TextStyle(
-                    fontSize: AppTextSizes.small,
-                    color: theme.colorScheme.onSurface,
-                  ),
-                  // placeholderStyle: TextStyle(
-                  //   fontSize: AppTextSizes.small,
-                  //   color: Colors.pink,
-                  // ),
-                  icon: Icon(
-                    Icons.expand_more,
-                    size: 16,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
-                  ),
-                  onTap: _openSortPicker,
-                ),
-                const SizedBox(width: AppElementSizes.spacingSm),
-                GlassSquircleIconButton(
-                  onPressed: () {
-                    setState(() => _isAscending = !_isAscending);
+                  selectedList: _showArchived ? null : _selectedList,
+                  onListSelected: (list) {
+                    setState(() {
+                      _showArchived = false;
+                      _selectedList = list;
+                    });
                     _loadTasks();
                   },
-                  icon: Icon(
-                    _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
-                    color: theme.colorScheme.onSurface,
-                  ),
+                  onListChanged: _loadTasks,
+                  onArchivedToggled: () {
+                    setState(() => _showArchived = true);
+                    _loadTasks();
+                  },
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppElementSizes.spacingSm),
+              GlassPicker(
+                width: 100,
+                height: 36,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                value: _sortByLabel,
+                placeholder: 'Sort',
+                textStyle: TextStyle(
+                  fontSize: AppTextSizes.small,
+                  color: theme.colorScheme.onSurface,
+                ),
+                // placeholderStyle: TextStyle(
+                //   fontSize: AppTextSizes.small,
+                //   color: Colors.pink,
+                // ),
+                icon: Icon(
+                  Icons.expand_more,
+                  size: 16,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                ),
+                onTap: _openSortPicker,
+              ),
+              const SizedBox(width: AppElementSizes.spacingSm),
+              GlassSquircleButton(
+                width: AppElementSizes.buttonSquare,
+                onPressed: () {
+                  setState(() => _isAscending = !_isAscending);
+                  _loadTasks();
+                },
+                child: Icon(
+                  _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-          // Task list view
-          Expanded(
-            child: TaskListView(
-              incompleteTasks: _incompleteTasks,
-              completedTasks: _completedTasks,
-              interceptionMode: widget.interceptionMode,
-              onEditTask: _openEditTask,
-              onTaskChanged: _handleTaskChanged,
-              animatedCompletedTaskId: _animatedCompletedTaskId,
-            ),
+        ),
+        // Task list view
+        Expanded(
+          child: TaskListView(
+            incompleteTasks: _incompleteTasks,
+            completedTasks: _completedTasks,
+            interceptionMode: widget.interceptionMode,
+            onEditTask: _openEditTask,
+            onTaskChanged: _handleTaskChanged,
+            animatedCompletedTaskId: _animatedCompletedTaskId,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

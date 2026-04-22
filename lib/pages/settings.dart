@@ -25,9 +25,9 @@ class SettingsPage extends StatelessWidget {
             child: Column(
               children: [
                 const ThemePicker(),
-                const SizedBox(height: AppElementSizes.spacingLg * 1.5),
+                const SizedBox(height: AppElementSizes.spacingLg ),
                 PermissionsTile(),
-                const SizedBox(height: AppElementSizes.spacingLg * 1.5),
+                const SizedBox(height: AppElementSizes.spacingLg ),
                 TrackedAppsWidget(),
               ],
             ),

@@ -1,10 +1,10 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:must_stay_focused/style/containers.dart';
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';
 import '../../style/theme.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'dart:math' as math;
 
 import 'flash_card_edit_dialog.dart';
@@ -150,7 +150,10 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
             children: [
               Positioned.fill(
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: themeController.glassBlur, sigmaY: themeController.glassBlur),
+                  filter: ImageFilter.blur(
+                    sigmaX: GlassEffects.blurSigma,
+                    sigmaY: GlassEffects.blurSigma,
+                  ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
@@ -240,24 +243,13 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
             final transform = Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateY(angle);
-            final glassColor = isFlipped
-                ? theme.colorScheme.secondary.withValues(alpha: 0.26)
-                : theme.colorScheme.primary.withValues(alpha: 0.26);
 
             return Transform(
               alignment: Alignment.center,
               transform: transform,
               transformHitTests: false,
               child: GlassCard(
-                useOwnLayer: true,
-                settings: LiquidGlassSettings(
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: glassColor,
-                ),
+                isPrimary: true,
                 child: Container(
                   width: cardWidth,
                   child: ClipRRect(
@@ -287,7 +279,7 @@ class _FlashCardWidgetState extends State<FlashCardWidget>
                                   isFlipped
                                       ? widget.card.back
                                       : widget.card.front,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: AppTextSizes.small,
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,

@@ -11,7 +11,6 @@
 //    - All DB operations via global taskRepo instance.
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import 'task_card.dart';
@@ -91,52 +90,50 @@ class TaskListView extends StatelessWidget {
         completedTasks.length;
 
     // Build task list with cards
-    return LiquidGlassBlendGroup(
-      child: ListView.builder(
-        itemCount: totalItems,
-        addRepaintBoundaries: true,
-        itemBuilder: (context, index) {
-          // First, show all incomplete tasks
-          if (index < incompleteTasks.length) {
-            final task = incompleteTasks[index];
-            return TaskCard(
-              key: ValueKey('incomplete-${task.id}'),
-              task: task,
-              onEdit: () => onEditTask(task),
-              onTaskChanged: onTaskChanged,
-              showInterceptionGlow: interceptionMode,
-            );
-          }
-
-          // Then, show "Completed Tasks" header if there are completed tasks
-          final headerIndex = incompleteTasks.length;
-          if (hasCompletedTasks && index == headerIndex) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Completed Tasks',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-              ),
-            );
-          }
-
-          // Finally, show completed tasks
-          final completedIndex =
-              index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
-          final task = completedTasks[completedIndex];
+    return ListView.builder(
+      itemCount: totalItems,
+      addRepaintBoundaries: true,
+      itemBuilder: (context, index) {
+        // First, show all incomplete tasks
+        if (index < incompleteTasks.length) {
+          final task = incompleteTasks[index];
           return TaskCard(
-            key: ValueKey('completed-${task.id}'),
+            key: ValueKey('incomplete-${task.id}'),
             task: task,
             onEdit: () => onEditTask(task),
             onTaskChanged: onTaskChanged,
-            animateEntry: task.id == animatedCompletedTaskId,
-            showInterceptionGlow: false,
+            showInterceptionGlow: interceptionMode,
           );
-        },
-      ),
+        }
+
+        // Then, show "Completed Tasks" header if there are completed tasks
+        final headerIndex = incompleteTasks.length;
+        if (hasCompletedTasks && index == headerIndex) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Completed Tasks',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          );
+        }
+
+        // Finally, show completed tasks
+        final completedIndex =
+            index - (hasCompletedTasks ? headerIndex + 1 : headerIndex);
+        final task = completedTasks[completedIndex];
+        return TaskCard(
+          key: ValueKey('completed-${task.id}'),
+          task: task,
+          onEdit: () => onEditTask(task),
+          onTaskChanged: onTaskChanged,
+          animateEntry: task.id == animatedCompletedTaskId,
+          showInterceptionGlow: false,
+        );
+      },
     );
   }
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/community_template.dart';
 import '../../data/repositories/community_repository.dart';
 import '../../style/background.dart';
+import '../../style/containers.dart';
 import '../../style/theme.dart';
 import '../../widgets/community/template_card.dart';
 
@@ -235,14 +235,18 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                   child: Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 )
               : template == null
-              ? const Center(
+              ? Center(
                   child: Text(
                     'Template not found.',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 )
               : Column(

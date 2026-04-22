@@ -29,7 +29,6 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         'Tasks',
         style: TextStyle(color: onSurface),
       ),
-      backgroundColor: Colors.transparent,
       elevation: 0,
       actions: [
         if (showDebugInterceptionButton)

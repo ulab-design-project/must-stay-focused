@@ -5,10 +5,12 @@
 // Only the Default list is protected from deletion.
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/chips.dart';
+import '../../style/dialogs.dart';
+import '../../style/forms.dart';
 import '../../style/theme.dart';
 import '../../utils/task_list_icons.dart';
 import '../../utils/logging.dart';
@@ -83,23 +85,26 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
       return;
     }
 
-    final merge = await GlassDialog.show<bool>(
+    final merge = await showDialog<bool>(
       barrierDismissible: true,
       context: context,
-      title: 'Delete List',
-      message: 'Move tasks to Default list before deleting?',
-      actions: [
-        GlassDialogAction(
-          label: 'Delete', //TODO known issue  - the task list needs to reset to default
-          isDestructive: true,
-          onPressed: () => Navigator.pop(context, false),
-        ),
-        GlassDialogAction(
-          label: 'Move',
-          isPrimary: true,
-          onPressed: () => Navigator.pop(context, true),
-        ),
-      ],
+      builder: (ctx) => GlassDialog(
+        title: 'Delete List',
+        content: const Text('Move tasks to Default list before deleting?'),
+        actions: [
+          GlassDialogAction(
+            label:
+                'Delete', //TODO known issue  - the task list needs to reset to default
+            isDestructive: true,
+            onPressed: () => Navigator.pop(ctx, false),
+          ),
+          GlassDialogAction(
+            label: 'Move',
+            isPrimary: true,
+            onPressed: () => Navigator.pop(ctx, true),
+          ),
+        ],
+      ),
     );
     if (merge == null) return;
 
@@ -141,58 +146,49 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
         children: [
           if (isProtectedList)
             Padding(
-              padding: const EdgeInsets.only(
-                bottom: AppElementSizes.spacingSm,
-              ),
+              padding: const EdgeInsets.only(bottom: AppElementSizes.spacingSm),
               child: Text(
                 'This is a system list and cannot be edited.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
               ),
             ),
-              GlassTextField(
-                controller: _nameController,
-                enabled: !isProtectedList,
-                placeholder: 'List Name',
-              ),
-              const SizedBox(height: AppElementSizes.spacingMd),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Select Icon',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white,
-                  ),
+          GlassTextField(
+            controller: _nameController,
+            enabled: !isProtectedList,
+            placeholder: 'List Name',
+          ),
+          const SizedBox(height: AppElementSizes.spacingMd),
+          Text(
+            'Select Icon',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppElementSizes.spacingSm),
+          Wrap(
+            spacing: AppElementSizes.spacingSm,
+            runSpacing: AppElementSizes.spacingSm,
+            children: taskListAvailableIcons.map((icon) {
+              final isSelected = icon.codePoint == _selectedIcon;
+              return GlassChip(
+                label: '',
+                leading: Icon(
+                  icon,
+                  size: AppElementSizes.icon,
+                  color: isSelected
+                      ? theme.colorScheme.secondary
+                      : theme.colorScheme.onSurface,
                 ),
-              ),
-              const SizedBox(height: AppElementSizes.spacingSm),
-              Wrap(
-                spacing: AppElementSizes.spacingSm,
-                runSpacing: AppElementSizes.spacingSm,
-                children: taskListAvailableIcons.map((icon) {
-                  final isSelected = icon.codePoint == _selectedIcon;
-                  return GlassChip(
-                    label: '',
-                    icon: Padding(
-                      padding: const EdgeInsets.only(left: 4.0), // Alignment -_-
-                      child: Icon(
-                        icon,
-                        size: AppElementSizes.icon,
-                        color: isSelected
-                            ? theme.colorScheme.secondary
-                            : Colors.white,
-                      ),
-                    ),
-                    labelStyle: TextStyle(fontSize: 0),
-                    selected: isSelected,
-                    onTap: isProtectedList
-                        ? null
-                        : () => setState(() => _selectedIcon = icon.codePoint),
-                  );
-                }).toList(),
-              ),
-          ],
+                selected: isSelected,
+                onTap: isProtectedList
+                    ? null
+                    : () => setState(() => _selectedIcon = icon.codePoint),
+              );
+            }).toList(),
+          ),
+        ],
       ),
       actions: [
         GlassDialogAction(
@@ -206,11 +202,7 @@ class _TaskListEditDialogState extends State<TaskListEditDialog> {
             onPressed: _delete,
           ),
         if (!isProtectedList)
-          GlassDialogAction(
-            label: 'Save',
-            isPrimary: true,
-            onPressed: _save,
-          ),
+          GlassDialogAction(label: 'Save', isPrimary: true, onPressed: _save),
       ],
     );
   }

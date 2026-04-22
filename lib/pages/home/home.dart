@@ -1,10 +1,7 @@
 import 'dart:async';
-import 'dart:typed_data';
 
-import 'package:background/background.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:must_stay_focused/style/theme.dart';
 
 import '../../data/db/isar_service.dart';
 import '../../data/models/app_usage.dart';
@@ -248,6 +245,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 
     final defaultOvertimeLimitMinutes = await _interceptionController
         .getDefaultOvertimeLimitMinutes();
+
+    if (!mounted) return;
 
     final remainingMinutes = _interceptionController.remainingMinutes(
       latestApp,

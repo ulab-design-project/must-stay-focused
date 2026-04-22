@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+
+import 'package:must_stay_focused/style/chips.dart';
+import 'package:must_stay_focused/style/containers.dart';
+import 'package:must_stay_focused/style/dialogs.dart';
+import 'package:must_stay_focused/style/forms.dart';
+import 'package:must_stay_focused/style/switch.dart';
 
 import '../../data/models/community_template.dart';
 import '../../data/models/flash_card.dart';
@@ -236,7 +241,7 @@ class _TemplateUploadState extends State<TemplateUpload> {
               )
             else
               DeckSelector(
-                width: null,
+                width: 200,
                 selectedDeck: _selectedDeck,
                 onDeckSelected: (deck) => setState(() => _selectedDeck = deck),
                 onDeckChanged: _loadDefaultSelections,
@@ -307,7 +312,7 @@ class _TemplateUploadState extends State<TemplateUpload> {
                             onTap: () {
                               setState(() => _tags.removeAt(index));
                             },
-                            icon: const Icon(Icons.close, size: 14),
+                            leading: const Icon(Icons.close, size: 14),
                           ),
                         );
                       },

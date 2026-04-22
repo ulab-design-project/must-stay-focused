@@ -1,17 +1,23 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:must_stay_focused/style/theme.dart';
 
 import '../utils/theme_helpers.dart';
 
-// TODO: Convert to liquid glass widgets.
-
+/// Background wrapper with gradient circles.
+///
+/// Provides the glass-morphism style background with gradient circles
+/// and transparent content scaffold. No blur filter (performance).
 class BackgroundDrop extends StatelessWidget {
   final Scaffold scaffold;
-  final double filterStrength = 70.0;
-  final double circleOpacity = 0.6;
+  final double circleOpacity;
 
-  const BackgroundDrop({super.key, required this.scaffold});
+  const BackgroundDrop({
+    super.key,
+    required this.scaffold,
+    this.circleOpacity = 0.6,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +30,9 @@ class BackgroundDrop extends StatelessWidget {
 
     return Stack(
       children: [
-        // Base BG Box
+        // Base BG
         Container(width: screenWidth, height: screenHeight, color: bgColor),
-        // Big Circle (top left, so only bottom right piece is visible)
+        // Big Circle (top left)
         Positioned(
           top: -screenWidth,
           left: -screenWidth,
@@ -39,8 +45,7 @@ class BackgroundDrop extends StatelessWidget {
             ),
           ),
         ),
-        // Small Circle (bottom center, top 1/4 visible)
-        // center at bottom center - 0.25 screenWidth means its center is at y = screenHeight - 0.25 * screenWidth
+        // Small Circle (bottom center)
         Positioned(
           top: screenHeight - 0.25 * screenWidth,
           left: screenWidth / 2 - 0.5 * screenWidth,
@@ -53,19 +58,16 @@ class BackgroundDrop extends StatelessWidget {
             ),
           ),
         ),
-        // Blur Filter
-        Positioned.fill(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: filterStrength,
-              sigmaY: filterStrength,
-            ),
-            child: Container(color: Colors.transparent),
+
+        // Background blur
+        BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: GlassEffects.blurSigma, sigmaY: GlassEffects.blurSigma),
+          child: Container(
+            width: screenWidth,
+            height: screenHeight,
+            color: Colors.transparent,
           ),
         ),
-        // Positioned(child: Container(color: primaryColor,width: screenWidth,height: 100,),top: screenHeight * 0.5,),
-        // const _LoopingBackgroundVideo(),
-        // TODO: Convert to liquid glass widgets.
         // Content (Glass Scaffold)
         Theme(
           data: theme.copyWith(
@@ -90,7 +92,7 @@ class BackgroundDrop extends StatelessWidget {
             onEndDrawerChanged: scaffold.onEndDrawerChanged,
             bottomNavigationBar: scaffold.bottomNavigationBar,
             bottomSheet: scaffold.bottomSheet,
-            backgroundColor: Colors.transparent, // force transparent bg
+            backgroundColor: Colors.transparent,
             resizeToAvoidBottomInset: scaffold.resizeToAvoidBottomInset,
             primary: scaffold.primary,
             drawerDragStartBehavior: scaffold.drawerDragStartBehavior,
@@ -108,103 +110,3 @@ class BackgroundDrop extends StatelessWidget {
     );
   }
 }
-
-// class _LoopingBackgroundVideo extends StatefulWidget {
-//   const _LoopingBackgroundVideo();
-
-//   @override
-//   State<_LoopingBackgroundVideo> createState() =>
-//       _LoopingBackgroundVideoState();
-// }
-
-// class _LoopingBackgroundVideoState extends State<_LoopingBackgroundVideo>
-//     with WidgetsBindingObserver {
-//   static VideoPlayerController? _controller;
-//   static Future<void>? _initFuture;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     WidgetsBinding.instance.addObserver(this);
-//     _initVideo();
-//   }
-
-//   Future<void> _initVideo() async {
-//     if (_controller == null) {
-//       _controller = VideoPlayerController.asset(
-//         'assets/bgvid/3.mp4', //TODO bg video
-//         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
-//       );
-//       _initFuture = _controller!
-//           .initialize()
-//           .then((_) async {
-//             await _controller!.setLooping(true);
-//             await _controller!.setVolume(0);
-//             await _controller!.play();
-//           })
-//           .catchError((e, stackTrace) {
-//             debugPrint('Background video initialization failed: $e');
-//           });
-//     }
-
-//     if (_initFuture != null) {
-//       await _initFuture;
-//     }
-
-//     if (mounted) setState(() {});
-//     _controller?.play(); // Ensure it's playing when returning to screen
-//   }
-
-//   @override
-//   void dispose() {
-//     WidgetsBinding.instance.removeObserver(this);
-//     // Note: Intentionally not disposing _controller so the video stays loaded and loops continuously across app navigation.
-//     super.dispose();
-//   }
-
-//   @override
-//   void didChangeAppLifecycleState(AppLifecycleState state) {
-//     if (state == AppLifecycleState.resumed) {
-//       _controller?.play();
-//     } else if (state == AppLifecycleState.paused) {
-//       _controller?.pause();
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (_controller == null || !_controller!.value.isInitialized) {
-//       return const SizedBox.shrink();
-//     }
-
-//     final theme = Theme.of(context);
-//     // const double darkBrightness = 0.4; // 0.0 is completely black, 1.0 is full brightness
-
-//     Widget videoWidget = Transform.rotate(
-//       angle: math.pi / 2,
-//       child: FittedBox(
-//         fit: BoxFit.cover,
-//         child: SizedBox(
-//           width: _controller!.value.size.width,
-//           height: _controller!.value.size.height,
-//           child: VideoPlayer(_controller!),
-//         ),
-//       ),
-//     );
-
-//     videoWidget = ColorFiltered(
-//       colorFilter: theme.brightness == Brightness.light
-//           ? ColorFilter.mode(
-//               theme.colorScheme.secondary.withValues(alpha: 0.6),
-//               BlendMode.hardLight,
-//             )
-//           : ColorFilter.mode(
-//               theme.colorScheme.primary.withValues(alpha: 0.8),
-//               BlendMode.multiply,
-//             ),
-//       child: videoWidget,
-//     );
-
-//     return Positioned.fill(child: IgnorePointer(child: videoWidget));
-//   }
-// }

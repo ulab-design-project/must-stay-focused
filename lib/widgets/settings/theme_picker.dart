@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:must_stay_focused/style/picker.dart';
 
+import '../../style/containers.dart';
+import '../../style/list_tile.dart';
 import '../../style/theme.dart';
-import 'gyroscope_glass_toggle.dart';
 
 class ThemePicker extends StatefulWidget {
   const ThemePicker({super.key});
@@ -30,36 +31,37 @@ class _ThemePickerState extends State<ThemePicker> {
                         entry.key == themeController.currentThemeKey;
                     final isLightMode =
                         entry.value.brightness == Brightness.light;
-                    return GlassListTile(
-                      leading: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: isLightMode ? Colors.white : Colors.black87,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Icon(
-                            isLightMode ? Icons.wb_sunny : Icons.nightlight_round,
-                            color: entry.value.primaryColor,
-                            size: 20,
+                    return Padding(
+                      padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                      child: GlassListTile(
+                        leading: Container(
+                          width: 30,
+                          height: 30,                        
+                          child: Center(
+                            child: Icon(
+                              isLightMode
+                                  ? Icons.wb_sunny
+                                  : Icons.nightlight_round,
+                              color: entry.value.primaryColor,
+                              size: 20,
+                            ),
                           ),
                         ),
-                      ),
-                      title: Text(
-                        entry.key,
-                        style: TextStyle(
-                          color: Colors.white,
+                        title: Text(
+                          entry.key,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                         ),
+                        trailing: isSelected
+                            ? Icon(
+                                Icons.check_circle,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              )
+                            : null,
+                        onTap: () => Navigator.of(context).pop(entry.key),
+                        isLast: entry == entries.last,
                       ),
-                      trailing: isSelected
-                          ? Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                            )
-                          : null,
-                      onTap: () => Navigator.of(context).pop(entry.key),
-                      isLast: entry == entries.last,
                     );
                   }),
                 ],
@@ -143,7 +145,6 @@ class _ThemePickerState extends State<ThemePicker> {
                 ),
                 isLast: false,
               ),
-              const GyroscopeGlassToggle(),
             ],
           );
         },

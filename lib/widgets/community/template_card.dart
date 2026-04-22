@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/community_template.dart';
 import '../../style/buttons.dart';
+import '../../style/chips.dart';
+import '../../style/containers.dart';
 import '../../style/theme.dart';
 
 class TemplateCard extends StatelessWidget {
@@ -27,15 +28,6 @@ class TemplateCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppElementSizes.spacingSm),
       child: GlassCard(
-        useOwnLayer: true,
-        settings: LiquidGlassSettings(
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: theme.primaryColor.withValues(alpha: 0.3),
-                ),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppElementSizes.cardRadius),
           onTap: onTap,
@@ -89,22 +81,13 @@ class TemplateCard extends StatelessWidget {
                               .take(4)
                               .map(
                                 (tag) => GlassChip(
-                                  useOwnLayer: true,
-                                  settings: LiquidGlassSettings(
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: theme.colorScheme.secondary.withValues(alpha: 0.3),
-                ),
                                   label: tag,
+                                  labelStyle: TextStyle(
+                                    fontSize: AppTextSizes.compact,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                   selected: false,
                                   onTap: null,
-                                  labelStyle: TextStyle(
-                                    color: theme.colorScheme.onSurface,
-                                    fontSize: AppTextSizes.compact,
-                                  ),
                                 ),
                               )
                               .toList(),

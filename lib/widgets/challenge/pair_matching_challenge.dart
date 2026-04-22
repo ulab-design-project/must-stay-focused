@@ -1,25 +1,23 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../style/buttons.dart';
+import '../../style/progress_indicator.dart';
 import '../../style/theme.dart';
 
 class PairMatchingChallengeWidget extends StatefulWidget {
   final VoidCallback onSolved;
 
-  const PairMatchingChallengeWidget({
-    super.key,
-    required this.onSolved,
-  });
+  const PairMatchingChallengeWidget({super.key, required this.onSolved});
 
   @override
   State<PairMatchingChallengeWidget> createState() =>
       _PairMatchingChallengeWidgetState();
 }
 
-class _PairMatchingChallengeWidgetState extends State<PairMatchingChallengeWidget> {
+class _PairMatchingChallengeWidgetState
+    extends State<PairMatchingChallengeWidget> {
   static const int _gridSize = 4;
   static const int _pairCount = 8;
 
@@ -161,10 +159,7 @@ class _PairMatchingChallengeWidgetState extends State<PairMatchingChallengeWidge
       children: [
         Text(
           'Match all icon pairs',
-          style: TextStyle(
-            color: onSurface,
-            fontSize: AppTextSizes.body,
-          ),
+          style: TextStyle(color: onSurface, fontSize: AppTextSizes.body),
         ),
         const SizedBox(height: AppElementSizes.spacingSm),
         GlassProgressIndicator.linear(
@@ -172,15 +167,11 @@ class _PairMatchingChallengeWidgetState extends State<PairMatchingChallengeWidge
           value: _progressValue,
           height: 8,
           minWidth: 260,
-          useOwnLayer: true,
         ),
         const SizedBox(height: AppElementSizes.spacingSm),
         Text(
           '${_matchedPairs * 2} / ${_gridSize * _gridSize} matched',
-          style: TextStyle(
-            color: onSurface,
-            fontSize: AppTextSizes.small,
-          ),
+          style: TextStyle(color: onSurface, fontSize: AppTextSizes.small),
         ),
         const SizedBox(height: AppElementSizes.spacingMd),
         SizedBox(
@@ -204,10 +195,7 @@ class _PairMatchingChallengeWidgetState extends State<PairMatchingChallengeWidge
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 220),
                   transitionBuilder: (child, animation) {
-                    return RotationYTransition(
-                      turns: animation,
-                      child: child,
-                    );
+                    return RotationYTransition(turns: animation, child: child);
                   },
                   child: GlassSquircleIconButton(
                     key: ValueKey<String>(
@@ -246,11 +234,7 @@ class _PairTile {
   bool isFaceUp = false;
   bool isMatched = false;
 
-  _PairTile({
-    required this.id,
-    required this.pairId,
-    required this.icon,
-  });
+  _PairTile({required this.id, required this.pairId, required this.icon});
 }
 
 class RotationYTransition extends AnimatedWidget {

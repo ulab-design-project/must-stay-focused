@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+
+import 'package:must_stay_focused/style/dialogs.dart';
+import 'package:must_stay_focused/style/forms.dart';
 
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';

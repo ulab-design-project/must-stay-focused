@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
-import '../../style/liquid_glass_style.dart';
+import '../../style/containers.dart';
+import '../../style/list_tile.dart';
+import '../../style/dialogs.dart';
 import '../../utils/logging.dart';
 import '../../utils/theme_helpers.dart';
 
@@ -356,7 +357,9 @@ class _TaskCardState extends State<TaskCard>
                           title: 'Delete Task',
                           content: const Text(
                             'Are you sure you want to delete this task?',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 0.87),
+                            ),
                           ),
                           actions: [
                             GlassDialogAction(
@@ -406,12 +409,8 @@ class _TaskCardState extends State<TaskCard>
                         Positioned.fill(child: _buildGlowUnderlay(context)),
                         GlassCard(
                           padding: EdgeInsets.zero,
-                          useOwnLayer: false,
-                          settings: glassSettingsFor(
-                            context,
-                            isPrimary:
-                                widget.task.priority == TaskPriority.critical,
-                          ),
+                          isPrimary:
+                              widget.task.priority == TaskPriority.critical,
                           child: GlassListTile(
                             leading: GestureDetector(
                               onTap: () => _toggleComplete(context),
@@ -419,17 +418,20 @@ class _TaskCardState extends State<TaskCard>
                                 visualDensity: VisualDensity.compact,
                                 value: widget.task.isCompleted,
                                 onChanged: null,
-                                fillColor: WidgetStateProperty.resolveWith<
-                                  Color
-                                >((states) {
-                                  if (states.contains(WidgetState.disabled)) {
-                                    return widget.task.isCompleted
-                                        ? theme.colorScheme.primary
-                                        : theme.colorScheme.secondary
-                                              .withValues(alpha: 0.2);
-                                  }
-                                  return theme.colorScheme.primary;
-                                }),
+                                fillColor:
+                                    WidgetStateProperty.resolveWith<Color>((
+                                      states,
+                                    ) {
+                                      if (states.contains(
+                                        WidgetState.disabled,
+                                      )) {
+                                        return widget.task.isCompleted
+                                            ? theme.colorScheme.primary
+                                            : theme.colorScheme.secondary
+                                                  .withValues(alpha: 0.2);
+                                      }
+                                      return theme.colorScheme.primary;
+                                    }),
                               ),
                             ),
                             title: Text(

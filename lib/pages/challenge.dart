@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:isar/isar.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../data/db/isar_service.dart';
 import '../data/db/quotes.dart';
@@ -14,6 +13,9 @@ import '../services/app_interception_service.dart';
 import '../services/appUsageMonitor/android_app_usage.dart';
 import '../style/background.dart';
 import '../style/buttons.dart';
+import '../style/containers.dart';
+import '../style/list_tile.dart';
+import '../style/picker.dart';
 import '../style/theme.dart';
 import '../widgets/challenge/flashcard_challenge.dart';
 import '../widgets/challenge/math_challenge.dart';
@@ -134,10 +136,15 @@ class _ChallengePageState extends State<ChallengePage> {
                 return GlassListTile(
                   title: Text(
                     type,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                   trailing: isSelected
-                      ? const Icon(Icons.check_circle, color: Colors.white)
+                      ? Icon(
+                          Icons.check_circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
                       : null,
                   onTap: () => Navigator.pop(context, type),
                 );
@@ -349,8 +356,8 @@ class _ChallengePageState extends State<ChallengePage> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : _isSolved
-                        ? const Text('Continue to App')
-                        : const Text('Challenge Incomplete'),
+                    ? const Text('Continue to App')
+                    : const Text('Challenge Incomplete'),
               ),
             ],
           ),

@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:must_stay_focused/style/containers.dart';
+import 'package:must_stay_focused/style/list_tile.dart';
+import 'package:must_stay_focused/style/picker.dart';
 
 import '../../data/models/flash_card.dart';
 import '../../data/repositories/flashcard_repository.dart';
@@ -96,16 +100,12 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
           horizontal: AppElementSizes.spacingLg,
         ),
         child: GlassCard(
-          useOwnLayer: true,
-          settings: LiquidGlassSettings(
-            chromaticAberration: 0.5,
-            glassColor: theme.colorScheme.primary.withValues(alpha: 0.25),
-          ),
+          isPrimary: true,
           child: TextButton(
             onPressed: _toggleDeckMode,
             child: Text(
               _showFullDeck ? 'Show Today' : 'Show All',
-              style: TextStyle(color: theme.colorScheme.onSurface),
+              style: TextStyle(color: theme.colorScheme.surface),
             ),
           ),
         ),
@@ -114,59 +114,68 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
   }
 
   Future<void> _openSortPicker() async {
-    final value = await showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        final options = [
-          ('Creation Date', 'creationTime'),
-          ('Smart Review', 'sm2'),
-        ];
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom:
-                MediaQuery.of(context).padding.bottom +
-                AppElementSizes.spacingMd,
-            left: AppElementSizes.spacingMd,
-            right: AppElementSizes.spacingMd,
-          ),
-          child: GlassCard(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: options.map((option) {
-                final isSelected = _sortBy == option.$2;
-                return GlassListTile(
-                  leading: isSelected
-                      ? const Icon(Icons.check_circle, size: 20)
-                      : const SizedBox(width: 20),
-                  title: Text(
-                    option.$1,
-                    style: TextStyle(
-                      color: Colors.white,
-                      // primary : theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  onTap: () => Navigator.pop(ctx, option.$2),
-                );
-              }).toList(),
+    try {
+      final selected = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) {
+          final options = [
+            ('Creation Date', 'creationTime'),
+            ('Smart Review', 'sm2'),
+          ];
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom:
+                  MediaQuery.of(ctx).padding.bottom + AppElementSizes.spacingMd,
+              left: AppElementSizes.spacingMd,
+              right: AppElementSizes.spacingMd,
             ),
-          ),
-        );
-      },
-    );
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: options.map((option) {
+                  final isSelected = _sortBy == option.$2;
+                  return GlassListTile(
+                    leading: isSelected
+                        ? const Icon(Icons.check_circle, size: 20)
+                        : const SizedBox(width: 20),
+                    title: Text(
+                      option.$1,
+                      style: TextStyle(
+                        color: Theme.of(ctx).colorScheme.onSurface,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(ctx).colorScheme.primary,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(ctx, option.$2),
+                    isLast: option == options.last,
+                  );
+                }).toList(),
+              ),
+            ),
+          );
+        },
+      );
 
-    if (value != null && mounted) {
-      setState(() => _sortBy = value);
-      _loadCards();
+      if (selected == null || !mounted) return;
+
+      setState(() => _sortBy = selected);
+      await _loadCards();
+    } catch (e, stackTrace) {
+      debugPrint('FlashCardCarousel _openSortPicker error: $e');
+      debugPrintStack(stackTrace: stackTrace);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     final height = getScreenHeight(context) * 0.2;
 
-  final theme = Theme.of(context);
+    final theme = Theme.of(context);
     return SafeArea(
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -201,7 +210,7 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                     const SizedBox(width: AppElementSizes.spacingSm),
                     Expanded(
                       child: DeckSelector(
-                        width: null, // Let it expand inside Expanded
+                        width: 200, // Let it expand inside Expanded
                         selectedDeck: _selectedDeck,
                         onDeckSelected: (d) {
                           setState(() {
@@ -277,7 +286,9 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                                   _showFullDeck
                                       ? 'No cards found.'
                                       : 'No cards due. Show all or add new.',
-                                  style: TextStyle(color: theme.colorScheme.onSurface),
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurface,
+                                  ),
                                 ),
                                 if (_hasAnyCardsInDeck) ...[
                                   const SizedBox(

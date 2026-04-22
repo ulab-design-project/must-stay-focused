@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+import 'package:must_stay_focused/style/dialogs.dart';
+import 'package:must_stay_focused/style/forms.dart';
+import 'package:must_stay_focused/style/picker.dart';
 import 'dart:async';
 
 import '../../data/models/flash_card.dart';
@@ -11,7 +13,7 @@ class DeckSelector extends StatefulWidget {
   final Deck? selectedDeck;
   final ValueChanged<Deck> onDeckSelected;
   final VoidCallback? onDeckChanged;
-  final double? width;
+  final double width;
 
   const DeckSelector({
     super.key,
@@ -120,10 +122,15 @@ class _DeckSelectorState extends State<DeckSelector> {
                 children: [
                   GlassTextField(
                     placeholder: 'Search decks...',
-                    prefixIcon: const Icon(
+                    placeholderStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    prefixIcon: Icon(
                       Icons.search,
                       size: 18,
-                      color: Colors.white70,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                     onChanged: (v) => setStateDialog(() => _searchQuery = v),
                   ),
@@ -138,7 +145,9 @@ class _DeckSelectorState extends State<DeckSelector> {
                         return ListTile(
                           title: Text(
                             deck.name,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: Theme.of(ctx).colorScheme.onSurface,
+                            ),
                           ),
                           onTap: () {
                             widget.onDeckSelected(deck);
@@ -147,9 +156,10 @@ class _DeckSelectorState extends State<DeckSelector> {
                           trailing: deck.name == 'Default'
                               ? null
                               : IconButton(
-                                  icon: const Icon(
+                                  icon: Icon(
                                     Icons.edit,
-                                    color: Colors.white70,
+                                    color: Theme.of(ctx).colorScheme.onSurface
+                                        .withValues(alpha: 0.7),
                                     size: 18,
                                   ),
                                   onPressed: () {
