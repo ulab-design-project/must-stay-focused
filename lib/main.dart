@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import 'data/db/isar_service.dart';
 import 'data/db/supabase_client.dart';
@@ -20,11 +19,8 @@ void main() async {
 
   Object? initError;
   StackTrace? initStackTrace;
-  var liquidGlassReady = false;
 
   try {
-    await LiquidGlassWidgets.initialize();
-    liquidGlassReady = true;
     await sdb.init();
     await IsarService().init();
     await AppInterceptionService().syncTrackedAppsFromDatabase();
@@ -35,27 +31,16 @@ void main() async {
     initStackTrace = stackTrace;
   }
 
-  final app = MSF(
-    initError: initError,
-    initStackTrace: initStackTrace,
-  );
+  final app = MSF(initError: initError, initStackTrace: initStackTrace);
 
-  if (liquidGlassReady) {
-    runApp(LiquidGlassWidgets.wrap(app));
-  } else {
-    runApp(app);
-  }
+  runApp(app);
 }
 
 class MSF extends StatelessWidget {
   final Object? initError;
   final StackTrace? initStackTrace;
 
-  const MSF({
-    super.key,
-    this.initError,
-    this.initStackTrace,
-  });
+  const MSF({super.key, this.initError, this.initStackTrace});
 
   @override
   Widget build(BuildContext context) {
@@ -73,20 +58,12 @@ class MSF extends StatelessWidget {
     return AnimatedBuilder(
       animation: themeController,
       builder: (context, _) {
-        final app = MaterialApp(
+        return MaterialApp(
           navigatorKey: appNavigatorKey,
           title: 'Must Stay Focused',
           debugShowCheckedModeBanner: false,
           theme: themeController.currentTheme,
           home: const Home(),
-        );
-
-        return GlassTheme(
-          data: themeController.currentGlassTheme,
-          child: GlassMotionScope(
-            lightAngle: themeController.gyroscopeLightAngleStream,
-            child: app,
-          ),
         );
       },
     );
@@ -97,15 +74,14 @@ class _StartupErrorScreen extends StatelessWidget {
   final Object error;
   final StackTrace? stackTrace;
 
-  const _StartupErrorScreen({
-    required this.error,
-    this.stackTrace,
-  });
+  const _StartupErrorScreen({required this.error, this.stackTrace});
 
   @override
   Widget build(BuildContext context) {
-    final stackTraceText = stackTrace?.toString() ?? 'No stack trace available.';
-    final copyText = 'Startup failed\n\nError:\n${error.toString()}\n\nStack trace:\n$stackTraceText';
+    final stackTraceText =
+        stackTrace?.toString() ?? 'No stack trace available.';
+    final copyText =
+        'Startup failed\n\nError:\n${error.toString()}\n\nStack trace:\n$stackTraceText';
 
     return Scaffold(
       body: SafeArea(
@@ -146,7 +122,10 @@ class _StartupErrorScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     stackTrace.toString(),
-                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ],

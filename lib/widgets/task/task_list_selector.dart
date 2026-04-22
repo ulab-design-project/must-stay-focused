@@ -10,12 +10,15 @@
 //    - All DB operations via global taskRepo instance
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'dart:async';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
 import '../../style/buttons.dart';
+import '../../style/dialogs.dart';
+import '../../style/forms.dart';
+import '../../style/list_tile.dart';
+import '../../style/picker.dart';
 import '../../style/theme.dart';
 import '../../utils/task_list_icons.dart';
 import 'task_list_edit_dialog.dart';
@@ -113,7 +116,7 @@ class _TaskListSelectorState extends State<TaskListSelector> {
     final theme = Theme.of(context);
 
     return GlassPicker(
-      width: widget.width,
+      width: widget.width ?? 120,
       height: 36,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       value: widget.selectedList?.name ?? 'Archived',
@@ -140,101 +143,115 @@ class _TaskListSelectorState extends State<TaskListSelector> {
       context: context,
       builder: (ctx) {
         _searchQuery = '';
-        _filterLists();
         return StatefulBuilder(
-          builder: (ctx, setDialogState) => GlassDialog(
-            title: 'Select List',
-            maxWidth: 360,
-            actions: [
-              GlassDialogAction(
-                label: 'Close',
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  GlassTextField(
-                    placeholder: 'Search...',
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.white.withValues(alpha: 0.75),
-                      size: 18,
-                    ),
-                    onChanged: (v) {
-                      _searchQuery = v;
-                      _filterLists();
-                      setDialogState(() {});
-                    },
-                  ),
-                  const SizedBox(height: AppElementSizes.spacingSm),
-                  SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _filteredLists.length,
-                      itemBuilder: (ctx, i) {
-                        final list = _filteredLists[i];
-                        final isProtectedList = list.isDefault;
-                        return GlassListTile(
-                          leading: Icon(
-                            taskListIconFromCodePoint(list.iconCodePoint),
-                            color: Colors.white,
-                          ),
-                          title: Text(
-                            list.name,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          trailing: isProtectedList
-                              ? null
-                              : GlassSquircleIconButton(
-                                  size: 30,
-                                  color: Colors.white,
-                                  icon: const Icon(Icons.edit, size: 16),
-                                  onPressed: () {
-                                    Navigator.pop(ctx);
-                                    _openEditDialog(list: list);
-                                  },
-                                ),
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            widget.onListSelected(list);
-                          },
-                          isLast: i == _filteredLists.length - 1,
-                        );
+          builder: (ctx, setDialogState) {
+            final theme = Theme.of(ctx);
+            return GlassDialog(
+              title: 'Select List',
+              maxWidth: 360,
+              actions: [
+                GlassDialogAction(
+                  label: 'Close',
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GlassTextField(
+                      placeholder: 'Search...',
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.75,
+                        ),
+                        size: 18,
+                      ),
+                      onChanged: (v) {
+                        _searchQuery = v;
+                        _filterLists();
+                        setDialogState(() {});
                       },
                     ),
-                  ),
-                  const SizedBox(height: AppElementSizes.spacingSm),
-                  GlassListTile(
-                    leading: Icon(Icons.archive, color: Colors.white),
-                    title: Text(
-                      'Archived',
-                      style: TextStyle(color: Colors.white),
+                    const SizedBox(height: AppElementSizes.spacingSm),
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: _filteredLists.length,
+                        itemBuilder: (ctx, i) {
+                          final list = _filteredLists[i];
+                          final isProtectedList = list.isDefault;
+                          return GlassListTile(
+                            leading: Icon(
+                              taskListIconFromCodePoint(list.iconCodePoint),
+                              color: theme.colorScheme.onSurface,
+                            ),
+                            title: Text(
+                              list.name,
+                              style: TextStyle(
+                                color: theme.colorScheme.onSurface,
+                              ),
+                            ),
+                            trailing: isProtectedList
+                                ? null
+                                : GlassSquircleIconButton(
+                                    size: 30,
+                                    icon: const Icon(Icons.edit, size: 16),
+                                    onPressed: () {
+                                      Navigator.pop(ctx);
+                                      _openEditDialog(list: list);
+                                    },
+                                  ),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              widget.onListSelected(list);
+                            },
+                            isLast: i == _filteredLists.length - 1,
+                          );
+                        },
+                      ),
                     ),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      widget.onArchivedToggled?.call();
-                    },
-                    isLast: false,
-                  ),
-                  GlassListTile(
-                    leading: Icon(Icons.add, color: Colors.white),
-                    title: Text(
-                      'Add List',
-                      style: TextStyle(color: Colors.white),
+                    const SizedBox(height: AppElementSizes.spacingSm),
+                    GlassListTile(
+                      leading: Icon(
+                        Icons.archive,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      title: Text(
+                        'Archived',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        widget.onArchivedToggled?.call();
+                      },
+                      isLast: false,
                     ),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      _openEditDialog();
-                    },
-                    isLast: true,
-                  ),
-                ],
+                    SizedBox(height: AppElementSizes.spacingSm),
+
+
+                    GlassListTile(
+                      leading: Icon(
+                        Icons.add,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      title: Text(
+                        'Add List',
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                      ),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _openEditDialog();
+                      },
+                      isLast: true,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

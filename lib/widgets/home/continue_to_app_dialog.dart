@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
+
+import '../../style/dialogs.dart';
 
 enum ContinueToAppAction { stayFocused, openSettings, challenge, continueToApp }
 
@@ -37,19 +38,20 @@ Future<ContinueToAppAction> showContinueToAppDialog(
         title: 'Continue to $appName',
         content: Text(
           message,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
           textAlign: TextAlign.center,
         ),
         actions: [
-          GlassDialogAction(
-            label: 'Stay Focused',
-            onPressed: () =>
-                Navigator.pop(context, ContinueToAppAction.stayFocused),
-          ),
+          
           GlassDialogAction(
             label: primaryLabel,
-            isPrimary: true,
             onPressed: () => Navigator.pop(context, primaryAction),
+          ),
+          GlassDialogAction(
+            label: 'Stay Focused',
+            isPrimary: true,
+            onPressed: () =>
+                Navigator.pop(context, ContinueToAppAction.stayFocused),
           ),
         ],
       );

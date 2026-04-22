@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import '../../services/permission_service.dart';
 import '../../services/appUsageMonitor/android_app_usage.dart';
+import '../../style/dialogs.dart';
 import '../../style/theme.dart';
 
 class InterceptionPermissionsDialog extends StatefulWidget {
   const InterceptionPermissionsDialog({super.key});
 
   @override
-  State<InterceptionPermissionsDialog> createState() => _InterceptionPermissionsDialogState();
+  State<InterceptionPermissionsDialog> createState() =>
+      _InterceptionPermissionsDialogState();
 }
 
-class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsDialog> with WidgetsBindingObserver {
+class _InterceptionPermissionsDialogState
+    extends State<InterceptionPermissionsDialog>
+    with WidgetsBindingObserver {
   bool _notificationsEnabled = false;
-  bool _usageEnabled = false; 
+  bool _usageEnabled = false;
   bool _accessibilityEnabled = false;
   bool _overlayEnabled = false;
   bool _batteryOptEnabled = false;
@@ -45,7 +49,8 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
     final overlay = await Permission.systemAlertWindow.isGranted;
     final battery = await Permission.ignoreBatteryOptimizations.isGranted;
     final usage = await PermissionService().isUsageAccessGranted();
-    final accessibility = await PermissionService().isAccessibilityServiceEnabled();
+    final accessibility = await PermissionService()
+        .isAccessibilityServiceEnabled();
 
     setState(() {
       _notificationsEnabled = notif;
@@ -93,9 +98,13 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
+          Text(
             "We need the following permissions to track and limit your app usage.",
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppElementSizes.spacingLg * 1.5),
@@ -140,17 +149,25 @@ class _InterceptionPermissionsDialogState extends State<InterceptionPermissionsD
     );
   }
 
-  Widget _buildPermissionTile({required String title, required bool enabled, required VoidCallback onTap}) {
+  Widget _buildPermissionTile({
+    required String title,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    final onSurface = Theme.of(context).colorScheme.onSurface;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white10,
         borderRadius: BorderRadius.circular(AppElementSizes.cardRadius),
       ),
       child: ListTile(
-        title: Text(title, style: const TextStyle(color: Colors.white)),
+        title: Text(title, style: TextStyle(color: onSurface)),
         trailing: enabled
-            ? const Icon(Icons.check_circle, color: Colors.white)
-            : const Icon(Icons.radio_button_unchecked, color: Colors.white54),
+            ? Icon(Icons.check_circle, color: onSurface)
+            : Icon(
+                Icons.radio_button_unchecked,
+                color: onSurface.withValues(alpha: 0.54),
+              ),
         onTap: enabled ? null : onTap,
       ),
     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/community_template.dart';
 import '../../data/repositories/community_repository.dart';
 import '../../style/background.dart';
+import '../../style/tabs.dart';
 import '../../style/theme.dart';
 import '../../widgets/community/template_list_view.dart';
 import '../../widgets/community/template_search_bar.dart';
@@ -17,8 +17,9 @@ class CommunityTemplatesPage extends StatefulWidget {
   State<CommunityTemplatesPage> createState() => _CommunityTemplatesPageState();
 }
 
-class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
-  int _tabIndex = 0;
+class _CommunityTemplatesPageState extends State<CommunityTemplatesPage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
   bool _isLoading = true;
   String? _errorMessage;
   int _loadRequestId = 0;
@@ -28,7 +29,7 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
   String? _downloadingTemplateId;
 
   String get _activeType {
-    if (_tabIndex == 1) {
+    if (_tabController.index == 1) {
       return CommunityTemplateType.flashCard;
     }
     return CommunityTemplateType.taskList;
@@ -37,7 +38,25 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_handleTabChange);
     _loadTemplates();
+  }
+
+  @override
+  void dispose() {
+    _tabController.removeListener(_handleTabChange);
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _handleTabChange() {
+    if (!_tabController.indexIsChanging) {
+      setState(() {});
+      if (_tabController.index != 2) {
+        _loadTemplates();
+      }
+    }
   }
 
   Future<void> _loadTemplates({String? forcedType}) async {
@@ -121,6 +140,7 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
   }
 
   Widget _buildListContent() {
+    final theme = Theme.of(context);
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -132,7 +152,20 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
           child: Text(
             _errorMessage!,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: theme.colorScheme.onSurface),
+          ),
+        ),
+      );
+    }
+
+    if (_errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppElementSizes.spacingMd),
+          child: Text(
+            _errorMessage!,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: theme.colorScheme.onSurface),
           ),
         ),
       );
@@ -165,7 +198,7 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final body = _tabIndex == 2
+    final body = _tabController.index == 2
         ? TemplateUpload(onUploaded: () {})
         : _buildListContent();
 
@@ -191,30 +224,23 @@ class _CommunityTemplatesPageState extends State<CommunityTemplatesPage> {
             ),
             child: GlassTabBar(
               height: 56,
-              iconSize: 18,
-              indicatorColor: theme.colorScheme.secondary.withValues(alpha: 0.5),
+              controller: _tabController,
+              indicatorColor: theme.colorScheme.secondary.withValues(
+                alpha: 0.5,
+              ),
               selectedIconColor: theme.colorScheme.onSurface,
-              unselectedIconColor:
-                  theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              unselectedIconColor: theme.colorScheme.onSurface.withValues(
+                alpha: 0.75,
+              ),
               selectedLabelStyle: TextStyle(color: theme.colorScheme.onSurface),
               unselectedLabelStyle: TextStyle(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
               ),
               tabs: const [
-                GlassTab(label: 'TaskList', icon: Icon(Icons.checklist_rtl)),
-                GlassTab(label: 'FlashCards', icon: Icon(Icons.style)),
-                GlassTab(label: 'Upload', icon: Icon(Icons.upload_rounded)),
+                Tab(icon: Icon(Icons.checklist_rtl), child: Text('TaskList')),
+                Tab(icon: Icon(Icons.style), child: Text('FlashCards')),
+                Tab(icon: Icon(Icons.upload_rounded), child: Text('Upload')),
               ],
-              selectedIndex: _tabIndex,
-              onTabSelected: (index) {
-                if (_tabIndex == index) {
-                  return;
-                }
-                setState(() => _tabIndex = index);
-                if (index != 2) {
-                  _loadTemplates();
-                }
-              },
             ),
           ),
         ),

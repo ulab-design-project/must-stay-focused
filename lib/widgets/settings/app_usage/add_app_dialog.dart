@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:isar/isar.dart';
-import 'package:liquid_glass_widgets/widgets/input/glass_text_field.dart';
-import 'package:liquid_glass_widgets/widgets/overlays/glass_dialog.dart';
+
 import 'package:must_stay_focused/data/db/isar_service.dart';
 import 'package:must_stay_focused/data/models/app_usage.dart';
 import 'package:must_stay_focused/data/models/user_settings.dart';
 import 'package:must_stay_focused/services/app_interception_service.dart';
 import 'package:must_stay_focused/services/appUsageMonitor/android_app_usage.dart';
+import 'package:must_stay_focused/style/dialogs.dart';
+import 'package:must_stay_focused/style/forms.dart';
 import 'package:must_stay_focused/style/theme.dart';
 
 class AddAppDialog extends StatefulWidget {
@@ -38,7 +39,7 @@ class _AddAppDialogState extends State<AddAppDialog> {
 
       // Retrieve installed apps
       final allAppsRaw = await AndroidAppUsageMonitor().getInstalledApps();
-      
+
       // Exclude must_stay_focused from the allowed apps to track
       final apps = allAppsRaw.where((app) {
         final pkg = app.packageName.toLowerCase();
@@ -68,7 +69,7 @@ class _AddAppDialogState extends State<AddAppDialog> {
     setState(() {
       _filteredApps = _allApps.where((app) {
         return app.name.toLowerCase().contains(query) ||
-               app.packageName.toLowerCase().contains(query);
+            app.packageName.toLowerCase().contains(query);
       }).toList();
     });
   }
@@ -91,16 +92,27 @@ class _AddAppDialogState extends State<AddAppDialog> {
         await idb.appUsages.put(usage);
       });
       await AppInterceptionService().syncTrackedAppsFromDatabase();
-      if (mounted) setState(() { _existingAppIds.add(app.packageName); });
+      if (mounted) {
+        setState(() {
+          _existingAppIds.add(app.packageName);
+        });
+      }
     } else {
-      final existing = await idb.appUsages.where().appIdEqualTo(app.packageName).findFirst();
+      final existing = await idb.appUsages
+          .where()
+          .appIdEqualTo(app.packageName)
+          .findFirst();
       if (existing != null) {
         await idb.writeTxn(() async {
           await idb.appUsages.delete(existing.id);
         });
       }
       await AppInterceptionService().syncTrackedAppsFromDatabase();
-      if (mounted) setState(() { _existingAppIds.remove(app.packageName); });
+      if (mounted) {
+        setState(() {
+          _existingAppIds.remove(app.packageName);
+        });
+      }
     }
   }
 
@@ -138,7 +150,15 @@ class _AddAppDialogState extends State<AddAppDialog> {
           GlassTextField(
             controller: _searchCtrl,
             placeholder: "Search apps...",
-            prefixIcon: const Icon(Icons.search, color: Colors.white54),
+            placeholderStyle: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+            ),
+            prefixIcon: Icon(
+              Icons.search,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.54),
+            ),
           ),
           const SizedBox(height: AppElementSizes.spacingLg),
           if (_isLoading)
@@ -152,23 +172,24 @@ class _AddAppDialogState extends State<AddAppDialog> {
                 itemBuilder: (context, index) {
                   final app = _filteredApps[index];
                   final isTracked = _existingAppIds.contains(app.packageName);
+                  final onSurface = Theme.of(context).colorScheme.onSurface;
                   return CheckboxListTile(
                     activeColor: Theme.of(context).colorScheme.primary,
-                    checkColor: Colors.white,
+                    checkColor: onSurface,
                     secondary: SizedBox(
                       width: AppElementSizes.buttonSquare,
                       height: AppElementSizes.buttonSquare,
                       child: app.icon != null
                           ? Image.memory(app.icon!)
-                          : const Icon(Icons.android, color: Colors.white),
+                          : Icon(Icons.android, color: onSurface),
                     ),
-                    title: Text(
-                      app.name,
-                      style: const TextStyle(color: Colors.white),
-                    ),
+                    title: Text(app.name, style: TextStyle(color: onSurface)),
                     subtitle: Text(
                       app.packageName,
-                      style: const TextStyle(fontSize: 10, color: Colors.white70),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                     value: isTracked,
                     onChanged: (val) {
@@ -178,7 +199,6 @@ class _AddAppDialogState extends State<AddAppDialog> {
                 },
               ),
             ),
-          const SizedBox(height: AppElementSizes.spacingLg),
         ],
       ),
       actions: [
@@ -190,4 +210,3 @@ class _AddAppDialogState extends State<AddAppDialog> {
     );
   }
 }
-

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
-import '../../../style/buttons.dart';
-import 'app_usage_data.dart';
+
 import '../../../data/models/app_usage.dart';
+import '../../../style/buttons.dart';
+import '../../../style/list_tile.dart';
 import '../../../style/theme.dart';
+import 'app_usage_data.dart';
 
 class AppUsageCard extends StatelessWidget {
   final AppUsage appUsage;
@@ -23,8 +24,8 @@ class AppUsageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconSize = AppElementSizes.buttonSquare;
-    final iconCacheSize =
-        (iconSize * MediaQuery.devicePixelRatioOf(context)).round();
+    final iconCacheSize = (iconSize * MediaQuery.devicePixelRatioOf(context))
+        .round();
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
 
@@ -53,8 +54,7 @@ class AppUsageCard extends StatelessWidget {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (context) =>
-                    AppUsageDataDialog(appUsage: appUsage),
+                builder: (context) => AppUsageDataDialog(appUsage: appUsage),
               );
             },
           ),

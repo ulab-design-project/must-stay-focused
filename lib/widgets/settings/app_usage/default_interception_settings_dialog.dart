@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../../data/db/isar_service.dart';
 import '../../../data/models/user_settings.dart';
+import '../../../style/containers.dart';
+import '../../../style/dialogs.dart';
+import '../../../style/forms.dart';
+import '../../../style/list_tile.dart';
+import '../../../style/picker.dart';
 import '../../../style/theme.dart';
 
 class DefaultInterceptionSettingsDialog extends StatefulWidget {
@@ -96,15 +99,23 @@ class _DefaultInterceptionSettingsDialogState
               mainAxisSize: MainAxisSize.min,
               children: options.map((option) {
                 final isSelected = option == _selectedChallengeType;
-                return GlassListTile(
-                  title: Text(
-                    option,
-                    style: const TextStyle(color: Colors.white),
+                return Padding(
+                  padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                  child: GlassListTile(
+                    title: Text(
+                      option,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(context, option),
                   ),
-                  trailing: isSelected
-                      ? const Icon(Icons.check_circle, color: Colors.white)
-                      : null,
-                  onTap: () => Navigator.pop(context, option),
                 );
               }).toList(),
             ),
@@ -146,6 +157,7 @@ class _DefaultInterceptionSettingsDialogState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GlassDialog(
       title: 'Default App Settings',
       content: _isLoading
@@ -162,7 +174,7 @@ class _DefaultInterceptionSettingsDialogState
                 Text(
                   'Overtime Limit (0 to block)',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     fontSize: AppTextSizes.body,
                   ),
                 ),
@@ -175,16 +187,13 @@ class _DefaultInterceptionSettingsDialogState
                         controller: _overtimeCtrl,
                         placeholder: 'Minutes',
                         keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
                       ),
                     ),
                     const SizedBox(width: AppElementSizes.spacingSm),
                     Text(
                       'Minutes for Challenge',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: theme.colorScheme.onSurface,
                         fontSize: AppTextSizes.small,
                       ),
                     ),
@@ -194,7 +203,7 @@ class _DefaultInterceptionSettingsDialogState
                 Text(
                   'Challenge Type',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: theme.colorScheme.onSurface,
                     fontSize: AppTextSizes.body,
                   ),
                 ),
@@ -208,18 +217,20 @@ class _DefaultInterceptionSettingsDialogState
                       horizontal: AppElementSizes.spacingSm,
                     ),
                     value: _selectedChallengeType,
-                    textStyle: const TextStyle(
+                    textStyle: TextStyle(
                       fontSize: AppTextSizes.body,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                     placeholderStyle: TextStyle(
                       fontSize: AppTextSizes.body,
-                      color: Colors.white.withValues(alpha: 0.65),
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.65,
+                      ),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.expand_more,
                       size: AppElementSizes.icon,
-                      color: Colors.white,
+                      color: theme.colorScheme.onSurface,
                     ),
                     onTap: _openChallengePicker,
                   ),

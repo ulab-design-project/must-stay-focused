@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 import '../data/db/isar_service.dart';
 import '../data/models/user_settings.dart';
-import '../utils/theme_helpers.dart';
 
+/// Application theme definitions - Light and Dark variants for Purple and Green color schemes.
 final Map<String, ThemeData> themes = {
   'Purple Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFFA666CC),
-    scaffoldBackgroundColor: const Color(0xFFEADCF2),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 232, 207, 247),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF8D47B3),
       secondary: Color(0xFFA666CC),
@@ -22,7 +19,7 @@ final Map<String, ThemeData> themes = {
   'Purple Dark': ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF7D4D99),
-    scaffoldBackgroundColor: const Color(0xFF1B121A),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 52, 30, 49),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF783D99),
       secondary: Color(0xFF915AB3),
@@ -33,7 +30,7 @@ final Map<String, ThemeData> themes = {
   'Green Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFF66CC66),
-    scaffoldBackgroundColor: const Color(0xFFDCF2DC),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 204, 250, 204),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF47B347),
       secondary: Color(0xFF66CC66),
@@ -44,7 +41,7 @@ final Map<String, ThemeData> themes = {
   'Green Dark': ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF4D994D),
-    scaffoldBackgroundColor: const Color(0xFF121A12),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 23, 37, 23),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF3D993D),
       secondary: Color(0xFF5AB35A),
@@ -52,8 +49,54 @@ final Map<String, ThemeData> themes = {
       onSurface: Color(0xFFD7F0D7),
     ),
   ),
+  'Blue Light': ThemeData(
+    brightness: Brightness.light,
+    primaryColor: const Color(0xFF66ACFF),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 209, 228, 252),
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFF4285F4),
+      secondary: Color(0xFF66ACFF),
+      surface: Color(0xFFF0F7FF),
+      onSurface: Color(0xFF0D1B2A),
+    ),
+  ),
+  'Blue Dark': ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: const Color(0xFF4A7ED9),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 13, 22, 42),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF3B6BCF),
+      secondary: Color(0xFF5A8CE5),
+      surface: Color(0xFF162036),
+      onSurface: Color(0xFFD8E6FF),
+    ),
+  ),
+  'Red Light': ThemeData(
+    brightness: Brightness.light,
+    primaryColor: const Color(0xFFFF8A80),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 250, 223, 227),
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFFEA4335),
+      secondary: Color(0xFFFF8A80),
+      surface: Color(0xFFFFF5F5),
+      onSurface: Color(0xFF2A1215),
+    ),
+  ),
+ 
+  'Orange Dark': ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: const Color(0xFFF9A825),
+    scaffoldBackgroundColor: const Color(0xFF1A1500),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFFF57F17),
+      secondary: Color(0xFFFFB300),
+      surface: Color(0xFF261E00),
+      onSurface: Color(0xFFFFF8E1),
+    ),
+  ),
 };
 
+/// Text size constants used throughout the app.
 class AppTextSizes {
   static const double h1 = 28;
   static const double h2 = 24;
@@ -66,6 +109,7 @@ class AppTextSizes {
   static const double unavailable = 12;
 }
 
+/// Element size constants used throughout the app.
 class AppElementSizes {
   static const double buttonSquare = 40;
   static const double buttonHeight = 40;
@@ -79,115 +123,48 @@ class AppElementSizes {
   static const double spacingLg = 16;
 }
 
-class Backgrounds{
-  static const String iridescent = 'assets/bgvid/3.mp4';
-  static const String gradients = 'assets/bgvid/2.mp4';
+/// Glass effect constants.
+class GlassEffects {
+  /// Opacity for glass card backgrounds (0.5 as specified)
+  static const double opacity = 0.5;
+
+  /// Opacity for glass stroke/border (0.3 as specified)
+  static const double strokeOpacity = 0.5;
+
+  /// Blur radius not used directly (laggy), kept for reference
+  static const double blurSigma = 60.0;
+
+  /// Corner radius for glass elements
+  static final double radius = AppElementSizes.cardRadius;
+
+  /// Glow intensity on hover
+  static const double glowIntensity = 0.15;
+
+  /// Stroke width for glass border
+  static const double strokeWidth = 1.0;
 }
 
+/// Controller for managing theme changes and gyroscope settings.
 class ThemeController extends ChangeNotifier {
-  static const double _primaryBlendRatio = 0.4;
-
   String _currentThemeKey = 'Purple Light';
-  bool _isGyroscopeEnabled = false;
   bool _initialized = false;
 
-  late List<Color> lightColorSteps;
-  late List<Color> darkColorSteps;
-
-  final double glassOpacity = 0.1;
-  final double glassBlur = 50.0;
+  ThemeController() {
+    _loadTheme();
+  }
 
   String get currentThemeKey => _currentThemeKey;
   ThemeData get currentTheme =>
       themes[_currentThemeKey] ?? themes['Purple Light']!;
-  bool get isGyroscopeEnabled => _isGyroscopeEnabled;
   bool get isInitialized => _initialized;
-
-  Stream<double>? get gyroscopeLightAngleStream {
-    if (!_isGyroscopeEnabled) {
-      return null;
-    }
-
-    if (kIsWeb ||
-        (defaultTargetPlatform != TargetPlatform.android &&
-            defaultTargetPlatform != TargetPlatform.iOS)) {
-      return null;
-    }
-
-    try {
-      return gyroscopeEventStream(samplingPeriod: SensorInterval.normalInterval)
-          .map((event) {
-            return event.y.clamp(-1.2, 1.2);
-          })
-          .handleError((Object error, StackTrace stackTrace) {
-            debugPrint('ThemeController gyroscope stream error: $error');
-            debugPrintStack(stackTrace: stackTrace);
-          });
-    } catch (e, stackTrace) {
-      debugPrint('ThemeController gyroscope stream init error: $e');
-      debugPrintStack(stackTrace: stackTrace);
-      return null;
-    }
-  }
-
-  GlassThemeData get currentGlassTheme {
-    final theme = currentTheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final baseSettings =
-        (isDark
-            ? GlassThemeVariant.dark.settings
-            : GlassThemeVariant.light.settings) ??
-        const LiquidGlassSettings();
-    final primaryTint = theme.colorScheme.primary.withValues(
-      alpha: isDark ? 0.28 : 0.22,
-    );
-
-    final tintedSettings = baseSettings.copyWith(
-      glassColor:
-          Color.lerp(
-            baseSettings.glassColor,
-            primaryTint,
-            _primaryBlendRatio,
-          ) ??
-          primaryTint,
-      thickness: isDark ? 46 : 36,
-      blur: isDark ? 12 : 10,
-      lightIntensity: isDark ? 1.45 : 1.2,
-      ambientStrength: isDark ? 0.34 : 0.26,
-      saturation: 1.28,
-      chromaticAberration: 0.8,
-    );
-
-    final variant = GlassThemeVariant(
-      settings: tintedSettings,
-      quality: GlassQuality.standard,
-      glowColors: GlassGlowColors(primary: theme.colorScheme.primary),
-    );
-
-    return GlassThemeData(light: variant, dark: variant);
-  }
-
-  ThemeController() {
-    _updateColorSteps();
-    _loadTheme();
-  }
-
-  void _updateColorSteps() {
-    final curTheme = currentTheme;
-    lightColorSteps = generateColorSteps(curTheme.primaryColor, lighter: true);
-    darkColorSteps = generateColorSteps(curTheme.primaryColor);
-  }
 
   Future<void> _loadTheme() async {
     try {
       var settingsConfig = await idb.userSettings.get(1);
-      if (settingsConfig != null) {
-        if (themes.containsKey(settingsConfig.themeMode)) {
-          _currentThemeKey = settingsConfig.themeMode;
-        }
-        _isGyroscopeEnabled = settingsConfig.gyroscopeGlassLightingEnabled;
+      if (settingsConfig != null &&
+          themes.containsKey(settingsConfig.themeMode)) {
+        _currentThemeKey = settingsConfig.themeMode;
       }
-      _updateColorSteps();
     } catch (e, stackTrace) {
       debugPrint('ThemeController load error: $e');
       debugPrintStack(stackTrace: stackTrace);
@@ -199,51 +176,24 @@ class ThemeController extends ChangeNotifier {
   Future<void> setTheme(String themeKey) async {
     if (themes.containsKey(themeKey) && _currentThemeKey != themeKey) {
       _currentThemeKey = themeKey;
-      _updateColorSteps();
       notifyListeners();
 
-      var settingsConfig = await idb.userSettings.get(1);
-      if (settingsConfig != null) {
-        settingsConfig.themeMode = themeKey;
-      } else {
-        settingsConfig = UserSettings()
-          ..id = 1
-          ..themeMode = themeKey
-          ..gyroscopeGlassLightingEnabled = _isGyroscopeEnabled;
+      try {
+        var settingsConfig = await idb.userSettings.get(1);
+        if (settingsConfig != null) {
+          settingsConfig.themeMode = themeKey;
+        } else {
+          settingsConfig = UserSettings()
+            ..id = 1
+            ..themeMode = themeKey;
+        }
+        await idb.writeTxn(() async {
+          await idb.userSettings.put(settingsConfig!);
+        });
+      } catch (e, stackTrace) {
+        debugPrint('ThemeController setTheme error: $e');
+        debugPrintStack(stackTrace: stackTrace);
       }
-
-      await idb.writeTxn(() async {
-        await idb.userSettings.put(settingsConfig!);
-      });
-    }
-  }
-
-  Future<void> setGyroscopeEnabled(bool enabled) async {
-    if (_isGyroscopeEnabled == enabled) {
-      return;
-    }
-
-    try {
-      _isGyroscopeEnabled = enabled;
-      notifyListeners();
-
-      var settingsConfig = await idb.userSettings.get(1);
-      if (settingsConfig != null) {
-        settingsConfig.gyroscopeGlassLightingEnabled = enabled;
-      } else {
-        settingsConfig = UserSettings()
-          ..id = 1
-          ..themeMode = _currentThemeKey
-          ..gyroscopeGlassLightingEnabled = enabled;
-      }
-
-      await idb.writeTxn(() async {
-        await idb.userSettings.put(settingsConfig!);
-      });
-    } catch (e, stackTrace) {
-      debugPrint('ThemeController setGyroscopeEnabled error: $e');
-      debugPrintStack(stackTrace: stackTrace);
-      rethrow;
     }
   }
 }

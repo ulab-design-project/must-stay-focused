@@ -29,14 +29,13 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         'Tasks',
         style: TextStyle(color: onSurface),
       ),
-      backgroundColor: Colors.transparent,
       elevation: 0,
       actions: [
         if (showDebugInterceptionButton)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: GlassSquircleIconButton(
-              icon: Icon(Icons.bug_report, color: onSurface),
+              icon: Icon(Icons.code, color: onSurface),
               onPressed: onDebugInterception,
             ),
           ),

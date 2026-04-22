@@ -21,6 +21,13 @@ class CommunityTemplateRemoteService {
       return 'CommunityTemplateRemoteService $action failed: Supabase denied access to public.community_templates. Re-run `dart run tool/reset_seed_supabase.dart` to apply GRANTs and disable RLS for community templates. Original error: $error\n$stackTrace';
     }
 
+    if (message.contains('523') ||
+        message.toLowerCase().contains('timeout') ||
+        message.toLowerCase().contains('connection') ||
+        message.toLowerCase().contains('network')) {
+      return 'CommunityTemplateRemoteService $action failed: Supabase connection timeout (HTTP 523). Ensure:\n1. Supabase local instance is running (supabase start)\n2. SUPABASE_URL and SUPABASE_ANON_KEY are set in .env\n3. Database is accessible and migrations are applied\n4. Docker network allows connections\nOriginal error: $error\n$stackTrace';
+    }
+
     return 'CommunityTemplateRemoteService $action failed: $error\n$stackTrace';
   }
 

@@ -1,9 +1,10 @@
 // File: lib/widgets/challenge/math_challenge.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
-import 'package:must_stay_focused/style/buttons.dart';
-import 'package:must_stay_focused/style/theme.dart';
+
+import '../../style/buttons.dart';
+import '../../style/containers.dart';
+import '../../style/forms.dart';
 
 enum DifficultySettings { easy, medium, hard }
 
@@ -106,9 +107,7 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
       }
 
       if (input == _correctAnswer) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Challenge solved. Press Continue.')),
         );
         setState(() {
@@ -165,7 +164,7 @@ class _MathChallengeWidgetState extends State<MathChallengeWidget> {
             SizedBox(
               width: 200,
               child: GlassTextField(
-                textStyle: TextStyle(color: theme.colorScheme.onSurface, ),
+                textStyle: TextStyle(color: theme.colorScheme.onSurface),
                 controller: _answerController,
                 placeholder: 'Write Answer',
                 placeholderStyle: TextStyle(

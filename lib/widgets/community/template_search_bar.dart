@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/community_template.dart';
+import '../../style/containers.dart';
+import '../../style/dialogs.dart';
+import '../../style/forms.dart';
+import '../../style/list_tile.dart';
+import '../../style/picker.dart';
 import '../../style/theme.dart';
 
 class TemplateSearchBar extends StatefulWidget {
@@ -99,22 +103,32 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   GlassListTile(
-                    title: const Text(
+                    title: Text(
                       'Recent',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     trailing: _sortBy == 'recent'
-                        ? const Icon(Icons.check, color: Colors.white)
+                        ? Icon(
+                            Icons.check,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
                         : null,
                     onTap: () => Navigator.pop(context, 'recent'),
                   ),
                   GlassListTile(
-                    title: const Text(
+                    title: Text(
                       'Downloads',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                     trailing: _sortBy == 'downloads'
-                        ? const Icon(Icons.check, color: Colors.white)
+                        ? Icon(
+                            Icons.check,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
                         : null,
                     onTap: () => Navigator.pop(context, 'downloads'),
                     isLast: true,
@@ -152,11 +166,17 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
                 title: 'Select Tags',
                 maxWidth: 360,
                 content: allTags.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(AppElementSizes.spacingSm),
+                    ? Padding(
+                        padding: const EdgeInsets.all(
+                          AppElementSizes.spacingSm,
+                        ),
                         child: Text(
                           'No tags available.',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(
+                            color: Theme.of(
+                              dialogContext,
+                            ).colorScheme.onSurface,
+                          ),
                         ),
                       )
                     : SizedBox(
@@ -169,16 +189,25 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
                             return GlassListTile(
                               title: Text(
                                 tag,
-                                style: const TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
                               ),
                               trailing: selected
-                                  ? const Icon(
+                                  ? Icon(
                                       Icons.check_circle,
-                                      color: Colors.white,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     )
-                                  : const Icon(
+                                  : Icon(
                                       Icons.circle_outlined,
-                                      color: Colors.white70,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.7),
                                     ),
                               onTap: () {
                                 setDialogState(() {
@@ -237,26 +266,15 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
     return Column(
       children: [
         GlassTextField(
-          useOwnLayer: true,
-          settings: LiquidGlassSettings(
-
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
-                ),
           controller: _searchController,
           placeholder: 'Search templates',
+          textStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface,
+          ),
           placeholderStyle: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             fontSize: AppTextSizes.body,
           ),
-          textStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface,
-          ),
-
           prefixIcon: Icon(
             Icons.search,
             color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
@@ -268,25 +286,19 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
           children: [
             Expanded(
               child: GlassPicker(
-                useOwnLayer: true,
-          glassSettings: LiquidGlassSettings(
-
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
-                ),
+                height: AppElementSizes.buttonHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 value: _selectedTags.isEmpty
                     ? 'Tags'
                     : 'Tags (${_selectedTags.length})',
                 placeholder: 'Tags',
-                height: AppElementSizes.inputHeight,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: TextStyle(
                   color: theme.colorScheme.onSurface,
                   fontSize: AppTextSizes.small,
+                ),
+                placeholderStyle: TextStyle(
+                  fontSize: AppTextSizes.small,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                 ),
                 icon: Icon(
                   Icons.expand_more,
@@ -299,23 +311,17 @@ class _TemplateSearchBarState extends State<TemplateSearchBar> {
             const SizedBox(width: AppElementSizes.spacingSm),
             Expanded(
               child: GlassPicker(
-                useOwnLayer: true,
-          glassSettings: LiquidGlassSettings(
-
-                  // TODO make singular origin for Glass Settings
-                  chromaticAberration: 0.5,
-                  thickness: 20,
-                  ambientStrength: 0.5,
-                  refractiveIndex: 1.33,
-                  glassColor: theme.primaryColor.withValues(alpha: 0.15),
-                ),
+                height: AppElementSizes.buttonHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
                 value: _sortBy == 'downloads' ? 'Downloads' : 'Recent',
                 placeholder: 'Sort by',
-                height: AppElementSizes.inputHeight,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
                 textStyle: TextStyle(
                   color: theme.colorScheme.onSurface,
                   fontSize: AppTextSizes.small,
+                ),
+                placeholderStyle: TextStyle(
+                  fontSize: AppTextSizes.small,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                 ),
                 icon: Icon(
                   Icons.expand_more,

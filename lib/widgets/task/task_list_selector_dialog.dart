@@ -5,10 +5,12 @@
 // Used within TaskEditDialog for simple list selection.
 
 import 'package:flutter/material.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 
 import '../../data/models/task.dart';
 import '../../data/repositories/task_repository.dart';
+import '../../style/dialogs.dart';
+import '../../style/forms.dart';
+import '../../style/list_tile.dart';
 import '../../style/theme.dart';
 import '../../utils/task_list_icons.dart';
 
@@ -64,52 +66,49 @@ class _TaskListSelectorDialogState extends State<TaskListSelectorDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           GlassTextField(
-                placeholder: 'Search...',
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.white.withValues(alpha: 0.75),
-                  size: 18,
-                ),
-                onChanged: (v) => setState(() => _searchQuery = v),
-              ),
-              const SizedBox(height: AppElementSizes.spacingSm),
-              if (_isLoading)
-                const Padding(
-                  padding: EdgeInsets.all(AppElementSizes.spacingLg),
-                  child: CircularProgressIndicator(),
-                )
-              else
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 280),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: _filteredLists.length,
-                    itemBuilder: (ctx, i) {
-                      final list = _filteredLists[i];
-                      final isSelected = list.id == widget.selectedList?.id;
-                      return GlassListTile(
-                        leading: Icon(
-                          taskListIconFromCodePoint(list.iconCodePoint),
-                          color: Colors.white,
-                        ),
-                        title: Text(
-                          list.name,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        trailing: isSelected
-                            ? Icon(
-                                Icons.check,
-                                color: theme.colorScheme.primary,
-                              )
-                            : null,
-                        onTap: () => Navigator.pop(ctx, list),
-                        isLast: i == _filteredLists.length - 1,
-                      );
-                    },
-                  ),
-                ),
-            ],
+            placeholder: 'Search...',
+            prefixIcon: Icon(
+              Icons.search,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              size: 18,
+            ),
+            onChanged: (v) => setState(() => _searchQuery = v),
           ),
+          const SizedBox(height: AppElementSizes.spacingSm),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(AppElementSizes.spacingLg),
+              child: CircularProgressIndicator(),
+            )
+          else
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 280),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _filteredLists.length,
+                itemBuilder: (ctx, i) {
+                  final list = _filteredLists[i];
+                  final isSelected = list.id == widget.selectedList?.id;
+                  return GlassListTile(
+                    leading: Icon(
+                      taskListIconFromCodePoint(list.iconCodePoint),
+                      color: theme.colorScheme.onSurface,
+                    ),
+                    title: Text(
+                      list.name,
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                    trailing: isSelected
+                        ? Icon(Icons.check, color: theme.colorScheme.primary)
+                        : null,
+                    onTap: () => Navigator.pop(ctx, list),
+                    isLast: i == _filteredLists.length - 1,
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
