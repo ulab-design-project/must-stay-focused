@@ -133,20 +133,23 @@ class _ChallengePageState extends State<ChallengePage> {
               mainAxisSize: MainAxisSize.min,
               children: _challengeTypes.map((type) {
                 final isSelected = type == _selectedChallengeType;
-                return GlassListTile(
-                  title: Text(
-                    type,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                return Padding(
+                  padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                  child: GlassListTile(
+                    title: Text(
+                      type,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(context, type),
                   ),
-                  trailing: isSelected
-                      ? Icon(
-                          Icons.check_circle,
-                          color: Theme.of(context).colorScheme.primary,
-                        )
-                      : null,
-                  onTap: () => Navigator.pop(context, type),
                 );
               }).toList(),
             ),

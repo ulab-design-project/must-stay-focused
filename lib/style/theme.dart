@@ -8,7 +8,7 @@ final Map<String, ThemeData> themes = {
   'Purple Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFFA666CC),
-    scaffoldBackgroundColor: const Color(0xFFEADCF2),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 232, 207, 247),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF8D47B3),
       secondary: Color(0xFFA666CC),
@@ -19,7 +19,7 @@ final Map<String, ThemeData> themes = {
   'Purple Dark': ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF7D4D99),
-    scaffoldBackgroundColor: const Color(0xFF1B121A),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 52, 30, 49),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF783D99),
       secondary: Color(0xFF915AB3),
@@ -30,7 +30,7 @@ final Map<String, ThemeData> themes = {
   'Green Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFF66CC66),
-    scaffoldBackgroundColor: const Color(0xFFDCF2DC),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 204, 250, 204),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF47B347),
       secondary: Color(0xFF66CC66),
@@ -41,7 +41,7 @@ final Map<String, ThemeData> themes = {
   'Green Dark': ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF4D994D),
-    scaffoldBackgroundColor: const Color(0xFF121A12),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 23, 37, 23),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF3D993D),
       secondary: Color(0xFF5AB35A),
@@ -52,7 +52,7 @@ final Map<String, ThemeData> themes = {
   'Blue Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFF66ACFF),
-    scaffoldBackgroundColor: const Color(0xFFDCEBFF),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 209, 228, 252),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFF4285F4),
       secondary: Color(0xFF66ACFF),
@@ -63,7 +63,7 @@ final Map<String, ThemeData> themes = {
   'Blue Dark': ThemeData(
     brightness: Brightness.dark,
     primaryColor: const Color(0xFF4A7ED9),
-    scaffoldBackgroundColor: const Color(0xFF0D1525),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 13, 22, 42),
     colorScheme: const ColorScheme.dark(
       primary: Color(0xFF3B6BCF),
       secondary: Color(0xFF5A8CE5),
@@ -74,7 +74,7 @@ final Map<String, ThemeData> themes = {
   'Red Light': ThemeData(
     brightness: Brightness.light,
     primaryColor: const Color(0xFFFF8A80),
-    scaffoldBackgroundColor: const Color(0xFFFFEBEE),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 250, 223, 227),
     colorScheme: const ColorScheme.light(
       primary: Color(0xFFEA4335),
       secondary: Color(0xFFFF8A80),
@@ -129,7 +129,7 @@ class GlassEffects {
   static const double opacity = 0.5;
 
   /// Opacity for glass stroke/border (0.3 as specified)
-  static const double strokeOpacity = 0.3;
+  static const double strokeOpacity = 0.5;
 
   /// Blur radius not used directly (laggy), kept for reference
   static const double blurSigma = 60.0;

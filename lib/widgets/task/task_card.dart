@@ -8,7 +8,6 @@ import '../../style/containers.dart';
 import '../../style/list_tile.dart';
 import '../../style/dialogs.dart';
 import '../../utils/logging.dart';
-import '../../utils/theme_helpers.dart';
 
 class TaskCard extends StatefulWidget {
   final Task task;
@@ -45,19 +44,31 @@ class _TaskCardState extends State<TaskCard>
   int _remainingGlowBursts = 0;
 
   Color _getPriorityColor(BuildContext context) {
-    final theme = Theme.of(context);
-    final priorityColors = generateColorSteps(theme.colorScheme.primary);
     switch (widget.task.priority) {
       case TaskPriority.critical:
-        return priorityColors[0];
+        return const Color(0xFFFF0000); // Red
       case TaskPriority.high:
-        return priorityColors[1];
+        return const Color(0xFFFFA500); // Orange
       case TaskPriority.medium:
-        return priorityColors[2];
+        return const Color.fromARGB(255, 228, 228, 10); // Yellow
       case TaskPriority.low:
-        return priorityColors[3];
+        return const Color(0xFF00FF00); // Green
     }
   }
+
+  Color _getPriorityTextColor(BuildContext context) {
+    switch (widget.task.priority) {
+      case TaskPriority.critical:
+        return const Color.fromARGB(255, 252, 12, 12); // Red
+      case TaskPriority.high:
+        return const Color.fromARGB(255, 211, 137, 0); // Orange
+      case TaskPriority.medium:
+        return const Color.fromARGB(255, 202, 169, 0); // Yellow
+      case TaskPriority.low:
+        return const Color.fromARGB(255, 0, 182, 0); // Green
+    }
+  }
+
 
   int _targetGlowBursts() {
     switch (widget.task.priority) {
@@ -409,8 +420,8 @@ class _TaskCardState extends State<TaskCard>
                         Positioned.fill(child: _buildGlowUnderlay(context)),
                         GlassCard(
                           padding: EdgeInsets.zero,
-                          isPrimary:
-                              widget.task.priority == TaskPriority.critical,
+                          // isPrimary:
+                          //     widget.task.priority == TaskPriority.critical,
                           child: GlassListTile(
                             leading: GestureDetector(
                               onTap: () => _toggleComplete(context),
@@ -465,17 +476,17 @@ class _TaskCardState extends State<TaskCard>
                               decoration: BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
-                                    color: theme.colorScheme.secondary
+                                    color: _getPriorityColor(context)
                                         .withValues(alpha: 0.3),
                                     blurRadius: 7,
                                   ),
                                 ],
-                                color: _getPriorityColor(
+                                color: _getPriorityTextColor(
                                   context,
-                                ).withValues(alpha: 0.2),
+                                ).withValues(alpha: 0.3),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: theme.colorScheme.primary.withValues(
+                                  color: _getPriorityColor(context).withValues(
                                     alpha: 0.5,
                                   ),
                                 ),
@@ -483,7 +494,7 @@ class _TaskCardState extends State<TaskCard>
                               child: Text(
                                 widget.task.priority.name.toUpperCase(),
                                 style: theme.textTheme.labelSmall?.copyWith(
-                                  color: theme.colorScheme.primary,
+                                  color: _getPriorityTextColor(context),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

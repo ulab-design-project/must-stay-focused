@@ -35,7 +35,7 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: GlassSquircleIconButton(
-              icon: Icon(Icons.bug_report, color: onSurface),
+              icon: Icon(Icons.code, color: onSurface),
               onPressed: onDebugInterception,
             ),
           ),

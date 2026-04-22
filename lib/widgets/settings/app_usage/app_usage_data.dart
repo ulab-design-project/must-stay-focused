@@ -80,20 +80,23 @@ class _AppUsageDataDialogState extends State<AppUsageDataDialog> {
               mainAxisSize: MainAxisSize.min,
               children: types.map((type) {
                 final isSelected = type == _selectedChallenge;
-                return GlassListTile(
-                  title: Text(
-                    type,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                return Padding(
+                  padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                  child: GlassListTile(
+                    title: Text(
+                      type,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
+                    trailing: isSelected
+                        ? const Icon(
+                            Icons.check_circle,
+                            color: Colors.greenAccent,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(context, type),
                   ),
-                  trailing: isSelected
-                      ? const Icon(
-                          Icons.check_circle,
-                          color: Colors.greenAccent,
-                        )
-                      : null,
-                  onTap: () => Navigator.pop(context, type),
                 );
               }).toList(),
             ),

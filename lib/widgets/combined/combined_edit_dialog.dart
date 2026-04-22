@@ -163,21 +163,24 @@ class _CombinedEditDialogState extends State<CombinedEditDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: TaskPriority.values.map((priority) {
-                return GlassListTile(
-                  leading: Icon(
-                    Icons.flag,
-                    color: theme.colorScheme.onSurface,
-                    size: 18,
+                return Padding(
+                  padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                  child: GlassListTile(
+                    leading: Icon(
+                      Icons.flag,
+                      color: theme.colorScheme.onSurface,
+                      size: 18,
+                    ),
+                    title: Text(
+                      priority.name.toUpperCase(),
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                    ),
+                    trailing: priority == _priority
+                        ? Icon(Icons.check, color: theme.colorScheme.primary)
+                        : null,
+                    onTap: () => Navigator.of(ctx).pop(priority),
+                    isLast: priority == TaskPriority.values.last,
                   ),
-                  title: Text(
-                    priority.name.toUpperCase(),
-                    style: TextStyle(color: theme.colorScheme.onSurface),
-                  ),
-                  trailing: priority == _priority
-                      ? Icon(Icons.check, color: theme.colorScheme.primary)
-                      : null,
-                  onTap: () => Navigator.of(ctx).pop(priority),
-                  isLast: priority == TaskPriority.values.last,
                 );
               }).toList(),
             ),
