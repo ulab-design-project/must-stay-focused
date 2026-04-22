@@ -23,48 +23,50 @@ class _ThemePickerState extends State<ThemePicker> {
           return Padding(
             padding: const EdgeInsets.all(AppElementSizes.spacingLg),
             child: GlassCard(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...entries.map((entry) {
-                    final isSelected =
-                        entry.key == themeController.currentThemeKey;
-                    final isLightMode =
-                        entry.value.brightness == Brightness.light;
-                    return Padding(
-                      padding: const EdgeInsets.all(AppElementSizes.spacingSm),
-                      child: GlassListTile(
-                        leading: Container(
-                          width: 30,
-                          height: 30,                        
-                          child: Center(
-                            child: Icon(
-                              isLightMode
-                                  ? Icons.wb_sunny
-                                  : Icons.nightlight_round,
-                              color: entry.value.primaryColor,
-                              size: 20,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...entries.map((entry) {
+                      final isSelected =
+                          entry.key == themeController.currentThemeKey;
+                      final isLightMode =
+                          entry.value.brightness == Brightness.light;
+                      return Padding(
+                        padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                        child: GlassListTile(
+                          leading: Container(
+                            width: 30,
+                            height: 30,                        
+                            child: Center(
+                              child: Icon(
+                                isLightMode
+                                    ? Icons.wb_sunny
+                                    : Icons.nightlight_round,
+                                color: entry.value.primaryColor,
+                                size: 20,
+                              ),
                             ),
                           ),
-                        ),
-                        title: Text(
-                          entry.key,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface,
+                          title: Text(
+                            entry.key,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
+                          trailing: isSelected
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                )
+                              : null,
+                          onTap: () => Navigator.of(context).pop(entry.key),
+                          isLast: entry == entries.last,
                         ),
-                        trailing: isSelected
-                            ? Icon(
-                                Icons.check_circle,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )
-                            : null,
-                        onTap: () => Navigator.of(context).pop(entry.key),
-                        isLast: entry == entries.last,
-                      ),
-                    );
-                  }),
-                ],
+                      );
+                    }),
+                  ],
+                ),
               ),
             ),
           );
