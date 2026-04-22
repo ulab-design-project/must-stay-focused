@@ -13,6 +13,7 @@ import '../../style/buttons.dart';
 import 'deck_selector.dart';
 import 'flash_card.dart';
 import 'flash_card_edit_dialog.dart';
+import '../combined/combined_edit_dialog.dart';
 
 class FlashCardCarousel extends StatefulWidget {
   const FlashCardCarousel({super.key});
@@ -92,8 +93,6 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
   }
 
   Widget _buildDeckModeButton(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(
@@ -105,7 +104,7 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
             onPressed: _toggleDeckMode,
             child: Text(
               _showFullDeck ? 'Show Today' : 'Show All',
-              style: TextStyle(color: theme.colorScheme.surface),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ),
@@ -135,24 +134,24 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                 mainAxisSize: MainAxisSize.min,
                 children: options.map((option) {
                   final isSelected = _sortBy == option.$2;
-                  return GlassListTile(
-                    leading: isSelected
-                        ? const Icon(Icons.check_circle, size: 20)
-                        : const SizedBox(width: 20),
-                    title: Text(
-                      option.$1,
-                      style: TextStyle(
-                        color: Theme.of(ctx).colorScheme.onSurface,
+                  return Padding(
+                    padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                    child: GlassListTile(
+                      title: Text(
+                        option.$1,
+                        style: TextStyle(
+                          color: Theme.of(ctx).colorScheme.onSurface,
+                        ),
                       ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check_circle,
+                              color: Theme.of(ctx).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () => Navigator.pop(ctx, option.$2),
+                      isLast: option == options.last,
                     ),
-                    trailing: isSelected
-                        ? Icon(
-                            Icons.check_circle,
-                            color: Theme.of(ctx).colorScheme.primary,
-                          )
-                        : null,
-                    onTap: () => Navigator.pop(ctx, option.$2),
-                    isLast: option == options.last,
                   );
                 }).toList(),
               ),
@@ -185,19 +184,37 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
             horizontal: AppElementSizes.spacingSm,
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min, // Constrains it to natural height
             children: [
-              Row(
-                children: [
-                  if (!_isCollapsed) ...[
+              Padding(
+                padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     GlassSquircleIconButton(
+                      size: !_isCollapsed
+                          ? AppElementSizes.buttonSquare
+                          : AppElementSizes.buttonSquare * 1.5,
+                      isPrimary: true,
+                      onPressed: () =>
+                          setState(() => _isCollapsed = !_isCollapsed),
+                      icon: Icon(
+                        _isCollapsed
+                            ? Icons.card_membership
+                            : Icons.keyboard_arrow_down,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    GlassSquircleIconButton(
+                      size: AppElementSizes.buttonSquare * 1.5,
+                      isPrimary: true,
                       onPressed: () {
                         if (_selectedDeck != null) {
                           showDialog(
                             context: context,
-                            builder: (ctx) =>
-                                FlashCardEditDialog(deck: _selectedDeck),
+                            builder: (ctx) => const CombinedEditDialog(),
                           ).then((_) => _loadCards());
                         }
                       },
@@ -205,124 +222,145 @@ class _FlashCardCarouselState extends State<FlashCardCarousel> {
                         Icons.add,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      isPrimary: false,
                     ),
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    Expanded(
-                      child: DeckSelector(
-                        width: 200, // Let it expand inside Expanded
-                        selectedDeck: _selectedDeck,
-                        onDeckSelected: (d) {
-                          setState(() {
-                            _selectedDeck = d;
-                            _showFullDeck = false; // reset on deck change
-                          });
-                          _loadCards();
-                        },
-                        onDeckChanged: _loadInitialDeck,
-                      ),
-                    ),
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    GlassPicker(
-                      width:
-                          80, // Give sufficient rigid space for text rendering
-                      height: 36,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      value: _sortBy == 'sm2' ? 'SM2' : 'Creation Date',
-                      placeholder: 'Sort',
-                      textStyle: TextStyle(
-                        fontSize: AppTextSizes.small,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      icon: Icon(
-                        Icons.expand_more,
-                        size: 16,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.85),
-                      ),
-                      onTap: _openSortPicker,
-                    ),
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                    GlassSquircleIconButton(
-                      onPressed: () {
-                        setState(() => _isAscending = !_isAscending);
-                        _loadCards();
-                      },
-                      icon: Icon(
-                        _isAscending
-                            ? Icons.arrow_upward
-                            : Icons.arrow_downward,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: AppElementSizes.spacingSm),
-                  ] else ...[
-                    const Spacer(),
                   ],
-                  GlassSquircleIconButton(
-                    onPressed: () =>
-                        setState(() => _isCollapsed = !_isCollapsed),
-                    icon: Icon(
-                      _isCollapsed
-                          ? Icons.card_membership
-                          : Icons.keyboard_arrow_down,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ],
+                ),
               ),
+              SizedBox(height: AppElementSizes.spacingSm),
               if (!_isCollapsed) ...[
-                const SizedBox(height: AppElementSizes.spacingSm),
                 GlassCard(
-                  child: SizedBox(
-                    height: height,
-                    child: _cards.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  _showFullDeck
-                                      ? 'No cards found.'
-                                      : 'No cards due. Show all or add new.',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.onSurface,
-                                  ),
-                                ),
-                                if (_hasAnyCardsInDeck) ...[
-                                  const SizedBox(
-                                    height: AppElementSizes.spacingMd,
-                                  ),
-                                  _buildDeckModeButton(context),
-                                ],
-                              ],
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          if (!_isCollapsed) ...[
+                            // GlassSquircleIconButton(
+                            //   onPressed: () {
+                            //     if (_selectedDeck != null) {
+                            //       showDialog(
+                            //         context: context,
+                            //         builder: (ctx) => FlashCardEditDialog(
+                            //           selectedDeck: _selectedDeck,
+                            //         ),
+                            //       ).then((_) => _loadCards());
+                            //     }
+                            //   },
+                            //   icon: Icon(
+                            //     Icons.add,
+                            //     color: Theme.of(context).colorScheme.onSurface,
+                            //   ),
+                            //   isPrimary: false,
+                            // ),
+                            // const SizedBox(width: AppElementSizes.spacingSm),
+                            Expanded(
+                              child: DeckSelector(
+                                width: 100, // Let it expand inside Expanded
+                                selectedDeck: _selectedDeck,
+                                onDeckSelected: (d) {
+                                  setState(() {
+                                    _selectedDeck = d;
+                                    _showFullDeck =
+                                        false; // reset on deck change
+                                  });
+                                  _loadCards();
+                                },
+                                onDeckChanged: _loadInitialDeck,
+                              ),
                             ),
-                          )
-                        : ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount:
-                                _cards.length + 1, // +1 for the end button
-                            itemBuilder: (context, index) {
-                              if (index == _cards.length) {
-                                if (!_hasAnyCardsInDeck) {
-                                  return const SizedBox.shrink();
-                                }
+                            const SizedBox(width: AppElementSizes.spacingSm),
+                            GlassPicker(
+                              width:
+                                  80, // Give sufficient rigid space for text rendering
+                              height: 36,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                              ),
+                              value: _sortBy == 'sm2' ? 'SM2' : 'Creation Date',
+                              placeholder: 'Sort',
+                              textStyle: TextStyle(
+                                fontSize: AppTextSizes.small,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              icon: Icon(
+                                Icons.expand_more,
+                                size: 16,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.85),
+                              ),
+                              onTap: _openSortPicker,
+                            ),
+                            const SizedBox(width: AppElementSizes.spacingSm),
+                            GlassSquircleIconButton(
+                              onPressed: () {
+                                setState(() => _isAscending = !_isAscending);
+                                _loadCards();
+                              },
+                              icon: Icon(
+                                _isAscending
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(width: AppElementSizes.spacingSm),
+                          ] else ...[
+                            const Spacer(),
+                          ],
+                        ],
+                      ),
+                      SizedBox(height: AppElementSizes.spacingSm),
+                      SizedBox(
+                        height: height,
+                        child: _cards.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      _showFullDeck
+                                          ? 'No cards found.'
+                                          : 'No cards due. Show all or add new.',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                    if (_hasAnyCardsInDeck) ...[
+                                      const SizedBox(
+                                        height: AppElementSizes.spacingMd,
+                                      ),
+                                      _buildDeckModeButton(context),
+                                    ],
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
 
-                                return _buildDeckModeButton(context);
-                              }
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                  left: AppElementSizes.spacingMd,
-                                ),
-                                child: FlashCardWidget(
-                                  key: ValueKey(_cards[index].id),
-                                  card: _cards[index],
-                                  onRated: _loadCards,
-                                ),
-                              );
-                            },
-                          ),
+                                itemCount:
+                                    _cards.length + 1, // +1 for the end button
+                                itemBuilder: (context, index) {
+                                  if (index == _cards.length) {
+                                    if (!_hasAnyCardsInDeck) {
+                                      return const SizedBox.shrink();
+                                    }
+
+                                    return _buildDeckModeButton(context);
+                                  }
+                                  return Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: AppElementSizes.spacingMd,
+                                    ),
+                                    child: FlashCardWidget(
+                                      key: ValueKey(_cards[index].id),
+                                      card: _cards[index],
+                                      onRated: _loadCards,
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
                   ),
                 ),
               ],

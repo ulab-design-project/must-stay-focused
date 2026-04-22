@@ -59,6 +59,10 @@ class BackgroundDrop extends StatelessWidget {
           ),
         ),
 
+        //Add a 30% line in the middle of the screen
+        //Rotate by 30 degrees
+        
+       
         // Background blur
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: GlassEffects.blurSigma, sigmaY: GlassEffects.blurSigma),

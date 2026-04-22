@@ -8,6 +8,8 @@
 //    - Supports sorting by priority, due date, or creation time.
 //    - All DB operations via global taskRepo instance.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../data/models/task.dart';
@@ -58,9 +60,13 @@ class _TasksPageState extends State<TasksPage> {
   // Last task moved into completed list (used for entry animation)
   int? _animatedCompletedTaskId;
 
+  // Subscription to task updates for live refresh
+  StreamSubscription<void>? _tasksSubscription;
+
   @override
   void initState() {
     super.initState();
+    _tasksSubscription = taskRepo.watchTasks().listen((_) => _loadTasks());
     if (widget.interceptionMode) {
       _applyInterceptionDefaultSort();
     }
@@ -99,6 +105,7 @@ class _TasksPageState extends State<TasksPage> {
 
   /// Loads tasks for the selected list with current sort settings.
   Future<void> _loadTasks() async {
+    if (_selectedList == null) return;
     // Load incomplete and completed tasks separately
     final results = await Future.wait([
       taskRepo.getFilteredTasks(
@@ -244,12 +251,12 @@ class _TasksPageState extends State<TasksPage> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              GlassSquircleIconButton(
-                onPressed: _openAddTask,
-                icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
-                isPrimary: false,
-              ),
-              const SizedBox(width: AppElementSizes.spacingSm),
+              // GlassSquircleIconButton(
+              //   onPressed: _openAddTask,
+              //   icon: Icon(Icons.add, color: theme.colorScheme.onSurface),
+              //   isPrimary: false,
+              // ),
+              // const SizedBox(width: AppElementSizes.spacingSm),
               Expanded(
                 child: TaskListSelector(
                   width: 100,
@@ -291,13 +298,12 @@ class _TasksPageState extends State<TasksPage> {
                 onTap: _openSortPicker,
               ),
               const SizedBox(width: AppElementSizes.spacingSm),
-              GlassSquircleButton(
-                width: AppElementSizes.buttonSquare,
+              GlassSquircleIconButton(
                 onPressed: () {
                   setState(() => _isAscending = !_isAscending);
                   _loadTasks();
                 },
-                child: Icon(
+                icon: Icon(
                   _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
                   color: theme.colorScheme.onSurface,
                 ),
@@ -318,5 +324,11 @@ class _TasksPageState extends State<TasksPage> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _tasksSubscription?.cancel();
+    super.dispose();
   }
 }

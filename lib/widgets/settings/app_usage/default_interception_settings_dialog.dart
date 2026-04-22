@@ -99,20 +99,23 @@ class _DefaultInterceptionSettingsDialogState
               mainAxisSize: MainAxisSize.min,
               children: options.map((option) {
                 final isSelected = option == _selectedChallengeType;
-                return GlassListTile(
-                  title: Text(
-                    option,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface,
+                return Padding(
+                  padding: const EdgeInsets.all(AppElementSizes.spacingSm),
+                  child: GlassListTile(
+                    title: Text(
+                      option,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(context, option),
                   ),
-                  trailing: isSelected
-                      ? Icon(
-                          Icons.check_circle,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        )
-                      : null,
-                  onTap: () => Navigator.pop(context, option),
                 );
               }).toList(),
             ),

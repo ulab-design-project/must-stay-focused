@@ -49,6 +49,51 @@ final Map<String, ThemeData> themes = {
       onSurface: Color(0xFFD7F0D7),
     ),
   ),
+  'Blue Light': ThemeData(
+    brightness: Brightness.light,
+    primaryColor: const Color(0xFF66ACFF),
+    scaffoldBackgroundColor: const Color(0xFFDCEBFF),
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFF4285F4),
+      secondary: Color(0xFF66ACFF),
+      surface: Color(0xFFF0F7FF),
+      onSurface: Color(0xFF0D1B2A),
+    ),
+  ),
+  'Blue Dark': ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: const Color(0xFF4A7ED9),
+    scaffoldBackgroundColor: const Color(0xFF0D1525),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFF3B6BCF),
+      secondary: Color(0xFF5A8CE5),
+      surface: Color(0xFF162036),
+      onSurface: Color(0xFFD8E6FF),
+    ),
+  ),
+  'Red Light': ThemeData(
+    brightness: Brightness.light,
+    primaryColor: const Color(0xFFFF8A80),
+    scaffoldBackgroundColor: const Color(0xFFFFEBEE),
+    colorScheme: const ColorScheme.light(
+      primary: Color(0xFFEA4335),
+      secondary: Color(0xFFFF8A80),
+      surface: Color(0xFFFFF5F5),
+      onSurface: Color(0xFF2A1215),
+    ),
+  ),
+ 
+  'Orange Dark': ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: const Color(0xFFF9A825),
+    scaffoldBackgroundColor: const Color(0xFF1A1500),
+    colorScheme: const ColorScheme.dark(
+      primary: Color(0xFFF57F17),
+      secondary: Color(0xFFFFB300),
+      surface: Color(0xFF261E00),
+      onSurface: Color(0xFFFFF8E1),
+    ),
+  ),
 };
 
 /// Text size constants used throughout the app.

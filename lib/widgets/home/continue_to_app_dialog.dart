@@ -44,12 +44,12 @@ Future<ContinueToAppAction> showContinueToAppDialog(
         actions: [
           GlassDialogAction(
             label: 'Stay Focused',
+            isPrimary: true,
             onPressed: () =>
                 Navigator.pop(context, ContinueToAppAction.stayFocused),
           ),
           GlassDialogAction(
             label: primaryLabel,
-            isPrimary: true,
             onPressed: () => Navigator.pop(context, primaryAction),
           ),
         ],

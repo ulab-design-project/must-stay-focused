@@ -355,10 +355,10 @@ class _TaskCardState extends State<TaskCard>
                         context: context,
                         builder: (ctx) => GlassDialog(
                           title: 'Delete Task',
-                          content: const Text(
+                          content: Text(
                             'Are you sure you want to delete this task?',
                             style: TextStyle(
-                              color: Color.fromRGBO(255, 255, 255, 0.87),
+                              color: theme.colorScheme.onSurface,
                             ),
                           ),
                           actions: [

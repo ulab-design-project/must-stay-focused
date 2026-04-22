@@ -233,7 +233,7 @@ class _TemplateUploadState extends State<TemplateUpload> {
             const SizedBox(height: AppElementSizes.spacingMd),
             if (isTaskList)
               TaskListSelector(
-                width: null,
+                width: 200,
                 selectedList: _selectedTaskList,
                 onListSelected: (list) =>
                     setState(() => _selectedTaskList = list),
