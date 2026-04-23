@@ -4,6 +4,7 @@ import 'package:isar/isar.dart';
 
 import '../data/db/isar_service.dart';
 import '../data/models/app_usage.dart';
+import '../data/models/user_settings.dart';
 
 class AppInterceptionService {
   AppInterceptionService._internal();
@@ -31,7 +32,23 @@ class AppInterceptionService {
         'packageNames': packageNames,
       });
     } catch (e, stackTrace) {
-      debugPrint('AppInterceptionService syncTrackedAppsFromDatabase error: $e');
+      debugPrint(
+        'AppInterceptionService syncTrackedAppsFromDatabase error: $e',
+      );
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> syncSettings() async {
+    try {
+      final settings = await idb.userSettings.get(1);
+      await _channel.invokeMethod<void>('syncSettings', {
+        'warningSecondsBeforeIntercept':
+            settings?.warningSecondsBeforeIntercept ?? 10,
+        'notificationsEnabled': settings?.notificationsEnabled ?? true,
+      });
+    } catch (e, stackTrace) {
+      debugPrint('AppInterceptionService syncSettings error: $e');
       debugPrintStack(stackTrace: stackTrace);
     }
   }

@@ -27,6 +27,7 @@ class UserSettings {
   String themeMode = 'Purple Light';
   String preferredChallengeType = 'Math';
   int defaultOvertimeLimitMinutes = 15;
+  int warningSecondsBeforeIntercept = 10;
 
   bool strictModeEnabled = false;
   bool gyroscopeGlassLightingEnabled = false;

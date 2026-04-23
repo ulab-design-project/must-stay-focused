@@ -58,30 +58,32 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
     super.dispose();
   }
 
-  /// Shows date and time picker for start time.
+  /// Shows time picker for start time (clock only, no calendar).
   Future<void> _pickStartTime() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: _startTime ?? DateTime.now(),
-      firstDate: DateTime.now().subtract(const Duration(days: 365)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (date == null || !mounted) return;
-
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_startTime ?? DateTime.now()),
+      initialTime: _startTime != null
+          ? TimeOfDay.fromDateTime(_startTime!)
+          : const TimeOfDay(hour: 9, minute: 0),
     );
     if (time == null || !mounted) return;
 
     setState(() {
       _startTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
         time.hour,
         time.minute,
       );
+    });
+  }
+
+  /// Clears both start and end times.
+  void _clearTimes() {
+    setState(() {
+      _startTime = null;
+      _endTime = null;
     });
   }
 
@@ -238,7 +240,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               ),
               const SizedBox(height: AppElementSizes.spacingMd),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal:   AppElementSizes.spacingMd),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppElementSizes.spacingMd,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -281,7 +285,9 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               ),
               const SizedBox(height: AppElementSizes.spacingMd),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppElementSizes.spacingMd),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppElementSizes.spacingMd,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -331,6 +337,17 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
               const SizedBox(height: AppElementSizes.spacingMd),
               Row(
                 children: [
+                  // only if time is set, show clear button
+                  if (_startTime != null || _endTime != null)
+                  GlassSquircleIconButton(
+                    isPrimary: true ,
+                    icon: const Icon(Icons.clear),
+                    size: AppElementSizes.buttonSquare,
+                    onPressed: _startTime != null || _endTime != null
+                        ? _clearTimes
+                        : null,
+                  ),
+                  const SizedBox(width: AppElementSizes.spacingSm),
                   Expanded(
                     child: GlassSquircleButton(
                       isPrimary: true,

@@ -21,10 +21,12 @@ class MainActivity: FlutterActivity() {
 
         private const val PREFS_NAME = "msf_interception_prefs"
         private const val PREF_TRACKED_PACKAGES = "tracked_packages"
-        private const val PREF_BYPASS_PREFIX = "bypass_until_"
+    private const val PREF_BYPASS_PREFIX = "bypass_until_"
+    private const val PREF_WARNING_SECONDS = "pref_warning_seconds"
+    private const val PREF_NOTIFICATIONS_ENABLED = "pref_notifications_enabled"
 
-        @Volatile
-        private var pendingInterceptedAppId: String? = null
+    @Volatile
+    private var pendingInterceptedAppId: String? = null
 
         fun readTrackedPackages(context: Context): Set<String> {
             return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -105,6 +107,17 @@ class MainActivity: FlutterActivity() {
                     ?: emptySet()
 
                 writeTrackedPackages(this, packages)
+                result.success(true)
+            }
+
+            "syncSettings" -> {
+                val warningSec = call.argument<Int>("warningSecondsBeforeIntercept") ?: 10
+                val notifEnabled = call.argument<Boolean>("notificationsEnabled") ?: true
+                val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                prefs.edit()
+                    .putInt(PREF_WARNING_SECONDS, warningSec)
+                    .putBoolean(PREF_NOTIFICATIONS_ENABLED, notifEnabled)
+                    .apply()
                 result.success(true)
             }
 

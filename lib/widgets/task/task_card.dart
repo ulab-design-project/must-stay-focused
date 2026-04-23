@@ -73,10 +73,11 @@ class _TaskCardState extends State<TaskCard>
   int _targetGlowBursts() {
     switch (widget.task.priority) {
       case TaskPriority.critical:
-        return 3;
+        return 10; //Glow burst count for critical tasks
       case TaskPriority.high:
-        return 2;
+        return 6; //Glow burst count for high priority tasks
       case TaskPriority.medium:
+        return 3; //Glow burst count for medium priority tasks
       case TaskPriority.low:
         return 0;
     }

@@ -71,8 +71,8 @@ Future<void> prepareDefaultData() async {
 
     // Sample task 4: Critical priority, recurring Mon/Wed/Fri
     final task4 = Task()
-      ..title = 'Daily standup'
-      ..description = 'Quick status update'
+      ..title = 'Complete Daily Commissions'
+      ..description = 'Ad Astra Abyssosque'
       ..priority = TaskPriority.critical
       ..startTime = DateTime.now().copyWith(hour: 9, minute: 30)
       ..days =

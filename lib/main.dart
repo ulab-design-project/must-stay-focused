@@ -5,6 +5,7 @@ import 'data/db/isar_service.dart';
 import 'data/db/supabase_client.dart';
 import 'pages/home/home.dart';
 import 'services/app_interception_service.dart';
+import 'services/notification_service.dart';
 import 'style/theme.dart';
 
 final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
@@ -24,6 +25,8 @@ void main() async {
     await sdb.init();
     await IsarService().init();
     await AppInterceptionService().syncTrackedAppsFromDatabase();
+    await AppInterceptionService().syncSettings();
+    await NotificationService().init();
   } catch (e, stackTrace) {
     debugPrint('App initialization error: $e');
     debugPrintStack(stackTrace: stackTrace);

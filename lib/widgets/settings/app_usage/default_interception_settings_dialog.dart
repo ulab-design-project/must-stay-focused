@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../data/db/isar_service.dart';
 import '../../../data/models/user_settings.dart';
+import '../../../services/app_interception_service.dart';
 import '../../../style/containers.dart';
 import '../../../style/dialogs.dart';
 import '../../../style/forms.dart';
@@ -20,6 +21,7 @@ class DefaultInterceptionSettingsDialog extends StatefulWidget {
 class _DefaultInterceptionSettingsDialogState
     extends State<DefaultInterceptionSettingsDialog> {
   final TextEditingController _overtimeCtrl = TextEditingController();
+  final TextEditingController _warningSecondsCtrl = TextEditingController();
   String _selectedChallengeType = 'Math';
   bool _isLoading = true;
 
@@ -32,6 +34,7 @@ class _DefaultInterceptionSettingsDialogState
   @override
   void dispose() {
     _overtimeCtrl.dispose();
+    _warningSecondsCtrl.dispose();
     super.dispose();
   }
 
@@ -64,6 +67,8 @@ class _DefaultInterceptionSettingsDialogState
 
       setState(() {
         _overtimeCtrl.text = overtime.toString();
+        _warningSecondsCtrl.text =
+            (settings?.warningSecondsBeforeIntercept ?? 10).toString();
         _selectedChallengeType = _normalizeChallengeType(
           settings?.preferredChallengeType,
         );
@@ -79,6 +84,7 @@ class _DefaultInterceptionSettingsDialogState
 
       setState(() {
         _overtimeCtrl.text = '15';
+        _warningSecondsCtrl.text = '10';
         _selectedChallengeType = 'Math';
         _isLoading = false;
       });
@@ -138,13 +144,20 @@ class _DefaultInterceptionSettingsDialogState
       final parsed = int.tryParse(_overtimeCtrl.text.trim()) ?? 15;
       final overtime = parsed.clamp(0, 600);
 
+      final warningParsed = int.tryParse(_warningSecondsCtrl.text.trim()) ?? 10;
+      final warningSeconds = warningParsed.clamp(0, 300);
+
       await idb.writeTxn(() async {
         final settings =
             await idb.userSettings.get(1) ?? (UserSettings()..id = 1);
         settings.defaultOvertimeLimitMinutes = overtime;
         settings.preferredChallengeType = _selectedChallengeType;
+        settings.warningSecondsBeforeIntercept = warningSeconds;
         await idb.userSettings.put(settings);
       });
+
+      // Sync settings to native
+      await AppInterceptionService().syncSettings();
 
       if (mounted) {
         Navigator.pop(context, true);
@@ -234,6 +247,35 @@ class _DefaultInterceptionSettingsDialogState
                     ),
                     onTap: _openChallengePicker,
                   ),
+                ),
+                const SizedBox(height: AppElementSizes.spacingLg),
+                Text(
+                  'Warning Before Block',
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: AppTextSizes.body,
+                  ),
+                ),
+                const SizedBox(height: AppElementSizes.spacingSm),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 60,
+                      child: GlassTextField(
+                        controller: _warningSecondsCtrl,
+                        placeholder: 'Sec',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    const SizedBox(width: AppElementSizes.spacingSm),
+                    Text(
+                      'Seconds before block warning',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurface,
+                        fontSize: AppTextSizes.small,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

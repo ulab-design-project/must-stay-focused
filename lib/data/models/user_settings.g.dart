@@ -61,6 +61,11 @@ const UserSettingsSchema = CollectionSchema(
       id: 8,
       name: r'themeMode',
       type: IsarType.string,
+    ),
+    r'warningSecondsBeforeIntercept': PropertySchema(
+      id: 9,
+      name: r'warningSecondsBeforeIntercept',
+      type: IsarType.long,
     )
   },
   estimateSize: _userSettingsEstimateSize,
@@ -130,6 +135,7 @@ void _userSettingsSerialize(
   writer.writeString(offsets[6], object.salt);
   writer.writeBool(offsets[7], object.strictModeEnabled);
   writer.writeString(offsets[8], object.themeMode);
+  writer.writeLong(offsets[9], object.warningSecondsBeforeIntercept);
 }
 
 UserSettings _userSettingsDeserialize(
@@ -149,6 +155,7 @@ UserSettings _userSettingsDeserialize(
   object.salt = reader.readStringOrNull(offsets[6]);
   object.strictModeEnabled = reader.readBool(offsets[7]);
   object.themeMode = reader.readString(offsets[8]);
+  object.warningSecondsBeforeIntercept = reader.readLong(offsets[9]);
   return object;
 }
 
@@ -177,6 +184,8 @@ P _userSettingsDeserializeProp<P>(
       return (reader.readBool(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
+    case 9:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -1222,6 +1231,62 @@ extension UserSettingsQueryFilter
       ));
     });
   }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      warningSecondsBeforeInterceptEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'warningSecondsBeforeIntercept',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      warningSecondsBeforeInterceptGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'warningSecondsBeforeIntercept',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      warningSecondsBeforeInterceptLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'warningSecondsBeforeIntercept',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterFilterCondition>
+      warningSecondsBeforeInterceptBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'warningSecondsBeforeIntercept',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension UserSettingsQueryObject
@@ -1398,6 +1463,20 @@ extension UserSettingsQuerySortBy
       return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByWarningSecondsBeforeIntercept() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'warningSecondsBeforeIntercept', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      sortByWarningSecondsBeforeInterceptDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'warningSecondsBeforeIntercept', Sort.desc);
+    });
+  }
 }
 
 extension UserSettingsQuerySortThenBy
@@ -1519,6 +1598,20 @@ extension UserSettingsQuerySortThenBy
       return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByWarningSecondsBeforeIntercept() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'warningSecondsBeforeIntercept', Sort.asc);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QAfterSortBy>
+      thenByWarningSecondsBeforeInterceptDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'warningSecondsBeforeIntercept', Sort.desc);
+    });
+  }
 }
 
 extension UserSettingsQueryWhereDistinct
@@ -1584,6 +1677,13 @@ extension UserSettingsQueryWhereDistinct
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<UserSettings, UserSettings, QDistinct>
+      distinctByWarningSecondsBeforeIntercept() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'warningSecondsBeforeIntercept');
     });
   }
 }
@@ -1653,6 +1753,13 @@ extension UserSettingsQueryProperty
   QueryBuilder<UserSettings, String, QQueryOperations> themeModeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'themeMode');
+    });
+  }
+
+  QueryBuilder<UserSettings, int, QQueryOperations>
+      warningSecondsBeforeInterceptProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'warningSecondsBeforeIntercept');
     });
   }
 }
