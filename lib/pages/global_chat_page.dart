@@ -65,17 +65,14 @@ class _GlobalChatPageState extends State<GlobalChatPage> {
   Future<void> sendMessage() async {
     if (controller.text.trim().isEmpty) return;
     try {
-      // Store all data in the message field as a JSON string
-      final Map<String, dynamic> combinedData = {
-        "title": titleController.text.trim(),
-        "username": usernameController.text.trim(),
-        "message": controller.text.trim(),
-      };
-
       final res = await http.post(
         Uri.parse("$baseUrl/message"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"message": jsonEncode(combinedData)}),
+        body: jsonEncode({
+          "title": titleController.text.trim(),
+          "username": usernameController.text.trim(),
+          "message": controller.text.trim(),
+        }),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
         titleController.clear();
@@ -218,26 +215,10 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String title = '';
-    String username = 'Anonymous';
-    String content = message['message'] ?? '';
+    final title = message['title'] ?? '';
+    final username = message['username'] ?? 'Anonymous';
+    final content = message['message'] ?? '';
     final likes = message['likes'] ?? 0;
-
-    // Try parsing the message as a JSON string to extract title and username
-    try {
-      final parsed = jsonDecode(content);
-      if (parsed is Map) {
-        title = parsed['title']?.toString() ?? '';
-        username = parsed['username']?.toString() ?? 'Anonymous';
-        content = parsed['message']?.toString() ?? '';
-        if (username.trim().isEmpty) username = 'Anonymous';
-      }
-    } catch (_) {
-      // Fallback if backend returned raw structure
-      title = message['title'] ?? title;
-      username = message['username'] ?? username;
-      if (username.trim().isEmpty) username = 'Anonymous';
-    }
 
     return Card(
       color: Colors.grey[900]?.withValues(alpha: 0.8),
