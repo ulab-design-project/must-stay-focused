@@ -7,6 +7,7 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onDebugInterception;
   final VoidCallback onStorePressed;
   final VoidCallback onSettingsPressed;
+  final VoidCallback onGlobalChatPressed;
 
   const DefaultHomeAppBar({
     super.key,
@@ -14,6 +15,7 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onDebugInterception,
     required this.onStorePressed,
     required this.onSettingsPressed,
+    required this.onGlobalChatPressed,
   });
 
   @override
@@ -51,6 +53,13 @@ class DefaultHomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: GlassSquircleIconButton(
             icon: Icon(Icons.settings, color: onSurface),
             onPressed: onSettingsPressed,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+          child: GlassSquircleIconButton(
+            icon: Icon(Icons.chat_bubble_outline, color: onSurface),
+            onPressed: onGlobalChatPressed,
           ),
         ),
         const SizedBox(width: 8),

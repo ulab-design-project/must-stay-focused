@@ -17,6 +17,8 @@ import '../../widgets/challenge/math_challenge.dart';
 import 'home_interception_controller.dart';
 import 'tasks.dart';
 
+import '../global_chat_page.dart';
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -339,6 +341,16 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _openGlobalChat() async
+  {
+      await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const GlobalChatPage(),
+          ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BackgroundDrop(
@@ -358,6 +370,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 onDebugInterception: _debugTriggerInterception,
                 onStorePressed: _openCommunityTemplates,
                 onSettingsPressed: _openSettings,
+                onGlobalChatPressed: _openGlobalChat,
               ),
         body: Stack(
           children: [
