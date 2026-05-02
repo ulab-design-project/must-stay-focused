@@ -23,6 +23,7 @@ class InterceptionService : AccessibilityService() {
         private const val SAME_PACKAGE_EVENT_THROTTLE_MS = 700L
         private const val BYPASS_EXPIRY_CHECK_GRACE_MS = 200L
         private const val FOREGROUND_QUERY_WINDOW_MS = 20_000L
+        private const val FOREGROUND_SERVICE_ID = 1001
 
         private val ignoredPackages = setOf(
             "android",
@@ -75,7 +76,24 @@ class InterceptionService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         createNotificationChannel()
+        startForegroundNotification()
         Log.d(TAG, "Interception service connected")
+    }
+
+    private fun startForegroundNotification() {
+        try {
+            val notification = NotificationCompat.Builder(this, "app_intercept_warnings")
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("Must Stay Focused")
+                .setContentText("App interception is active")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .build()
+            startForeground(FOREGROUND_SERVICE_ID, notification)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start foreground notification", e)
+        }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -86,7 +104,8 @@ class InterceptionService : AccessibilityService() {
 
             val isRelevantEvent =
                 event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED ||
-                event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED
+                event.eventType == AccessibilityEvent.TYPE_WINDOWS_CHANGED ||
+                event.eventType == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
 
             if (!isRelevantEvent) {
                 return
