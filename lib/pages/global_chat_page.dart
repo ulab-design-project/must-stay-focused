@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:url_launcher/url_launcher.dart';
+
 class GlobalChatPage extends StatefulWidget {
   const GlobalChatPage({super.key});
 
@@ -62,30 +64,52 @@ class _GlobalChatPageState extends State<GlobalChatPage> {
     }
   }
 
-  Future<void> sendMessage() async {
+    Future<void> sendMessage() async
+    {
     if (controller.text.trim().isEmpty) return;
-    try {
-      final res = await http.post(
-        Uri.parse("$baseUrl/message"),
+
+    try
+    {
+        final res = await http.post(
+        Uri.parse("$baseUrl/create-payment"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "title": titleController.text.trim(),
-          "username": usernameController.text.trim(),
-          "message": controller.text.trim(),
+        body: jsonEncode(
+        {
+            "message": controller.text.trim(),
+            "title": titleController.text.trim(),
+            "username": usernameController.text.trim(),
         }),
-      );
-      if (res.statusCode == 200 || res.statusCode == 201) {
+        );
+
+        if (res.statusCode == 200)
+        {
+        final data = jsonDecode(res.body);
+        final url = data["paymentUrl"];
+
+        if (url != null && url.isNotEmpty)
+        {
+            final uri = Uri.parse(url);
+
+            await launchUrl(
+            uri,
+            mode: LaunchMode.externalApplication,
+            );
+        }
+
         titleController.clear();
         usernameController.clear();
         controller.clear();
-        fetchMessages();
-      } else {
-        debugPrint("Send message failed: ${res.statusCode}");
-      }
-    } catch (e) {
-      debugPrint("Send message error: $e");
+        }
+        else
+        {
+        debugPrint("Payment init failed: ${res.statusCode}");
+        }
     }
-  }
+    catch (e)
+    {
+        debugPrint("Send payment error: $e");
+    }
+    }
 
   Future<void> likeMessage(String messageId) async {
     try {
