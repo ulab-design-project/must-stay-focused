@@ -71,13 +71,11 @@ class _GlobalChatPageState extends State<GlobalChatPage> {
         "username": usernameController.text.trim(),
         "message": controller.text.trim(),
       };
-      
+
       final res = await http.post(
         Uri.parse("$baseUrl/message"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "message": jsonEncode(combinedData),
-        }),
+        body: jsonEncode({"message": jsonEncode(combinedData)}),
       );
       if (res.statusCode == 200 || res.statusCode == 201) {
         titleController.clear();
