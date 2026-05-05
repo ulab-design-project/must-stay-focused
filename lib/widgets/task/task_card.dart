@@ -40,6 +40,7 @@ class _TaskCardState extends State<TaskCard>
   bool _isExiting = false;
   bool _isCollapsed = false;
   bool _entryReady = false;
+  bool _isExpanded = false;
   late final AnimationController _glowController;
   int _remainingGlowBursts = 0;
 
@@ -420,88 +421,168 @@ class _TaskCardState extends State<TaskCard>
                       children: [
                         Positioned.fill(child: _buildGlowUnderlay(context)),
                         GlassCard(
-                          padding: EdgeInsets.zero,
-                          // isPrimary:
-                          //     widget.task.priority == TaskPriority.critical,
-                          child: GlassListTile(
-                            leading: GestureDetector(
-                              onTap: () => _toggleComplete(context),
-                              child: Checkbox(
-                                visualDensity: VisualDensity.compact,
-                                value: widget.task.isCompleted,
-                                onChanged: null,
-                                fillColor:
-                                    WidgetStateProperty.resolveWith<Color>((
-                                      states,
-                                    ) {
-                                      if (states.contains(
-                                        WidgetState.disabled,
-                                      )) {
-                                        return widget.task.isCompleted
-                                            ? theme.colorScheme.primary
-                                            : theme.colorScheme.secondary
-                                                  .withValues(alpha: 0.2);
-                                      }
-                                      return theme.colorScheme.primary;
-                                    }),
-                              ),
-                            ),
-                            title: Text(
-                              widget.task.title,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                decoration: widget.task.isCompleted
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                                color: widget.task.isCompleted
-                                    ? theme.colorScheme.onSurface.withValues(
-                                        alpha: 0.5,
-                                      )
-                                    : theme.colorScheme.onSurface,
-                              ),
-                            ),
-                            subtitle: Text(
-                              widget.task.startTime != null
-                                  ? '${_formatTime(widget.task.startTime!)}${widget.task.endTime != null ? ' - ${_formatTime(widget.task.endTime!)}' : ''}'
-                                  : (widget.task.description ?? ''),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.7,
-                                ),
-                              ),
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: _getPriorityColor(context)
-                                        .withValues(alpha: 0.3),
-                                    blurRadius: 7,
-                                  ),
-                                ],
-                                color: _getPriorityTextColor(
-                                  context,
-                                ).withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: _getPriorityColor(context).withValues(
-                                    alpha: 0.5,
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                widget.task.priority.name.toUpperCase(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: _getPriorityTextColor(context),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
+                          padding: const EdgeInsets.all(16.0),
+                          child: InkWell(
                             onTap: widget.onEdit,
-                            isLast: true,
+                            borderRadius: BorderRadius.circular(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        widget.task.title,
+                                        style: theme.textTheme.titleMedium?.copyWith(
+                                          decoration: widget.task.isCompleted
+                                              ? TextDecoration.lineThrough
+                                              : null,
+                                          color: widget.task.isCompleted
+                                              ? theme.colorScheme.onSurface.withValues(
+                                                  alpha: 0.5,
+                                                )
+                                              : theme.colorScheme.onSurface,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: _getPriorityColor(context)
+                                                .withValues(alpha: 0.3),
+                                            blurRadius: 7,
+                                          ),
+                                        ],
+                                        color: _getPriorityTextColor(
+                                          context,
+                                        ).withValues(alpha: 0.3),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: _getPriorityColor(context).withValues(
+                                            alpha: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        widget.task.priority.name.toUpperCase(),
+                                        style: theme.textTheme.labelSmall?.copyWith(
+                                          color: _getPriorityTextColor(context),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                AnimatedSize(
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeInOut,
+                                  alignment: Alignment.topCenter,
+                                  child: Text(
+                                    widget.task.startTime != null
+                                        ? '${_formatTime(widget.task.startTime!)}${widget.task.endTime != null ? ' - ${_formatTime(widget.task.endTime!)}' : ''}'
+                                        : (widget.task.description ?? ''),
+                                    maxLines: _isExpanded ? null : 3,
+                                    overflow: _isExpanded ? null : TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => _toggleComplete(context),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          SizedBox(
+                                            height: 24,
+                                            width: 24,
+                                            child: Checkbox(
+                                              visualDensity: VisualDensity.compact,
+                                              value: widget.task.isCompleted,
+                                              onChanged: null,
+                                              fillColor:
+                                                  WidgetStateProperty.resolveWith<Color>((
+                                                states,
+                                              ) {
+                                                if (states.contains(
+                                                  WidgetState.disabled,
+                                                )) {
+                                                  return widget.task.isCompleted
+                                                      ? theme.colorScheme.primary
+                                                      : theme.colorScheme.secondary
+                                                            .withValues(alpha: 0.2);
+                                                }
+                                                return theme.colorScheme.primary;
+                                              }),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            widget.task.isCompleted ? 'Completed' : 'Mark done',
+                                            style: theme.textTheme.labelMedium?.copyWith(
+                                              color: widget.task.isCompleted
+                                                  ? theme.colorScheme.primary
+                                                  : theme.colorScheme.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        InkWell(
+                                          borderRadius: BorderRadius.circular(12),
+                                          onTap: () {
+                                            setState(() {
+                                              _isExpanded = !_isExpanded;
+                                            });
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: Icon(
+                                              _isExpanded 
+                                                  ? Icons.keyboard_arrow_up_rounded 
+                                                  : Icons.keyboard_arrow_down_rounded,
+                                              size: 20,
+                                              color: theme.colorScheme.onSurfaceVariant.withValues(
+                                                alpha: 0.7,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Icon(
+                                          Icons.push_pin_outlined,
+                                          size: 20,
+                                          color: theme.colorScheme.onSurfaceVariant.withValues(
+                                            alpha: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],
